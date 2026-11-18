@@ -1,0 +1,1471 @@
+{
+  "protocol": "T01–T12",
+  "schema_version": "1.0",
+  "engine_version": "rules-1.0.0",
+  "oracle_version": "1.0",
+  "python_version": "3.12.14",
+  "dataset_sha256": "82f85b14d30a7fa4d37fa4d19919d7416c9a06252a9c4f309818b239083e244f",
+  "dataset": "synthetic",
+  "as_of": "2026-10-31",
+  "passed": 12,
+  "total": 12,
+  "interpretation": "Выполнение фиксированных сценариев на синтетических данных; не измерение точности OCR, качества на реальных закупках или эффекта для пользователей.",
+  "cases": [
+    {
+      "id": "T01",
+      "title": "Полное совпадение",
+      "passed": true,
+      "errors": [],
+      "expected": {
+        "status": "ok",
+        "required_codes": [],
+        "forbidden_codes": [
+          "OVER_DELIVERY",
+          "PRICE_MISMATCH",
+          "LATE_DELIVERY",
+          "INCOMPLETE_DELIVERY"
+        ],
+        "allowed_codes": [],
+        "delivered_quantity": "10",
+        "accepted_quantity": "10",
+        "expected_quantity": "10"
+      },
+      "observed": {
+        "schema_version": "1.0",
+        "engine_version": "rules-1.0.0",
+        "input_hash": "1ee90d9130de97795b566c77c57bee3606025855933110e4b8017e20306aee9d",
+        "result_hash": "08b37fe349b6194c41014d357aefdb8b7dc7e37c303383cd650085334960959c",
+        "as_of": "2026-10-31",
+        "status": "ok",
+        "signals": [],
+        "matches": [
+          {
+            "document_id": "acceptance-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          }
+        ],
+        "positions": [
+          {
+            "line_id": "1",
+            "name": "Скамья парковая",
+            "unit": "шт",
+            "expected_quantity": "10",
+            "delivered_quantity": "10",
+            "accepted_quantity": "10",
+            "remaining_quantity": "0",
+            "complete": true,
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              }
+            ]
+          }
+        ],
+        "audit": [],
+        "active_document_ids": [
+          "acceptance-1",
+          "contract",
+          "delivery-1"
+        ],
+        "ignored_document_ids": [],
+        "applied_amendment_ids": []
+      }
+    },
+    {
+      "id": "T02",
+      "title": "Акт и комплект поставки расходятся",
+      "passed": true,
+      "errors": [],
+      "expected": {
+        "status": "needs_review",
+        "required_codes": [
+          "QUANTITY_MISMATCH"
+        ],
+        "forbidden_codes": [
+          "OVER_DELIVERY",
+          "PRICE_MISMATCH",
+          "LATE_DELIVERY",
+          "INCOMPLETE_DELIVERY"
+        ],
+        "allowed_codes": [
+          "QUANTITY_MISMATCH"
+        ],
+        "delivered_quantity": "8",
+        "accepted_quantity": "10",
+        "expected_quantity": "10",
+        "minimum_signal_sources": 2
+      },
+      "observed": {
+        "schema_version": "1.0",
+        "engine_version": "rules-1.0.0",
+        "input_hash": "c203bc46e593e35134bf3dada6dd291adc3197fea15da31a73ba9d9430c471d6",
+        "result_hash": "6564ed7e48a30dbeb5cb33057280e31f9a87564c5c61ed887b279477089c2f3f",
+        "as_of": "2026-10-31",
+        "status": "needs_review",
+        "signals": [
+          {
+            "id": "sig_b3fc89601e0defeb5ab9",
+            "code": "QUANTITY_MISMATCH",
+            "severity": "warning",
+            "title": "Приёмка превышает документы поставки",
+            "explanation": "В актах указано больше единиц, чем в учтённых накладных. Проверьте дополнительные накладные, частичные поставки и исправления. По текущему комплекту причина не установлена.",
+            "rule": "Σ принято по действующим incremental актам > Σ поставлено по действующим накладным.",
+            "expected": "8",
+            "actual": "10",
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%"
+              }
+            ],
+            "position_id": "1",
+            "status": "needs_review",
+            "blocks_comparison": false
+          }
+        ],
+        "matches": [
+          {
+            "document_id": "acceptance-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          }
+        ],
+        "positions": [
+          {
+            "line_id": "1",
+            "name": "Скамья парковая",
+            "unit": "шт",
+            "expected_quantity": "10",
+            "delivered_quantity": "8",
+            "accepted_quantity": "10",
+            "remaining_quantity": "2",
+            "complete": true,
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%"
+              }
+            ]
+          }
+        ],
+        "audit": [],
+        "active_document_ids": [
+          "acceptance-1",
+          "contract",
+          "delivery-1"
+        ],
+        "ignored_document_ids": [],
+        "applied_amendment_ids": []
+      }
+    },
+    {
+      "id": "T03",
+      "title": "Частичные поставки складываются",
+      "passed": true,
+      "errors": [],
+      "expected": {
+        "status": "ok",
+        "required_codes": [],
+        "forbidden_codes": [
+          "OVER_DELIVERY",
+          "PRICE_MISMATCH",
+          "LATE_DELIVERY",
+          "INCOMPLETE_DELIVERY"
+        ],
+        "allowed_codes": [],
+        "delivered_quantity": "10",
+        "accepted_quantity": "10",
+        "expected_quantity": "10"
+      },
+      "observed": {
+        "schema_version": "1.0",
+        "engine_version": "rules-1.0.0",
+        "input_hash": "4ada2f886a0c41276402c86fae007f2ea394ad7ed30c207a97ff61e6e48b87df",
+        "result_hash": "7e9dc25482aeda85e11afb1e43a2dcb65eb62b77a30ae4c13449edff4fb0dcdd",
+        "as_of": "2026-10-31",
+        "status": "ok",
+        "signals": [],
+        "matches": [
+          {
+            "document_id": "acceptance-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-2",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          }
+        ],
+        "positions": [
+          {
+            "line_id": "1",
+            "name": "Скамья парковая",
+            "unit": "шт",
+            "expected_quantity": "10",
+            "delivered_quantity": "10",
+            "accepted_quantity": "10",
+            "remaining_quantity": "0",
+            "complete": true,
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-2",
+                "filename": "delivery-2.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 2 шт; цена 1200 руб. с НДС 20%"
+              }
+            ]
+          }
+        ],
+        "audit": [],
+        "active_document_ids": [
+          "acceptance-1",
+          "contract",
+          "delivery-1",
+          "delivery-2"
+        ],
+        "ignored_document_ids": [],
+        "applied_amendment_ids": []
+      }
+    },
+    {
+      "id": "T04",
+      "title": "Действующая редакция спецификации",
+      "passed": true,
+      "errors": [],
+      "expected": {
+        "status": "ok",
+        "required_codes": [],
+        "forbidden_codes": [
+          "OVER_DELIVERY",
+          "PRICE_MISMATCH",
+          "LATE_DELIVERY",
+          "INCOMPLETE_DELIVERY"
+        ],
+        "allowed_codes": [],
+        "delivered_quantity": "12",
+        "accepted_quantity": "12",
+        "expected_quantity": "12",
+        "applied_amendments": [
+          "amendment-1"
+        ]
+      },
+      "observed": {
+        "schema_version": "1.0",
+        "engine_version": "rules-1.0.0",
+        "input_hash": "f87327e0224014cc480deb52342365a4b4beb10097d672bb658b21260900e786",
+        "result_hash": "f328b9a024cbc89c0a3db711e0bef9670ac84270aaaf48f43aa71c74773bfe22",
+        "as_of": "2026-10-31",
+        "status": "ok",
+        "signals": [],
+        "matches": [
+          {
+            "document_id": "acceptance-1",
+            "line_id": "1",
+            "target_document_id": "spec-v2",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-1",
+            "line_id": "1",
+            "target_document_id": "spec-v2",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          }
+        ],
+        "positions": [
+          {
+            "line_id": "1",
+            "name": "Скамья парковая",
+            "unit": "шт",
+            "expected_quantity": "12",
+            "delivered_quantity": "12",
+            "accepted_quantity": "12",
+            "remaining_quantity": "0",
+            "complete": true,
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "spec-v2",
+                "filename": "spec-v2.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%"
+              }
+            ]
+          }
+        ],
+        "audit": [
+          {
+            "code": "AMENDMENT_APPLIED",
+            "document_ids": [
+              "amendment-1",
+              "spec-v2"
+            ],
+            "explanation": "Применены условия с 2026-10-15; прежняя редакция сохранена для исторических проверок."
+          },
+          {
+            "code": "SPECIFICATION_REPLACED",
+            "document_ids": [
+              "amendment-1",
+              "spec-v1",
+              "spec-v2"
+            ],
+            "explanation": "Количество на дату среза берётся из новой редакции; исторические цены проверяются на дату поставки."
+          }
+        ],
+        "active_document_ids": [
+          "acceptance-1",
+          "amendment-1",
+          "contract",
+          "delivery-1",
+          "spec-v1",
+          "spec-v2"
+        ],
+        "ignored_document_ids": [],
+        "applied_amendment_ids": [
+          "amendment-1"
+        ]
+      }
+    },
+    {
+      "id": "T05",
+      "title": "Повторная загрузка",
+      "passed": true,
+      "errors": [],
+      "expected": {
+        "status": "ok",
+        "required_codes": [],
+        "forbidden_codes": [
+          "OVER_DELIVERY",
+          "PRICE_MISMATCH",
+          "LATE_DELIVERY",
+          "INCOMPLETE_DELIVERY"
+        ],
+        "allowed_codes": [],
+        "delivered_quantity": "10",
+        "accepted_quantity": "10",
+        "expected_quantity": "10",
+        "audit_codes": [
+          "DUPLICATE_IGNORED"
+        ],
+        "ignored_ids": [
+          "delivery-1-copy"
+        ]
+      },
+      "observed": {
+        "schema_version": "1.0",
+        "engine_version": "rules-1.0.0",
+        "input_hash": "ade2a2584c7019024eb30e88a4908cbe2024be15758d3f1df707f3dee2570f0f",
+        "result_hash": "0b1837167e9228441b3abd4aa5c972177f4f8d02f22de2fc40c0efcb7a04d78b",
+        "as_of": "2026-10-31",
+        "status": "ok",
+        "signals": [],
+        "matches": [
+          {
+            "document_id": "acceptance-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          }
+        ],
+        "positions": [
+          {
+            "line_id": "1",
+            "name": "Скамья парковая",
+            "unit": "шт",
+            "expected_quantity": "10",
+            "delivered_quantity": "10",
+            "accepted_quantity": "10",
+            "remaining_quantity": "0",
+            "complete": true,
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              }
+            ]
+          }
+        ],
+        "audit": [
+          {
+            "code": "DUPLICATE_IGNORED",
+            "document_ids": [
+              "delivery-1",
+              "delivery-1-copy"
+            ],
+            "explanation": "Повторный документ с теми же реквизитами и значениями исключён из суммирования."
+          }
+        ],
+        "active_document_ids": [
+          "acceptance-1",
+          "contract",
+          "delivery-1"
+        ],
+        "ignored_document_ids": [
+          "delivery-1-copy"
+        ],
+        "applied_amendment_ids": []
+      }
+    },
+    {
+      "id": "T06",
+      "title": "Разные названия при одном артикуле",
+      "passed": true,
+      "errors": [],
+      "expected": {
+        "status": "ok",
+        "required_codes": [],
+        "forbidden_codes": [
+          "OVER_DELIVERY",
+          "PRICE_MISMATCH",
+          "LATE_DELIVERY",
+          "INCOMPLETE_DELIVERY"
+        ],
+        "allowed_codes": [],
+        "delivered_quantity": "10",
+        "accepted_quantity": "10",
+        "expected_quantity": "10",
+        "required_match": {
+          "document_id": "delivery-1",
+          "line_id": "1",
+          "state": "matched"
+        }
+      },
+      "observed": {
+        "schema_version": "1.0",
+        "engine_version": "rules-1.0.0",
+        "input_hash": "3b14d2ae549c5d8eed8fea81b95a437f52e7d625e21eff59ecf3dbe16f434cf6",
+        "result_hash": "57fe33cccc9991fd9af1bbce250c67d5214f8edf12aca7c0790a04faa3715b08",
+        "as_of": "2026-10-31",
+        "status": "ok",
+        "signals": [],
+        "matches": [
+          {
+            "document_id": "acceptance-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "sku",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает уникальный артикул; различие названий не меняет связь."
+          }
+        ],
+        "positions": [
+          {
+            "line_id": "1",
+            "name": "Скамья парковая",
+            "unit": "шт",
+            "expected_quantity": "10",
+            "delivered_quantity": "10",
+            "accepted_quantity": "10",
+            "remaining_quantity": "0",
+            "complete": true,
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Лавочка уличная; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              }
+            ]
+          }
+        ],
+        "audit": [],
+        "active_document_ids": [
+          "acceptance-1",
+          "contract",
+          "delivery-1"
+        ],
+        "ignored_document_ids": [],
+        "applied_amendment_ids": []
+      }
+    },
+    {
+      "id": "T07",
+      "title": "Единицы без коэффициента",
+      "passed": true,
+      "errors": [],
+      "expected": {
+        "status": "incomplete",
+        "required_codes": [
+          "UNIT_CONVERSION_REQUIRED"
+        ],
+        "forbidden_codes": [
+          "OVER_DELIVERY",
+          "PRICE_MISMATCH",
+          "LATE_DELIVERY",
+          "INCOMPLETE_DELIVERY"
+        ],
+        "allowed_codes": [
+          "UNIT_CONVERSION_REQUIRED"
+        ],
+        "delivered_quantity": null,
+        "accepted_quantity": "10",
+        "expected_quantity": "10",
+        "blocked_codes": [
+          "UNIT_CONVERSION_REQUIRED"
+        ]
+      },
+      "observed": {
+        "schema_version": "1.0",
+        "engine_version": "rules-1.0.0",
+        "input_hash": "b86063f8d9491fa3fe9ae97e245394b9cdf287ffdb561979e7b40e02b3ed135a",
+        "result_hash": "ce3c9d8ba10063f2a3bf7da91ed476b30c6266c4a511a6301d74f2c5ffdb63d0",
+        "as_of": "2026-10-31",
+        "status": "incomplete",
+        "signals": [
+          {
+            "id": "sig_9c171d4e7513478b0a69",
+            "code": "UNIT_CONVERSION_REQUIRED",
+            "severity": "warning",
+            "title": "Единицы нельзя сопоставить",
+            "explanation": "Для этих единиц нет подтверждённого коэффициента перевода. Упаковки и штуки автоматически не приравниваются.",
+            "rule": "quantity_target = quantity_source × conversion_factor; для упаковок коэффициент должен быть задан явно.",
+            "expected": "шт",
+            "actual": "упак",
+            "sources": [
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "unit",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": 1,
+                "field": "unit",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 2 упак; цена 1200 руб. с НДС 20%"
+              }
+            ],
+            "position_id": "1",
+            "status": "needs_review",
+            "blocks_comparison": true
+          }
+        ],
+        "matches": [
+          {
+            "document_id": "acceptance-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          }
+        ],
+        "positions": [
+          {
+            "line_id": "1",
+            "name": "Скамья парковая",
+            "unit": "шт",
+            "expected_quantity": "10",
+            "delivered_quantity": null,
+            "accepted_quantity": "10",
+            "remaining_quantity": null,
+            "complete": false,
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 2 упак; цена 1200 руб. с НДС 20%"
+              }
+            ]
+          }
+        ],
+        "audit": [],
+        "active_document_ids": [
+          "acceptance-1",
+          "contract",
+          "delivery-1"
+        ],
+        "ignored_document_ids": [],
+        "applied_amendment_ids": []
+      }
+    },
+    {
+      "id": "T08",
+      "title": "Исправленная накладная",
+      "passed": true,
+      "errors": [],
+      "expected": {
+        "status": "ok",
+        "required_codes": [],
+        "forbidden_codes": [
+          "OVER_DELIVERY",
+          "PRICE_MISMATCH",
+          "LATE_DELIVERY",
+          "INCOMPLETE_DELIVERY"
+        ],
+        "allowed_codes": [],
+        "delivered_quantity": "10",
+        "accepted_quantity": "10",
+        "expected_quantity": "10",
+        "ignored_ids": [
+          "delivery-1"
+        ],
+        "active_ids": [
+          "delivery-1-v2"
+        ],
+        "audit_codes": [
+          "DOCUMENT_CANCELLED"
+        ]
+      },
+      "observed": {
+        "schema_version": "1.0",
+        "engine_version": "rules-1.0.0",
+        "input_hash": "0d717dcbdbe5b468b2ae3632575d93fd5988d922f6df391e33de5c991cd8f440",
+        "result_hash": "5cb440447cf504ba2567d5fb269246bea26d6dbf194ecb018d483a7e0d8fb18b",
+        "as_of": "2026-10-31",
+        "status": "ok",
+        "signals": [],
+        "matches": [
+          {
+            "document_id": "acceptance-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-1-v2",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          }
+        ],
+        "positions": [
+          {
+            "line_id": "1",
+            "name": "Скамья парковая",
+            "unit": "шт",
+            "expected_quantity": "10",
+            "delivered_quantity": "10",
+            "accepted_quantity": "10",
+            "remaining_quantity": "0",
+            "complete": true,
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1-v2",
+                "filename": "delivery-1-v2.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              }
+            ]
+          }
+        ],
+        "audit": [
+          {
+            "code": "DOCUMENT_CANCELLED",
+            "document_ids": [
+              "delivery-1"
+            ],
+            "explanation": "Отменённый документ не участвует в расчётах."
+          },
+          {
+            "code": "DOCUMENT_SUPERSEDED",
+            "document_ids": [
+              "delivery-1",
+              "delivery-1-v2"
+            ],
+            "explanation": "Исходная версия исключена; учтено явное исправление."
+          }
+        ],
+        "active_document_ids": [
+          "acceptance-1",
+          "contract",
+          "delivery-1-v2"
+        ],
+        "ignored_document_ids": [
+          "delivery-1"
+        ],
+        "applied_amendment_ids": []
+      }
+    },
+    {
+      "id": "T09",
+      "title": "Неполный исходный документ",
+      "passed": true,
+      "errors": [],
+      "expected": {
+        "status": "incomplete",
+        "required_codes": [
+          "INCOMPLETE_DOCUMENT"
+        ],
+        "forbidden_codes": [
+          "OVER_DELIVERY",
+          "PRICE_MISMATCH",
+          "LATE_DELIVERY",
+          "INCOMPLETE_DELIVERY"
+        ],
+        "allowed_codes": [
+          "INCOMPLETE_DOCUMENT"
+        ],
+        "delivered_quantity": null,
+        "accepted_quantity": "10",
+        "expected_quantity": "10",
+        "blocked_codes": [
+          "INCOMPLETE_DOCUMENT"
+        ]
+      },
+      "observed": {
+        "schema_version": "1.0",
+        "engine_version": "rules-1.0.0",
+        "input_hash": "cd4b5f7b63b5001406d9b63dd78ad6344b6d15a9e4735558c2db8e971d0c6388",
+        "result_hash": "c674941f6e6bf56ee543d4889e0a90f3335b5aecb21761f862dd6ca97ead5586",
+        "as_of": "2026-10-31",
+        "status": "incomplete",
+        "signals": [
+          {
+            "id": "sig_89fa345cc6a5409400a3",
+            "code": "INCOMPLETE_DOCUMENT",
+            "severity": "warning",
+            "title": "Не хватает данных документа",
+            "explanation": "Неполные реквизиты или страницы: document_completeness, pages. Данные необходимо дополнить; итог по затронутым сравнениям не установлен.",
+            "rule": "Пустое поле и отсутствующая страница не приравниваются к нулевому значению.",
+            "expected": "Полный документ и обязательные реквизиты",
+            "actual": [
+              "document_completeness",
+              "pages"
+            ],
+            "sources": [
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": null,
+                "field": null,
+                "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+              }
+            ],
+            "position_id": null,
+            "status": "needs_review",
+            "blocks_comparison": true
+          }
+        ],
+        "matches": [
+          {
+            "document_id": "acceptance-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          }
+        ],
+        "positions": [
+          {
+            "line_id": "1",
+            "name": "Скамья парковая",
+            "unit": "шт",
+            "expected_quantity": "10",
+            "delivered_quantity": null,
+            "accepted_quantity": "10",
+            "remaining_quantity": null,
+            "complete": false,
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              }
+            ]
+          }
+        ],
+        "audit": [
+          {
+            "code": "PRICE_CHECK_BLOCKED",
+            "document_ids": [
+              "acceptance-1",
+              "delivery-1"
+            ],
+            "explanation": "Цена акта не проверена: данные связанной поставки не подтверждены; причина указана в сигнале неполноты или низкой уверенности."
+          }
+        ],
+        "active_document_ids": [
+          "acceptance-1",
+          "contract",
+          "delivery-1"
+        ],
+        "ignored_document_ids": [],
+        "applied_amendment_ids": []
+      }
+    },
+    {
+      "id": "T10",
+      "title": "Цена с НДС и скидкой",
+      "passed": true,
+      "errors": [],
+      "expected": {
+        "status": "ok",
+        "required_codes": [],
+        "forbidden_codes": [
+          "OVER_DELIVERY",
+          "PRICE_MISMATCH",
+          "LATE_DELIVERY",
+          "INCOMPLETE_DELIVERY"
+        ],
+        "allowed_codes": [],
+        "delivered_quantity": "10",
+        "accepted_quantity": "10",
+        "expected_quantity": "10"
+      },
+      "observed": {
+        "schema_version": "1.0",
+        "engine_version": "rules-1.0.0",
+        "input_hash": "ca14f64ec5ce46594e1a56da3bc317d09d1d12960da66b1c3e52a54777213363",
+        "result_hash": "5e46942cead30d102c5772824b3f099c51b1897ee8fe884c3599d5805b3af885",
+        "as_of": "2026-10-31",
+        "status": "ok",
+        "signals": [],
+        "matches": [
+          {
+            "document_id": "acceptance-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          }
+        ],
+        "positions": [
+          {
+            "line_id": "1",
+            "name": "Скамья парковая",
+            "unit": "шт",
+            "expected_quantity": "10",
+            "delivered_quantity": "10",
+            "accepted_quantity": "10",
+            "remaining_quantity": "0",
+            "complete": true,
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "10 шт; цена без НДС 1250; скидка 20%; НДС 20%; сумма с НДС 12000"
+              }
+            ]
+          }
+        ],
+        "audit": [],
+        "active_document_ids": [
+          "acceptance-1",
+          "contract",
+          "delivery-1"
+        ],
+        "ignored_document_ids": [],
+        "applied_amendment_ids": []
+      }
+    },
+    {
+      "id": "T11",
+      "title": "Изменённый срок поставки",
+      "passed": true,
+      "errors": [],
+      "expected": {
+        "status": "ok",
+        "required_codes": [],
+        "forbidden_codes": [
+          "OVER_DELIVERY",
+          "PRICE_MISMATCH",
+          "LATE_DELIVERY",
+          "INCOMPLETE_DELIVERY"
+        ],
+        "allowed_codes": [],
+        "delivered_quantity": "10",
+        "accepted_quantity": "10",
+        "expected_quantity": "10",
+        "applied_amendments": [
+          "amendment-1"
+        ]
+      },
+      "observed": {
+        "schema_version": "1.0",
+        "engine_version": "rules-1.0.0",
+        "input_hash": "349e394e12c608d07857501c376d944a6dd8df90a65499a6e717df805f8a750f",
+        "result_hash": "523bf5415574b585931ad2bb50749501df6fc80471219055db74ecbdc8668021",
+        "as_of": "2026-10-31",
+        "status": "ok",
+        "signals": [],
+        "matches": [
+          {
+            "document_id": "acceptance-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          }
+        ],
+        "positions": [
+          {
+            "line_id": "1",
+            "name": "Скамья парковая",
+            "unit": "шт",
+            "expected_quantity": "10",
+            "delivered_quantity": "10",
+            "accepted_quantity": "10",
+            "remaining_quantity": "0",
+            "complete": true,
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              }
+            ]
+          }
+        ],
+        "audit": [
+          {
+            "code": "AMENDMENT_APPLIED",
+            "document_ids": [
+              "amendment-1",
+              "contract"
+            ],
+            "explanation": "Применены условия с 2026-10-15; прежняя редакция сохранена для исторических проверок."
+          }
+        ],
+        "active_document_ids": [
+          "acceptance-1",
+          "amendment-1",
+          "contract",
+          "delivery-1"
+        ],
+        "ignored_document_ids": [],
+        "applied_amendment_ids": [
+          "amendment-1"
+        ]
+      }
+    },
+    {
+      "id": "T12",
+      "title": "Неоднозначная цифра на скане",
+      "passed": true,
+      "errors": [],
+      "expected": {
+        "status": "incomplete",
+        "required_codes": [
+          "LOW_CONFIDENCE"
+        ],
+        "forbidden_codes": [
+          "OVER_DELIVERY",
+          "PRICE_MISMATCH",
+          "LATE_DELIVERY",
+          "INCOMPLETE_DELIVERY"
+        ],
+        "allowed_codes": [
+          "LOW_CONFIDENCE"
+        ],
+        "delivered_quantity": null,
+        "accepted_quantity": "10",
+        "expected_quantity": "10",
+        "blocked_codes": [
+          "LOW_CONFIDENCE"
+        ]
+      },
+      "observed": {
+        "schema_version": "1.0",
+        "engine_version": "rules-1.0.0",
+        "input_hash": "b23d4579c5330a23bba8744311fcfb714090c177e93568016755f0b8abd03d96",
+        "result_hash": "27f296f207119ef28bd38d8b630707b835374ffc5bc83a8a14c2ed166060388b",
+        "as_of": "2026-10-31",
+        "status": "incomplete",
+        "signals": [
+          {
+            "id": "sig_cbf2eb58139147987ab7",
+            "code": "LOW_CONFIDENCE",
+            "severity": "warning",
+            "title": "Значение требует подтверждения",
+            "explanation": "В строке 1 уверенность поля «quantity» = 0.48; порог = 0.90. Проверьте исходный фрагмент.",
+            "rule": "Низкая уверенность блокирует сравнение затронутого поля, но не превращает значение в ноль.",
+            "expected": 0.9,
+            "actual": 0.48,
+            "sources": [
+              {
+                "document_id": "delivery-1",
+                "filename": "ambiguous-scan.png",
+                "page": 1,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Количество: 8 (синтетический эталон: неоднозначная цифра 8 или 3)"
+              }
+            ],
+            "position_id": "P-01",
+            "status": "needs_review",
+            "blocks_comparison": true
+          }
+        ],
+        "matches": [
+          {
+            "document_id": "acceptance-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          },
+          {
+            "document_id": "delivery-1",
+            "line_id": "1",
+            "target_document_id": "contract",
+            "target_line_id": "1",
+            "state": "matched",
+            "method": "position_id",
+            "score": 1.0,
+            "candidates": [],
+            "explanation": "Совпадает явный номер позиции контракта."
+          }
+        ],
+        "positions": [
+          {
+            "line_id": "1",
+            "name": "Скамья парковая",
+            "unit": "шт",
+            "expected_quantity": "10",
+            "delivered_quantity": null,
+            "accepted_quantity": "10",
+            "remaining_quantity": null,
+            "complete": false,
+            "sources": [
+              {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "page": null,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              {
+                "document_id": "delivery-1",
+                "filename": "ambiguous-scan.png",
+                "page": 1,
+                "row": 1,
+                "field": "quantity",
+                "excerpt": "Количество: 8 (синтетический эталон: неоднозначная цифра 8 или 3)"
+              }
+            ]
+          }
+        ],
+        "audit": [],
+        "active_document_ids": [
+          "acceptance-1",
+          "contract",
+          "delivery-1"
+        ],
+        "ignored_document_ids": [],
+        "applied_amendment_ids": []
+      }
+    }
+  ]
+}

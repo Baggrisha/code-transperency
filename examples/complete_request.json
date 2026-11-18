@@ -1,0 +1,551 @@
+{
+  "documents": [
+    {
+      "id": "doc-9ca18a3881863a0ef62d",
+      "type": "contract",
+      "number": "GK-2026-001",
+      "contract_id": "GK-2026-001",
+      "date": "2026-10-01",
+      "effective_from": null,
+      "deadline": "2026-11-05",
+      "revision": 1,
+      "logical_id": null,
+      "status": "active",
+      "supersedes": null,
+      "specification_id": null,
+      "base_document_id": null,
+      "replacement_spec_id": null,
+      "approved": false,
+      "related_delivery_ids": [],
+      "acceptance_mode": "incremental",
+      "items": [
+        {
+          "line_id": "t1-r2",
+          "position_id": "1",
+          "sku": "BENCH-01",
+          "name": "Скамья парковая",
+          "unit": "шт",
+          "quantity": "10",
+          "unit_price": "1200.00",
+          "amount": "12000.00",
+          "currency": "RUB",
+          "tax_included": true,
+          "vat_rate": "20",
+          "discount_percent": "0",
+          "conversion_factor": null,
+          "conversion_to": null,
+          "attributes": {},
+          "confidence": {
+            "position_id": 0.99,
+            "sku": 0.99,
+            "name": 0.99,
+            "unit": 0.99,
+            "quantity": 0.99,
+            "unit_price": 0.99,
+            "amount": 0.99
+          },
+          "source": {
+            "document_id": "doc-9ca18a3881863a0ef62d",
+            "filename": "contract.txt",
+            "page": null,
+            "row": 9,
+            "field": null,
+            "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+          },
+          "field_sources": {
+            "position_id": {
+              "document_id": "doc-9ca18a3881863a0ef62d",
+              "filename": "contract.txt",
+              "page": null,
+              "row": 9,
+              "field": "position_id",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            },
+            "sku": {
+              "document_id": "doc-9ca18a3881863a0ef62d",
+              "filename": "contract.txt",
+              "page": null,
+              "row": 9,
+              "field": "sku",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            },
+            "name": {
+              "document_id": "doc-9ca18a3881863a0ef62d",
+              "filename": "contract.txt",
+              "page": null,
+              "row": 9,
+              "field": "name",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            },
+            "unit": {
+              "document_id": "doc-9ca18a3881863a0ef62d",
+              "filename": "contract.txt",
+              "page": null,
+              "row": 9,
+              "field": "unit",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            },
+            "quantity": {
+              "document_id": "doc-9ca18a3881863a0ef62d",
+              "filename": "contract.txt",
+              "page": null,
+              "row": 9,
+              "field": "quantity",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            },
+            "unit_price": {
+              "document_id": "doc-9ca18a3881863a0ef62d",
+              "filename": "contract.txt",
+              "page": null,
+              "row": 9,
+              "field": "unit_price",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            },
+            "amount": {
+              "document_id": "doc-9ca18a3881863a0ef62d",
+              "filename": "contract.txt",
+              "page": null,
+              "row": 9,
+              "field": "amount",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            }
+          }
+        }
+      ],
+      "is_complete": true,
+      "missing_fields": [],
+      "expected_pages": null,
+      "actual_pages": null,
+      "content_hash": "9ca18a3881863a0ef62d13e8aa46bfc4603ebf0e1c6cb6aa2599b98b906cd060",
+      "filename": "contract.txt",
+      "source": {
+        "document_id": "doc-9ca18a3881863a0ef62d",
+        "filename": "contract.txt",
+        "page": null,
+        "row": null,
+        "field": null,
+        "excerpt": "Контракт № GK-2026-001 от 01.10.2026\nДата: 01.10.2026\nСрок поставки: 05.11.2026\nВалюта: RUB\nЦены включают НДС: да\nСтавка НДС: 20\n\nПозиция;Артикул;Наименование;Ед. изм.;Количество;Цена;Сумма\n1;BENCH-01;Скамья парковая;шт.;10;1 200,00;12 000,00\n"
+      },
+      "extraction_method": "rules-delimited-v1",
+      "extraction_warnings": [],
+      "fields_confidence": {
+        "number": 0.99,
+        "contract_id": 0.99,
+        "date": 0.99
+      }
+    },
+    {
+      "id": "doc-1f1c950bda15afae4904",
+      "type": "delivery",
+      "number": "N-001",
+      "contract_id": "GK-2026-001",
+      "date": "2026-10-20",
+      "effective_from": null,
+      "deadline": null,
+      "revision": 1,
+      "logical_id": null,
+      "status": "active",
+      "supersedes": null,
+      "specification_id": null,
+      "base_document_id": null,
+      "replacement_spec_id": null,
+      "approved": false,
+      "related_delivery_ids": [],
+      "acceptance_mode": "incremental",
+      "items": [
+        {
+          "line_id": "t1-r2",
+          "position_id": "1",
+          "sku": "BENCH-01",
+          "name": "Скамья уличная",
+          "unit": "шт",
+          "quantity": "8",
+          "unit_price": "1200.00",
+          "amount": "9600.00",
+          "currency": "RUB",
+          "tax_included": true,
+          "vat_rate": "20",
+          "discount_percent": "0",
+          "conversion_factor": null,
+          "conversion_to": null,
+          "attributes": {},
+          "confidence": {
+            "position_id": 0.99,
+            "sku": 0.99,
+            "name": 0.99,
+            "unit": 0.99,
+            "quantity": 0.99,
+            "unit_price": 0.99,
+            "amount": 0.99
+          },
+          "source": {
+            "document_id": "doc-1f1c950bda15afae4904",
+            "filename": "delivery_8.csv",
+            "page": null,
+            "row": 9,
+            "field": null,
+            "excerpt": "1 | BENCH-01 | Скамья уличная | шт. | 8 | 1 200,00 | 9 600,00"
+          },
+          "field_sources": {
+            "position_id": {
+              "document_id": "doc-1f1c950bda15afae4904",
+              "filename": "delivery_8.csv",
+              "page": null,
+              "row": 9,
+              "field": "position_id",
+              "excerpt": "1 | BENCH-01 | Скамья уличная | шт. | 8 | 1 200,00 | 9 600,00"
+            },
+            "sku": {
+              "document_id": "doc-1f1c950bda15afae4904",
+              "filename": "delivery_8.csv",
+              "page": null,
+              "row": 9,
+              "field": "sku",
+              "excerpt": "1 | BENCH-01 | Скамья уличная | шт. | 8 | 1 200,00 | 9 600,00"
+            },
+            "name": {
+              "document_id": "doc-1f1c950bda15afae4904",
+              "filename": "delivery_8.csv",
+              "page": null,
+              "row": 9,
+              "field": "name",
+              "excerpt": "1 | BENCH-01 | Скамья уличная | шт. | 8 | 1 200,00 | 9 600,00"
+            },
+            "unit": {
+              "document_id": "doc-1f1c950bda15afae4904",
+              "filename": "delivery_8.csv",
+              "page": null,
+              "row": 9,
+              "field": "unit",
+              "excerpt": "1 | BENCH-01 | Скамья уличная | шт. | 8 | 1 200,00 | 9 600,00"
+            },
+            "quantity": {
+              "document_id": "doc-1f1c950bda15afae4904",
+              "filename": "delivery_8.csv",
+              "page": null,
+              "row": 9,
+              "field": "quantity",
+              "excerpt": "1 | BENCH-01 | Скамья уличная | шт. | 8 | 1 200,00 | 9 600,00"
+            },
+            "unit_price": {
+              "document_id": "doc-1f1c950bda15afae4904",
+              "filename": "delivery_8.csv",
+              "page": null,
+              "row": 9,
+              "field": "unit_price",
+              "excerpt": "1 | BENCH-01 | Скамья уличная | шт. | 8 | 1 200,00 | 9 600,00"
+            },
+            "amount": {
+              "document_id": "doc-1f1c950bda15afae4904",
+              "filename": "delivery_8.csv",
+              "page": null,
+              "row": 9,
+              "field": "amount",
+              "excerpt": "1 | BENCH-01 | Скамья уличная | шт. | 8 | 1 200,00 | 9 600,00"
+            }
+          }
+        }
+      ],
+      "is_complete": true,
+      "missing_fields": [],
+      "expected_pages": null,
+      "actual_pages": null,
+      "content_hash": "1f1c950bda15afae49042c1c027763b132311d6e19827254771250aa529913a4",
+      "filename": "delivery_8.csv",
+      "source": {
+        "document_id": "doc-1f1c950bda15afae4904",
+        "filename": "delivery_8.csv",
+        "page": null,
+        "row": null,
+        "field": null,
+        "excerpt": "Накладная № N-001 от 20.10.2026\nКонтракт № GK-2026-001\nДата: 20.10.2026\nВалюта: RUB\nЦены включают НДС: да\nСтавка НДС: 20\n\nПозиция;Артикул;Наименование;Ед. изм.;Количество;Цена;Сумма\n1;BENCH-01;Скамья уличная;шт.;8;1 200,00;9 600,00\n"
+      },
+      "extraction_method": "rules-delimited-v1",
+      "extraction_warnings": [],
+      "fields_confidence": {
+        "number": 0.99,
+        "contract_id": 0.99,
+        "date": 0.99
+      }
+    },
+    {
+      "id": "doc-056a8192ef0991b28107",
+      "type": "delivery",
+      "number": "N-002",
+      "contract_id": "GK-2026-001",
+      "date": "2026-10-22",
+      "effective_from": null,
+      "deadline": null,
+      "revision": 1,
+      "logical_id": null,
+      "status": "active",
+      "supersedes": null,
+      "specification_id": null,
+      "base_document_id": null,
+      "replacement_spec_id": null,
+      "approved": false,
+      "related_delivery_ids": [],
+      "acceptance_mode": "incremental",
+      "items": [
+        {
+          "line_id": "t1-r2",
+          "position_id": "1",
+          "sku": "BENCH-01",
+          "name": "Скамья парковая",
+          "unit": "шт",
+          "quantity": "2",
+          "unit_price": "1200.00",
+          "amount": "2400.00",
+          "currency": "RUB",
+          "tax_included": true,
+          "vat_rate": "20",
+          "discount_percent": "0",
+          "conversion_factor": null,
+          "conversion_to": null,
+          "attributes": {},
+          "confidence": {
+            "position_id": 0.99,
+            "sku": 0.99,
+            "name": 0.99,
+            "unit": 0.99,
+            "quantity": 0.99,
+            "unit_price": 0.99,
+            "amount": 0.99
+          },
+          "source": {
+            "document_id": "doc-056a8192ef0991b28107",
+            "filename": "delivery_2.csv",
+            "page": null,
+            "row": 9,
+            "field": null,
+            "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 2 | 1 200,00 | 2 400,00"
+          },
+          "field_sources": {
+            "position_id": {
+              "document_id": "doc-056a8192ef0991b28107",
+              "filename": "delivery_2.csv",
+              "page": null,
+              "row": 9,
+              "field": "position_id",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 2 | 1 200,00 | 2 400,00"
+            },
+            "sku": {
+              "document_id": "doc-056a8192ef0991b28107",
+              "filename": "delivery_2.csv",
+              "page": null,
+              "row": 9,
+              "field": "sku",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 2 | 1 200,00 | 2 400,00"
+            },
+            "name": {
+              "document_id": "doc-056a8192ef0991b28107",
+              "filename": "delivery_2.csv",
+              "page": null,
+              "row": 9,
+              "field": "name",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 2 | 1 200,00 | 2 400,00"
+            },
+            "unit": {
+              "document_id": "doc-056a8192ef0991b28107",
+              "filename": "delivery_2.csv",
+              "page": null,
+              "row": 9,
+              "field": "unit",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 2 | 1 200,00 | 2 400,00"
+            },
+            "quantity": {
+              "document_id": "doc-056a8192ef0991b28107",
+              "filename": "delivery_2.csv",
+              "page": null,
+              "row": 9,
+              "field": "quantity",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 2 | 1 200,00 | 2 400,00"
+            },
+            "unit_price": {
+              "document_id": "doc-056a8192ef0991b28107",
+              "filename": "delivery_2.csv",
+              "page": null,
+              "row": 9,
+              "field": "unit_price",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 2 | 1 200,00 | 2 400,00"
+            },
+            "amount": {
+              "document_id": "doc-056a8192ef0991b28107",
+              "filename": "delivery_2.csv",
+              "page": null,
+              "row": 9,
+              "field": "amount",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 2 | 1 200,00 | 2 400,00"
+            }
+          }
+        }
+      ],
+      "is_complete": true,
+      "missing_fields": [],
+      "expected_pages": null,
+      "actual_pages": null,
+      "content_hash": "056a8192ef0991b28107b1e9ad9231da849466fa1c6e1076a017ef400bdd9ad7",
+      "filename": "delivery_2.csv",
+      "source": {
+        "document_id": "doc-056a8192ef0991b28107",
+        "filename": "delivery_2.csv",
+        "page": null,
+        "row": null,
+        "field": null,
+        "excerpt": "Накладная № N-002 от 22.10.2026\nКонтракт № GK-2026-001\nДата: 22.10.2026\nВалюта: RUB\nЦены включают НДС: да\nСтавка НДС: 20\n\nПозиция;Артикул;Наименование;Ед. изм.;Количество;Цена;Сумма\n1;BENCH-01;Скамья парковая;шт.;2;1 200,00;2 400,00\n"
+      },
+      "extraction_method": "rules-delimited-v1",
+      "extraction_warnings": [],
+      "fields_confidence": {
+        "number": 0.99,
+        "contract_id": 0.99,
+        "date": 0.99
+      }
+    },
+    {
+      "id": "doc-c5f422f07a2fc0d63c0b",
+      "type": "acceptance",
+      "number": "A-001",
+      "contract_id": "GK-2026-001",
+      "date": "2026-10-23",
+      "effective_from": null,
+      "deadline": null,
+      "revision": 1,
+      "logical_id": null,
+      "status": "active",
+      "supersedes": null,
+      "specification_id": null,
+      "base_document_id": null,
+      "replacement_spec_id": null,
+      "approved": false,
+      "related_delivery_ids": [],
+      "acceptance_mode": "incremental",
+      "items": [
+        {
+          "line_id": "t1-r2",
+          "position_id": "1",
+          "sku": "BENCH-01",
+          "name": "Скамья парковая",
+          "unit": "шт",
+          "quantity": "10",
+          "unit_price": "1200.00",
+          "amount": "12000.00",
+          "currency": "RUB",
+          "tax_included": true,
+          "vat_rate": "20",
+          "discount_percent": "0",
+          "conversion_factor": null,
+          "conversion_to": null,
+          "attributes": {},
+          "confidence": {
+            "position_id": 0.99,
+            "sku": 0.99,
+            "name": 0.99,
+            "unit": 0.99,
+            "quantity": 0.99,
+            "unit_price": 0.99,
+            "amount": 0.99
+          },
+          "source": {
+            "document_id": "doc-c5f422f07a2fc0d63c0b",
+            "filename": "acceptance.txt",
+            "page": null,
+            "row": 9,
+            "field": null,
+            "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+          },
+          "field_sources": {
+            "position_id": {
+              "document_id": "doc-c5f422f07a2fc0d63c0b",
+              "filename": "acceptance.txt",
+              "page": null,
+              "row": 9,
+              "field": "position_id",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            },
+            "sku": {
+              "document_id": "doc-c5f422f07a2fc0d63c0b",
+              "filename": "acceptance.txt",
+              "page": null,
+              "row": 9,
+              "field": "sku",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            },
+            "name": {
+              "document_id": "doc-c5f422f07a2fc0d63c0b",
+              "filename": "acceptance.txt",
+              "page": null,
+              "row": 9,
+              "field": "name",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            },
+            "unit": {
+              "document_id": "doc-c5f422f07a2fc0d63c0b",
+              "filename": "acceptance.txt",
+              "page": null,
+              "row": 9,
+              "field": "unit",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            },
+            "quantity": {
+              "document_id": "doc-c5f422f07a2fc0d63c0b",
+              "filename": "acceptance.txt",
+              "page": null,
+              "row": 9,
+              "field": "quantity",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            },
+            "unit_price": {
+              "document_id": "doc-c5f422f07a2fc0d63c0b",
+              "filename": "acceptance.txt",
+              "page": null,
+              "row": 9,
+              "field": "unit_price",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            },
+            "amount": {
+              "document_id": "doc-c5f422f07a2fc0d63c0b",
+              "filename": "acceptance.txt",
+              "page": null,
+              "row": 9,
+              "field": "amount",
+              "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+            }
+          }
+        }
+      ],
+      "is_complete": true,
+      "missing_fields": [],
+      "expected_pages": null,
+      "actual_pages": null,
+      "content_hash": "c5f422f07a2fc0d63c0bb41a1a224d820e71d1b83255ae15197f1c85cced3696",
+      "filename": "acceptance.txt",
+      "source": {
+        "document_id": "doc-c5f422f07a2fc0d63c0b",
+        "filename": "acceptance.txt",
+        "page": null,
+        "row": null,
+        "field": null,
+        "excerpt": "Акт приёмки № A-001 от 23.10.2026\nКонтракт № GK-2026-001\nДата: 23.10.2026\nВалюта: RUB\nЦены включают НДС: да\nСтавка НДС: 20\n\nПозиция;Артикул;Наименование;Ед. изм.;Количество;Цена;Сумма\n1;BENCH-01;Скамья парковая;шт.;10;1 200,00;12 000,00\n"
+      },
+      "extraction_method": "rules-delimited-v1",
+      "extraction_warnings": [],
+      "fields_confidence": {
+        "number": 0.99,
+        "contract_id": 0.99,
+        "date": 0.99
+      }
+    }
+  ],
+  "as_of": "2026-10-31",
+  "delivery_complete": false,
+  "selected_contract_id": null,
+  "manual_links": [],
+  "required_types": [
+    "contract",
+    "delivery",
+    "acceptance"
+  ],
+  "confidence_threshold": 0.9,
+  "money_tolerance": "0.01"
+}

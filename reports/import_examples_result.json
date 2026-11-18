@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "engine_version": "rules-1.0.0",
+  "input_hash": "b8853364a8cf76a561ab4622bcd282a67bf73fb4cd8c4ab09e008f06a1352cc1",
+  "result_hash": "1309412079129ce2a1003c2b18f1c22aa5c3a32706d463500aadec8345928343",
+  "as_of": "2026-10-31",
+  "status": "ok",
+  "signals": [],
+  "matches": [
+    {
+      "document_id": "doc-056a8192ef0991b28107",
+      "line_id": "t1-r2",
+      "target_document_id": "doc-9ca18a3881863a0ef62d",
+      "target_line_id": "t1-r2",
+      "state": "matched",
+      "method": "position_id",
+      "score": 1.0,
+      "candidates": [],
+      "explanation": "Совпадает явный номер позиции контракта."
+    },
+    {
+      "document_id": "doc-1f1c950bda15afae4904",
+      "line_id": "t1-r2",
+      "target_document_id": "doc-9ca18a3881863a0ef62d",
+      "target_line_id": "t1-r2",
+      "state": "matched",
+      "method": "position_id",
+      "score": 1.0,
+      "candidates": [],
+      "explanation": "Совпадает явный номер позиции контракта."
+    },
+    {
+      "document_id": "doc-c5f422f07a2fc0d63c0b",
+      "line_id": "t1-r2",
+      "target_document_id": "doc-9ca18a3881863a0ef62d",
+      "target_line_id": "t1-r2",
+      "state": "matched",
+      "method": "position_id",
+      "score": 1.0,
+      "candidates": [],
+      "explanation": "Совпадает явный номер позиции контракта."
+    }
+  ],
+  "positions": [
+    {
+      "line_id": "t1-r2",
+      "name": "Скамья парковая",
+      "unit": "шт",
+      "expected_quantity": "10",
+      "delivered_quantity": "10",
+      "accepted_quantity": "10",
+      "remaining_quantity": "0",
+      "complete": true,
+      "sources": [
+        {
+          "document_id": "doc-056a8192ef0991b28107",
+          "filename": "delivery_2.csv",
+          "page": null,
+          "row": 9,
+          "field": "quantity",
+          "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 2 | 1 200,00 | 2 400,00"
+        },
+        {
+          "document_id": "doc-1f1c950bda15afae4904",
+          "filename": "delivery_8.csv",
+          "page": null,
+          "row": 9,
+          "field": "quantity",
+          "excerpt": "1 | BENCH-01 | Скамья уличная | шт. | 8 | 1 200,00 | 9 600,00"
+        },
+        {
+          "document_id": "doc-9ca18a3881863a0ef62d",
+          "filename": "contract.txt",
+          "page": null,
+          "row": 9,
+          "field": "quantity",
+          "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+        },
+        {
+          "document_id": "doc-c5f422f07a2fc0d63c0b",
+          "filename": "acceptance.txt",
+          "page": null,
+          "row": 9,
+          "field": "quantity",
+          "excerpt": "1 | BENCH-01 | Скамья парковая | шт. | 10 | 1 200,00 | 12 000,00"
+        }
+      ]
+    }
+  ],
+  "audit": [],
+  "active_document_ids": [
+    "doc-056a8192ef0991b28107",
+    "doc-1f1c950bda15afae4904",
+    "doc-9ca18a3881863a0ef62d",
+    "doc-c5f422f07a2fc0d63c0b"
+  ],
+  "ignored_document_ids": [],
+  "applied_amendment_ids": []
+}

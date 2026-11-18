@@ -1,0 +1,90 @@
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_correction_is_versioned_and_old_run_becomes_stale (test_api.APIScenarios.test_correction_is_versioned_and_old_run_becomes_stale) ... ok
+test_csv_prevents_formula_interpretation_of_review_comment (test_api.APIScenarios.test_csv_prevents_formula_interpretation_of_review_comment) ... ok
+test_demo_run_agrees_with_stateless_check (test_api.APIScenarios.test_demo_run_agrees_with_stateless_check) ... ok
+test_invalid_upload_does_not_leave_documents_or_files (test_api.APIScenarios.test_invalid_upload_does_not_leave_documents_or_files) ... ok
+test_metadata_validation_is_controlled (test_api.APIScenarios.test_metadata_validation_is_controlled) ... ok
+test_missing_objects_and_invalid_input_are_controlled (test_api.APIScenarios.test_missing_objects_and_invalid_input_are_controlled) ... ok
+test_optional_token_protects_api (test_api.APIScenarios.test_optional_token_protects_api) ... ok
+test_review_and_exports_preserve_immutable_machine_result (test_api.APIScenarios.test_review_and_exports_preserve_immutable_machine_result) ... ok
+test_stale_html_export_is_visibly_marked (test_api.APIScenarios.test_stale_html_export_is_visibly_marked) ... ok
+test_store_survives_reinitialization (test_api.APIScenarios.test_store_survives_reinitialization) ... ok
+test_upload_duplicate_preserves_count_and_original_bytes (test_api.APIScenarios.test_upload_duplicate_preserves_count_and_original_bytes) ... ok
+test_T01 (test_cases.AcceptanceCases.test_T01)
+Полное совпадение ... ok
+test_T02 (test_cases.AcceptanceCases.test_T02)
+Акт и комплект поставки расходятся ... ok
+test_T03 (test_cases.AcceptanceCases.test_T03)
+Частичные поставки складываются ... ok
+test_T04 (test_cases.AcceptanceCases.test_T04)
+Действующая редакция спецификации ... ok
+test_T05 (test_cases.AcceptanceCases.test_T05)
+Повторная загрузка ... ok
+test_T06 (test_cases.AcceptanceCases.test_T06)
+Разные названия при одном артикуле ... ok
+test_T07 (test_cases.AcceptanceCases.test_T07)
+Единицы без коэффициента ... ok
+test_T08 (test_cases.AcceptanceCases.test_T08)
+Исправленная накладная ... ok
+test_T09 (test_cases.AcceptanceCases.test_T09)
+Неполный исходный документ ... ok
+test_T10 (test_cases.AcceptanceCases.test_T10)
+Цена с НДС и скидкой ... ok
+test_T11 (test_cases.AcceptanceCases.test_T11)
+Изменённый срок поставки ... ok
+test_T12 (test_cases.AcceptanceCases.test_T12)
+Неоднозначная цифра на скане ... ok
+test_ambiguous_quantity_is_not_zero (test_extraction.ExtractionTests.test_ambiguous_quantity_is_not_zero) ... ok
+test_conflicting_price_columns_are_not_silently_chosen (test_extraction.ExtractionTests.test_conflicting_price_columns_are_not_silently_chosen) ... ok
+test_docx_table_reads_real_office_bytes (test_extraction.ExtractionTests.test_docx_table_reads_real_office_bytes) ... ok
+test_json_and_content_hash_stable (test_extraction.ExtractionTests.test_json_and_content_hash_stable) ... ok
+test_metadata_cannot_replace_source_or_rows (test_extraction.ExtractionTests.test_metadata_cannot_replace_source_or_rows) ... ok
+test_missing_quantity_and_tax_not_invented (test_extraction.ExtractionTests.test_missing_quantity_and_tax_not_invented) ... ok
+test_non_tabular_document_does_not_pretend_success (test_extraction.ExtractionTests.test_non_tabular_document_does_not_pretend_success) ... ok
+test_ocr_missing_language_is_explicit (test_extraction.ExtractionTests.test_ocr_missing_language_is_explicit) ... ok
+test_pdf_missing_expected_page_is_incomplete (test_extraction.ExtractionTests.test_pdf_missing_expected_page_is_incomplete) ... ok
+test_pdf_table_extracts_real_pdf_page (test_extraction.ExtractionTests.test_pdf_table_extracts_real_pdf_page) ... ok
+test_real_english_ocr_reads_digits_but_requires_review (test_extraction.ExtractionTests.test_real_english_ocr_reads_digits_but_requires_review) ... ok
+test_real_text_contract_and_csv_decimal (test_extraction.ExtractionTests.test_real_text_contract_and_csv_decimal) ... ok
+test_supported_document_types (test_extraction.ExtractionTests.test_supported_document_types) ... ok
+test_unknown_discount_blocks_price (test_extraction.ExtractionTests.test_unknown_discount_blocks_price) ... ok
+test_unknown_format_and_bad_json_controlled (test_extraction.ExtractionTests.test_unknown_format_and_bad_json_controlled) ... ok
+test_acceptance_price_blocks_when_linked_delivery_date_is_untrusted (test_provenance.TemporalProvenance.test_acceptance_price_blocks_when_linked_delivery_date_is_untrusted) ... ok
+test_deadline_inheritance_uses_actual_source_and_confidence (test_provenance.TemporalProvenance.test_deadline_inheritance_uses_actual_source_and_confidence) ... ok
+test_acceptance_after_price_change_uses_linked_delivery_conditions (test_regressions.IndependentRegressions.test_acceptance_after_price_change_uses_linked_delivery_conditions) ... ok
+test_ambiguous_name_match_does_not_create_false_quantity_signal (test_regressions.IndependentRegressions.test_ambiguous_name_match_does_not_create_false_quantity_signal) ... ok
+test_cancelled_correction_does_not_resurrect_superseded_original (test_regressions.IndependentRegressions.test_cancelled_correction_does_not_resurrect_superseded_original) ... ok
+test_competing_corrections_require_review (test_regressions.IndependentRegressions.test_competing_corrections_require_review) ... ok
+test_conflicting_extraction_under_same_hash_is_not_deduplicated (test_regressions.IndependentRegressions.test_conflicting_extraction_under_same_hash_is_not_deduplicated) ... ok
+test_cumulative_acceptance_is_blocked_instead_of_double_counted (test_regressions.IndependentRegressions.test_cumulative_acceptance_is_blocked_instead_of_double_counted) ... ok
+test_currency_difference_is_not_silently_compared (test_regressions.IndependentRegressions.test_currency_difference_is_not_silently_compared) ... ok
+test_decimal_quantities_sum_exactly (test_regressions.IndependentRegressions.test_decimal_quantities_sum_exactly) ... ok
+test_document_order_does_not_change_result (test_regressions.IndependentRegressions.test_document_order_does_not_change_result) ... ok
+test_duplicate_acceptance_is_not_counted_twice (test_regressions.IndependentRegressions.test_duplicate_acceptance_is_not_counted_twice) ... ok
+test_earlier_delivery_uses_price_effective_on_delivery_date (test_regressions.IndependentRegressions.test_earlier_delivery_uses_price_effective_on_delivery_date) ... ok
+test_empty_contract_cannot_report_a_successful_check (test_regressions.IndependentRegressions.test_empty_contract_cannot_report_a_successful_check) ... ok
+test_evidence_and_link_aliases_resolve_to_real_documents (test_regressions.IndependentRegressions.test_evidence_and_link_aliases_resolve_to_real_documents) ... ok
+test_explicit_completed_set_reports_remaining_quantity (test_regressions.IndependentRegressions.test_explicit_completed_set_reports_remaining_quantity) ... ok
+test_explicit_package_conversion_adjusts_quantity_and_price (test_regressions.IndependentRegressions.test_explicit_package_conversion_adjusts_quantity_and_price) ... ok
+test_extra_unmatched_goods_are_reported (test_regressions.IndependentRegressions.test_extra_unmatched_goods_are_reported) ... ok
+test_future_amendment_does_not_remove_current_specification (test_regressions.IndependentRegressions.test_future_amendment_does_not_remove_current_specification) ... ok
+test_identical_goods_in_different_invoices_are_not_duplicate (test_regressions.IndependentRegressions.test_identical_goods_in_different_invoices_are_not_duplicate) ... ok
+test_late_delivery_without_amendment_is_explained (test_regressions.IndependentRegressions.test_late_delivery_without_amendment_is_explained) ... ok
+test_linked_acceptance_cannot_borrow_another_deliveries_quantity (test_regressions.IndependentRegressions.test_linked_acceptance_cannot_borrow_another_deliveries_quantity) ... ok
+test_missing_document_date_does_not_produce_numeric_conclusion (test_regressions.IndependentRegressions.test_missing_document_date_does_not_produce_numeric_conclusion) ... ok
+test_other_contract_is_excluded_from_totals (test_regressions.IndependentRegressions.test_other_contract_is_excluded_from_totals) ... ok
+test_partial_delivery_without_closure_is_not_shortage (test_regressions.IndependentRegressions.test_partial_delivery_without_closure_is_not_shortage) ... ok
+test_repeated_run_is_identical (test_regressions.IndependentRegressions.test_repeated_run_is_identical) ... ok
+test_same_id_with_changed_values_is_a_conflict (test_regressions.IndependentRegressions.test_same_id_with_changed_values_is_a_conflict) ... ok
+test_superseded_contract_without_replacement_is_unusable (test_regressions.IndependentRegressions.test_superseded_contract_without_replacement_is_unusable) ... ok
+test_unapproved_amendment_does_not_change_terms (test_regressions.IndependentRegressions.test_unapproved_amendment_does_not_change_terms) ... ok
+test_uncertain_date_or_deadline_does_not_claim_lateness (test_regressions.IndependentRegressions.test_uncertain_date_or_deadline_does_not_claim_lateness) ... ok
+test_unknown_manual_link_does_not_silently_disappear (test_regressions.IndependentRegressions.test_unknown_manual_link_does_not_silently_disappear) ... ok
+test_unknown_quantity_is_not_zero (test_regressions.IndependentRegressions.test_unknown_quantity_is_not_zero) ... ok
+test_unknown_tax_basis_is_not_assumed (test_regressions.IndependentRegressions.test_unknown_tax_basis_is_not_assumed) ... ok
+
+----------------------------------------------------------------------
+Ran 71 tests in 1.692s
+
+OK

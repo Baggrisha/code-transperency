@@ -1,0 +1,740 @@
+{
+  "$defs": {
+    "Document": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "contract",
+            "specification",
+            "delivery",
+            "acceptance",
+            "amendment"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Number"
+        },
+        "contract_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contract Id"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "effective_from": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective From"
+        },
+        "deadline": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deadline"
+        },
+        "revision": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "logical_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Logical Id"
+        },
+        "status": {
+          "default": "active",
+          "enum": [
+            "active",
+            "cancelled",
+            "superseded",
+            "draft"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "supersedes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Supersedes"
+        },
+        "specification_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Specification Id"
+        },
+        "base_document_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Document Id"
+        },
+        "replacement_spec_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replacement Spec Id"
+        },
+        "approved": {
+          "default": false,
+          "title": "Approved",
+          "type": "boolean"
+        },
+        "related_delivery_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Related Delivery Ids",
+          "type": "array"
+        },
+        "acceptance_mode": {
+          "default": "incremental",
+          "enum": [
+            "incremental",
+            "cumulative"
+          ],
+          "title": "Acceptance Mode",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/Item"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "is_complete": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Is Complete"
+        },
+        "missing_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Fields",
+          "type": "array"
+        },
+        "expected_pages": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Pages"
+        },
+        "actual_pages": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actual Pages"
+        },
+        "content_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Hash"
+        },
+        "filename": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Filename"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "extraction_method": {
+          "default": "structured",
+          "title": "Extraction Method",
+          "type": "string"
+        },
+        "extraction_warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Extraction Warnings",
+          "type": "array"
+        },
+        "fields_confidence": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Fields Confidence",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ],
+      "title": "Document",
+      "type": "object"
+    },
+    "Item": {
+      "additionalProperties": false,
+      "properties": {
+        "line_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Line Id",
+          "type": "string"
+        },
+        "position_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Position Id"
+        },
+        "sku": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sku"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "quantity": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                  "type": "string"
+                }
+              ],
+              "ge": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quantity"
+        },
+        "unit_price": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                  "type": "string"
+                }
+              ],
+              "ge": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit Price"
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                  "type": "string"
+                }
+              ],
+              "ge": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Amount"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "tax_included": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tax Included"
+        },
+        "vat_rate": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                  "type": "string"
+                }
+              ],
+              "ge": 0,
+              "le": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vat Rate"
+        },
+        "discount_percent": {
+          "anyOf": [
+            {
+              "maximum": 100.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            }
+          ],
+          "default": "0",
+          "title": "Discount Percent"
+        },
+        "conversion_factor": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                  "type": "string"
+                }
+              ],
+              "gt": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conversion Factor"
+        },
+        "conversion_to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conversion To"
+        },
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "confidence": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Confidence",
+          "type": "object"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "field_sources": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "title": "Field Sources",
+          "type": "object"
+        }
+      },
+      "required": [
+        "line_id"
+      ],
+      "title": "Item",
+      "type": "object"
+    },
+    "ManualLink": {
+      "additionalProperties": false,
+      "properties": {
+        "document_id": {
+          "title": "Document Id",
+          "type": "string"
+        },
+        "line_id": {
+          "title": "Line Id",
+          "type": "string"
+        },
+        "target_line_id": {
+          "title": "Target Line Id",
+          "type": "string"
+        },
+        "comment": {
+          "minLength": 1,
+          "title": "Comment",
+          "type": "string"
+        },
+        "reviewer": {
+          "minLength": 1,
+          "title": "Reviewer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "document_id",
+        "line_id",
+        "target_line_id",
+        "comment",
+        "reviewer"
+      ],
+      "title": "ManualLink",
+      "type": "object"
+    },
+    "SourceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "document_id": {
+          "title": "Document Id",
+          "type": "string"
+        },
+        "filename": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Filename"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "row": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Row"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "excerpt": {
+          "default": "",
+          "title": "Excerpt",
+          "type": "string"
+        }
+      },
+      "required": [
+        "document_id"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "documents": {
+      "items": {
+        "$ref": "#/$defs/Document"
+      },
+      "maxItems": 300,
+      "minItems": 1,
+      "title": "Documents",
+      "type": "array"
+    },
+    "as_of": {
+      "format": "date",
+      "title": "As Of",
+      "type": "string"
+    },
+    "delivery_complete": {
+      "default": false,
+      "title": "Delivery Complete",
+      "type": "boolean"
+    },
+    "selected_contract_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Selected Contract Id"
+    },
+    "manual_links": {
+      "items": {
+        "$ref": "#/$defs/ManualLink"
+      },
+      "title": "Manual Links",
+      "type": "array"
+    },
+    "required_types": {
+      "items": {
+        "enum": [
+          "contract",
+          "specification",
+          "delivery",
+          "acceptance",
+          "amendment"
+        ],
+        "type": "string"
+      },
+      "title": "Required Types",
+      "type": "array"
+    },
+    "confidence_threshold": {
+      "default": 0.9,
+      "maximum": 1,
+      "minimum": 0.5,
+      "title": "Confidence Threshold",
+      "type": "number"
+    },
+    "money_tolerance": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+          "type": "string"
+        }
+      ],
+      "default": "0.01",
+      "title": "Money Tolerance"
+    }
+  },
+  "required": [
+    "documents",
+    "as_of"
+  ],
+  "title": "CheckRequest",
+  "type": "object"
+}

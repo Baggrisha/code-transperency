@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "checks": [
+    "syntax",
+    "home rendering",
+    "signal rendering",
+    "saved options",
+    "stale notice",
+    "editor rendering",
+    "escaping"
+  ],
+  "scope": "Node VM with minimal document stubs; not a real browser or visual test"
+}

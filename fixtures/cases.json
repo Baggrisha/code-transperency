@@ -1,0 +1,2798 @@
+[
+  {
+    "id": "T01",
+    "title": "Полное совпадение",
+    "description": "Контракт, накладная и акт содержат 10 штук одной позиции.",
+    "source_requirement": "финал финал(1).pdf, раздел 9, страница 11",
+    "synthetic": true,
+    "request": {
+      "as_of": "2026-10-31",
+      "selected_contract_id": "contract",
+      "delivery_complete": false,
+      "documents": [
+        {
+          "id": "contract",
+          "type": "contract",
+          "number": "К-001/2026",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "contract.json",
+          "source": {
+            "document_id": "contract",
+            "filename": "contract.json",
+            "excerpt": "contract № К-001/2026 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "deadline": "2026-10-20"
+        },
+        {
+          "id": "delivery-1",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-18",
+          "is_complete": true,
+          "filename": "delivery-1.json",
+          "source": {
+            "document_id": "delivery-1",
+            "filename": "delivery-1.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "acceptance-1",
+          "type": "acceptance",
+          "number": "А-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "acceptance-1.json",
+          "source": {
+            "document_id": "acceptance-1",
+            "filename": "acceptance-1.json",
+            "excerpt": "acceptance № А-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "related_delivery_ids": [
+            "delivery-1"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "status": "ok",
+      "required_codes": [],
+      "forbidden_codes": [
+        "OVER_DELIVERY",
+        "PRICE_MISMATCH",
+        "LATE_DELIVERY",
+        "INCOMPLETE_DELIVERY"
+      ],
+      "allowed_codes": [],
+      "delivered_quantity": "10",
+      "accepted_quantity": "10",
+      "expected_quantity": "10"
+    }
+  },
+  {
+    "id": "T02",
+    "title": "Акт и комплект поставки расходятся",
+    "description": "В накладной 8 штук, в акте 10; дополнительных накладных нет. Требуется уточнение состава комплекта.",
+    "source_requirement": "финал финал(1).pdf, раздел 9, страница 11",
+    "synthetic": true,
+    "request": {
+      "as_of": "2026-10-31",
+      "selected_contract_id": "contract",
+      "delivery_complete": false,
+      "documents": [
+        {
+          "id": "contract",
+          "type": "contract",
+          "number": "К-001/2026",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "contract.json",
+          "source": {
+            "document_id": "contract",
+            "filename": "contract.json",
+            "excerpt": "contract № К-001/2026 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "deadline": "2026-10-20"
+        },
+        {
+          "id": "delivery-1",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-18",
+          "is_complete": true,
+          "filename": "delivery-1.json",
+          "source": {
+            "document_id": "delivery-1",
+            "filename": "delivery-1.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "8",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "acceptance-1",
+          "type": "acceptance",
+          "number": "А-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "acceptance-1.json",
+          "source": {
+            "document_id": "acceptance-1",
+            "filename": "acceptance-1.json",
+            "excerpt": "acceptance № А-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "related_delivery_ids": [
+            "delivery-1"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "status": "needs_review",
+      "required_codes": [
+        "QUANTITY_MISMATCH"
+      ],
+      "forbidden_codes": [
+        "OVER_DELIVERY",
+        "PRICE_MISMATCH",
+        "LATE_DELIVERY",
+        "INCOMPLETE_DELIVERY"
+      ],
+      "allowed_codes": [
+        "QUANTITY_MISMATCH"
+      ],
+      "delivered_quantity": "8",
+      "accepted_quantity": "10",
+      "expected_quantity": "10",
+      "minimum_signal_sources": 2
+    }
+  },
+  {
+    "id": "T03",
+    "title": "Частичные поставки складываются",
+    "description": "Две отдельные накладные на 8 и 2 штуки подтверждают акт на 10.",
+    "source_requirement": "финал финал(1).pdf, раздел 9, страница 11",
+    "synthetic": true,
+    "request": {
+      "as_of": "2026-10-31",
+      "selected_contract_id": "contract",
+      "delivery_complete": false,
+      "documents": [
+        {
+          "id": "contract",
+          "type": "contract",
+          "number": "К-001/2026",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "contract.json",
+          "source": {
+            "document_id": "contract",
+            "filename": "contract.json",
+            "excerpt": "contract № К-001/2026 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "deadline": "2026-10-20"
+        },
+        {
+          "id": "delivery-1",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-18",
+          "is_complete": true,
+          "filename": "delivery-1.json",
+          "source": {
+            "document_id": "delivery-1",
+            "filename": "delivery-1.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "8",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "delivery-2",
+          "type": "delivery",
+          "number": "Н-002",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "delivery-2.json",
+          "source": {
+            "document_id": "delivery-2",
+            "filename": "delivery-2.json",
+            "excerpt": "delivery № Н-002 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "2",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-2",
+                "filename": "delivery-2.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 2 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-2",
+                  "filename": "delivery-2.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 2 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-2",
+                  "filename": "delivery-2.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 2 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-2",
+                  "filename": "delivery-2.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 2 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "acceptance-1",
+          "type": "acceptance",
+          "number": "А-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "acceptance-1.json",
+          "source": {
+            "document_id": "acceptance-1",
+            "filename": "acceptance-1.json",
+            "excerpt": "acceptance № А-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "related_delivery_ids": [
+            "delivery-1",
+            "delivery-2"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "status": "ok",
+      "required_codes": [],
+      "forbidden_codes": [
+        "OVER_DELIVERY",
+        "PRICE_MISMATCH",
+        "LATE_DELIVERY",
+        "INCOMPLETE_DELIVERY"
+      ],
+      "allowed_codes": [],
+      "delivered_quantity": "10",
+      "accepted_quantity": "10",
+      "expected_quantity": "10"
+    }
+  },
+  {
+    "id": "T04",
+    "title": "Действующая редакция спецификации",
+    "description": "Допсоглашение меняет количество с 10 на 12 до поставки. Поставка и приёмка равны 12.",
+    "source_requirement": "финал финал(1).pdf, раздел 9, страница 11",
+    "synthetic": true,
+    "request": {
+      "as_of": "2026-10-31",
+      "selected_contract_id": "contract",
+      "delivery_complete": false,
+      "documents": [
+        {
+          "id": "contract",
+          "type": "contract",
+          "number": "К-001/2026",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "contract.json",
+          "source": {
+            "document_id": "contract",
+            "filename": "contract.json",
+            "excerpt": "contract № К-001/2026 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [],
+          "deadline": "2026-10-20",
+          "specification_id": "spec-v1"
+        },
+        {
+          "id": "spec-v1",
+          "type": "specification",
+          "number": "С-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "spec-v1.json",
+          "source": {
+            "document_id": "spec-v1",
+            "filename": "spec-v1.json",
+            "excerpt": "specification № С-001 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "spec-v1",
+                "filename": "spec-v1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "spec-v1",
+                  "filename": "spec-v1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "spec-v1",
+                  "filename": "spec-v1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "spec-v1",
+                  "filename": "spec-v1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "effective_from": "2026-10-01",
+          "logical_id": "spec",
+          "revision": 1
+        },
+        {
+          "id": "spec-v2",
+          "type": "specification",
+          "number": "С-002",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-15",
+          "is_complete": true,
+          "filename": "spec-v2.json",
+          "source": {
+            "document_id": "spec-v2",
+            "filename": "spec-v2.json",
+            "excerpt": "specification № С-002 от 2026-10-15; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "12",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "spec-v2",
+                "filename": "spec-v2.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "spec-v2",
+                  "filename": "spec-v2.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "spec-v2",
+                  "filename": "spec-v2.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "spec-v2",
+                  "filename": "spec-v2.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "effective_from": "2026-10-15",
+          "logical_id": "spec",
+          "revision": 2,
+          "supersedes": "spec-v1"
+        },
+        {
+          "id": "amendment-1",
+          "type": "amendment",
+          "number": "ДС-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-14",
+          "is_complete": true,
+          "filename": "amendment-1.json",
+          "source": {
+            "document_id": "amendment-1",
+            "filename": "amendment-1.json",
+            "excerpt": "amendment № ДС-001 от 2026-10-14; контракт К-001/2026"
+          },
+          "items": [],
+          "effective_from": "2026-10-15",
+          "base_document_id": "contract",
+          "replacement_spec_id": "spec-v2",
+          "approved": true
+        },
+        {
+          "id": "delivery-1",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-18",
+          "is_complete": true,
+          "filename": "delivery-1.json",
+          "source": {
+            "document_id": "delivery-1",
+            "filename": "delivery-1.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "12",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "acceptance-1",
+          "type": "acceptance",
+          "number": "А-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "acceptance-1.json",
+          "source": {
+            "document_id": "acceptance-1",
+            "filename": "acceptance-1.json",
+            "excerpt": "acceptance № А-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "12",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 12 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "related_delivery_ids": [
+            "delivery-1"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "status": "ok",
+      "required_codes": [],
+      "forbidden_codes": [
+        "OVER_DELIVERY",
+        "PRICE_MISMATCH",
+        "LATE_DELIVERY",
+        "INCOMPLETE_DELIVERY"
+      ],
+      "allowed_codes": [],
+      "delivered_quantity": "12",
+      "accepted_quantity": "12",
+      "expected_quantity": "12",
+      "applied_amendments": [
+        "amendment-1"
+      ]
+    }
+  },
+  {
+    "id": "T05",
+    "title": "Повторная загрузка",
+    "description": "Тот же файл накладной загружен повторно с тем же SHA-256; количество не удваивается.",
+    "source_requirement": "финал финал(1).pdf, раздел 9, страница 11",
+    "synthetic": true,
+    "request": {
+      "as_of": "2026-10-31",
+      "selected_contract_id": "contract",
+      "delivery_complete": false,
+      "documents": [
+        {
+          "id": "contract",
+          "type": "contract",
+          "number": "К-001/2026",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "contract.json",
+          "source": {
+            "document_id": "contract",
+            "filename": "contract.json",
+            "excerpt": "contract № К-001/2026 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "deadline": "2026-10-20"
+        },
+        {
+          "id": "delivery-1",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-18",
+          "is_complete": true,
+          "filename": "delivery-1.json",
+          "source": {
+            "document_id": "delivery-1",
+            "filename": "delivery-1.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "content_hash": "c9300012bdefb871ca4ab377831d55c48b51804a2f691cbf4984b623bf2dadea"
+        },
+        {
+          "id": "acceptance-1",
+          "type": "acceptance",
+          "number": "А-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "acceptance-1.json",
+          "source": {
+            "document_id": "acceptance-1",
+            "filename": "acceptance-1.json",
+            "excerpt": "acceptance № А-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "related_delivery_ids": [
+            "delivery-1"
+          ]
+        },
+        {
+          "id": "delivery-1-copy",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-18",
+          "is_complete": true,
+          "filename": "delivery-1-copy.json",
+          "source": {
+            "document_id": "delivery-1-copy",
+            "filename": "delivery-1-copy.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1-copy",
+                "filename": "delivery-1-copy.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1-copy",
+                  "filename": "delivery-1-copy.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1-copy",
+                  "filename": "delivery-1-copy.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1-copy",
+                  "filename": "delivery-1-copy.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "content_hash": "c9300012bdefb871ca4ab377831d55c48b51804a2f691cbf4984b623bf2dadea"
+        }
+      ]
+    },
+    "expected": {
+      "status": "ok",
+      "required_codes": [],
+      "forbidden_codes": [
+        "OVER_DELIVERY",
+        "PRICE_MISMATCH",
+        "LATE_DELIVERY",
+        "INCOMPLETE_DELIVERY"
+      ],
+      "allowed_codes": [],
+      "delivered_quantity": "10",
+      "accepted_quantity": "10",
+      "expected_quantity": "10",
+      "audit_codes": [
+        "DUPLICATE_IGNORED"
+      ],
+      "ignored_ids": [
+        "delivery-1-copy"
+      ]
+    }
+  },
+  {
+    "id": "T06",
+    "title": "Разные названия при одном артикуле",
+    "description": "Скамья парковая и лавочка уличная имеют один артикул BENCH-01.",
+    "source_requirement": "финал финал(1).pdf, раздел 9, страница 11",
+    "synthetic": true,
+    "request": {
+      "as_of": "2026-10-31",
+      "selected_contract_id": "contract",
+      "delivery_complete": false,
+      "documents": [
+        {
+          "id": "contract",
+          "type": "contract",
+          "number": "К-001/2026",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "contract.json",
+          "source": {
+            "document_id": "contract",
+            "filename": "contract.json",
+            "excerpt": "contract № К-001/2026 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "deadline": "2026-10-20"
+        },
+        {
+          "id": "delivery-1",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-18",
+          "is_complete": true,
+          "filename": "delivery-1.json",
+          "source": {
+            "document_id": "delivery-1",
+            "filename": "delivery-1.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": null,
+              "sku": "BENCH-01",
+              "name": "Лавочка уличная",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "row": 1,
+                "excerpt": "Лавочка уличная; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Лавочка уличная; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Лавочка уличная; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Лавочка уличная; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "acceptance-1",
+          "type": "acceptance",
+          "number": "А-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "acceptance-1.json",
+          "source": {
+            "document_id": "acceptance-1",
+            "filename": "acceptance-1.json",
+            "excerpt": "acceptance № А-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "related_delivery_ids": [
+            "delivery-1"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "status": "ok",
+      "required_codes": [],
+      "forbidden_codes": [
+        "OVER_DELIVERY",
+        "PRICE_MISMATCH",
+        "LATE_DELIVERY",
+        "INCOMPLETE_DELIVERY"
+      ],
+      "allowed_codes": [],
+      "delivered_quantity": "10",
+      "accepted_quantity": "10",
+      "expected_quantity": "10",
+      "required_match": {
+        "document_id": "delivery-1",
+        "line_id": "1",
+        "state": "matched"
+      }
+    }
+  },
+  {
+    "id": "T07",
+    "title": "Единицы без коэффициента",
+    "description": "Контракт в штуках, накладная в упаковках. Количество в упаковке не указано.",
+    "source_requirement": "финал финал(1).pdf, раздел 9, страница 11",
+    "synthetic": true,
+    "request": {
+      "as_of": "2026-10-31",
+      "selected_contract_id": "contract",
+      "delivery_complete": false,
+      "documents": [
+        {
+          "id": "contract",
+          "type": "contract",
+          "number": "К-001/2026",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "contract.json",
+          "source": {
+            "document_id": "contract",
+            "filename": "contract.json",
+            "excerpt": "contract № К-001/2026 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "deadline": "2026-10-20"
+        },
+        {
+          "id": "delivery-1",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-18",
+          "is_complete": true,
+          "filename": "delivery-1.json",
+          "source": {
+            "document_id": "delivery-1",
+            "filename": "delivery-1.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "упак",
+              "quantity": "2",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 2 упак; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 2 упак; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 2 упак; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 2 упак; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "acceptance-1",
+          "type": "acceptance",
+          "number": "А-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "acceptance-1.json",
+          "source": {
+            "document_id": "acceptance-1",
+            "filename": "acceptance-1.json",
+            "excerpt": "acceptance № А-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "related_delivery_ids": [
+            "delivery-1"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "status": "incomplete",
+      "required_codes": [
+        "UNIT_CONVERSION_REQUIRED"
+      ],
+      "forbidden_codes": [
+        "OVER_DELIVERY",
+        "PRICE_MISMATCH",
+        "LATE_DELIVERY",
+        "INCOMPLETE_DELIVERY"
+      ],
+      "allowed_codes": [
+        "UNIT_CONVERSION_REQUIRED"
+      ],
+      "delivered_quantity": null,
+      "accepted_quantity": "10",
+      "expected_quantity": "10",
+      "blocked_codes": [
+        "UNIT_CONVERSION_REQUIRED"
+      ]
+    }
+  },
+  {
+    "id": "T08",
+    "title": "Исправленная накладная",
+    "description": "Первая версия на 8 отменена; действует исправленная версия на 10.",
+    "source_requirement": "финал финал(1).pdf, раздел 9, страница 11",
+    "synthetic": true,
+    "request": {
+      "as_of": "2026-10-31",
+      "selected_contract_id": "contract",
+      "delivery_complete": false,
+      "documents": [
+        {
+          "id": "contract",
+          "type": "contract",
+          "number": "К-001/2026",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "contract.json",
+          "source": {
+            "document_id": "contract",
+            "filename": "contract.json",
+            "excerpt": "contract № К-001/2026 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "deadline": "2026-10-20"
+        },
+        {
+          "id": "delivery-1",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-18",
+          "is_complete": true,
+          "filename": "delivery-1.json",
+          "source": {
+            "document_id": "delivery-1",
+            "filename": "delivery-1.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "8",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 8 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "status": "cancelled",
+          "logical_id": "delivery-logical",
+          "revision": 1
+        },
+        {
+          "id": "delivery-1-v2",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "delivery-1-v2.json",
+          "source": {
+            "document_id": "delivery-1-v2",
+            "filename": "delivery-1-v2.json",
+            "excerpt": "delivery № Н-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1-v2",
+                "filename": "delivery-1-v2.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1-v2",
+                  "filename": "delivery-1-v2.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1-v2",
+                  "filename": "delivery-1-v2.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1-v2",
+                  "filename": "delivery-1-v2.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "logical_id": "delivery-logical",
+          "revision": 2,
+          "supersedes": "delivery-1"
+        },
+        {
+          "id": "acceptance-1",
+          "type": "acceptance",
+          "number": "А-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "acceptance-1.json",
+          "source": {
+            "document_id": "acceptance-1",
+            "filename": "acceptance-1.json",
+            "excerpt": "acceptance № А-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "related_delivery_ids": [
+            "delivery-1-v2"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "status": "ok",
+      "required_codes": [],
+      "forbidden_codes": [
+        "OVER_DELIVERY",
+        "PRICE_MISMATCH",
+        "LATE_DELIVERY",
+        "INCOMPLETE_DELIVERY"
+      ],
+      "allowed_codes": [],
+      "delivered_quantity": "10",
+      "accepted_quantity": "10",
+      "expected_quantity": "10",
+      "ignored_ids": [
+        "delivery-1"
+      ],
+      "active_ids": [
+        "delivery-1-v2"
+      ],
+      "audit_codes": [
+        "DOCUMENT_CANCELLED"
+      ]
+    }
+  },
+  {
+    "id": "T09",
+    "title": "Неполный исходный документ",
+    "description": "В загруженной накладной одна страница из заявленных двух. Таблица может быть неполной.",
+    "source_requirement": "финал финал(1).pdf, раздел 9, страница 11",
+    "synthetic": true,
+    "request": {
+      "as_of": "2026-10-31",
+      "selected_contract_id": "contract",
+      "delivery_complete": false,
+      "documents": [
+        {
+          "id": "contract",
+          "type": "contract",
+          "number": "К-001/2026",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "contract.json",
+          "source": {
+            "document_id": "contract",
+            "filename": "contract.json",
+            "excerpt": "contract № К-001/2026 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "deadline": "2026-10-20"
+        },
+        {
+          "id": "delivery-1",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-18",
+          "is_complete": false,
+          "filename": "delivery-1.json",
+          "source": {
+            "document_id": "delivery-1",
+            "filename": "delivery-1.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "expected_pages": 2,
+          "actual_pages": 1
+        },
+        {
+          "id": "acceptance-1",
+          "type": "acceptance",
+          "number": "А-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "acceptance-1.json",
+          "source": {
+            "document_id": "acceptance-1",
+            "filename": "acceptance-1.json",
+            "excerpt": "acceptance № А-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "related_delivery_ids": [
+            "delivery-1"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "status": "incomplete",
+      "required_codes": [
+        "INCOMPLETE_DOCUMENT"
+      ],
+      "forbidden_codes": [
+        "OVER_DELIVERY",
+        "PRICE_MISMATCH",
+        "LATE_DELIVERY",
+        "INCOMPLETE_DELIVERY"
+      ],
+      "allowed_codes": [
+        "INCOMPLETE_DOCUMENT"
+      ],
+      "delivered_quantity": null,
+      "accepted_quantity": "10",
+      "expected_quantity": "10",
+      "blocked_codes": [
+        "INCOMPLETE_DOCUMENT"
+      ]
+    }
+  },
+  {
+    "id": "T10",
+    "title": "Цена с НДС и скидкой",
+    "description": "1250 × (1 − 20 / 100) × (1 + 20 / 100) = 1200; структура цены известна.",
+    "source_requirement": "финал финал(1).pdf, раздел 9, страница 11",
+    "synthetic": true,
+    "request": {
+      "as_of": "2026-10-31",
+      "selected_contract_id": "contract",
+      "delivery_complete": false,
+      "documents": [
+        {
+          "id": "contract",
+          "type": "contract",
+          "number": "К-001/2026",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "contract.json",
+          "source": {
+            "document_id": "contract",
+            "filename": "contract.json",
+            "excerpt": "contract № К-001/2026 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "deadline": "2026-10-20"
+        },
+        {
+          "id": "delivery-1",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-18",
+          "is_complete": true,
+          "filename": "delivery-1.json",
+          "source": {
+            "document_id": "delivery-1",
+            "filename": "delivery-1.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1250",
+              "currency": "RUB",
+              "tax_included": false,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "row": 1,
+                "excerpt": "10 шт; цена без НДС 1250; скидка 20%; НДС 20%; сумма с НДС 12000"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "10 шт; цена без НДС 1250; скидка 20%; НДС 20%; сумма с НДС 12000",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "10 шт; цена без НДС 1250; скидка 20%; НДС 20%; сумма с НДС 12000",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "10 шт; цена без НДС 1250; скидка 20%; НДС 20%; сумма с НДС 12000",
+                  "field": "unit"
+                }
+              },
+              "discount_percent": "20",
+              "amount": "12000"
+            }
+          ]
+        },
+        {
+          "id": "acceptance-1",
+          "type": "acceptance",
+          "number": "А-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "acceptance-1.json",
+          "source": {
+            "document_id": "acceptance-1",
+            "filename": "acceptance-1.json",
+            "excerpt": "acceptance № А-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "related_delivery_ids": [
+            "delivery-1"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "status": "ok",
+      "required_codes": [],
+      "forbidden_codes": [
+        "OVER_DELIVERY",
+        "PRICE_MISMATCH",
+        "LATE_DELIVERY",
+        "INCOMPLETE_DELIVERY"
+      ],
+      "allowed_codes": [],
+      "delivered_quantity": "10",
+      "accepted_quantity": "10",
+      "expected_quantity": "10"
+    }
+  },
+  {
+    "id": "T11",
+    "title": "Изменённый срок поставки",
+    "description": "Исходный срок 20 октября заменён на 5 ноября до поставки 25 октября.",
+    "source_requirement": "финал финал(1).pdf, раздел 9, страница 11",
+    "synthetic": true,
+    "request": {
+      "as_of": "2026-10-31",
+      "selected_contract_id": "contract",
+      "delivery_complete": false,
+      "documents": [
+        {
+          "id": "contract",
+          "type": "contract",
+          "number": "К-001/2026",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "contract.json",
+          "source": {
+            "document_id": "contract",
+            "filename": "contract.json",
+            "excerpt": "contract № К-001/2026 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "deadline": "2026-10-20"
+        },
+        {
+          "id": "delivery-1",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-25",
+          "is_complete": true,
+          "filename": "delivery-1.json",
+          "source": {
+            "document_id": "delivery-1",
+            "filename": "delivery-1.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1",
+                "filename": "delivery-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "acceptance-1",
+          "type": "acceptance",
+          "number": "А-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-26",
+          "is_complete": true,
+          "filename": "acceptance-1.json",
+          "source": {
+            "document_id": "acceptance-1",
+            "filename": "acceptance-1.json",
+            "excerpt": "acceptance № А-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "related_delivery_ids": [
+            "delivery-1"
+          ]
+        },
+        {
+          "id": "amendment-1",
+          "type": "amendment",
+          "number": "ДС-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-14",
+          "is_complete": true,
+          "filename": "amendment-1.json",
+          "source": {
+            "document_id": "amendment-1",
+            "filename": "amendment-1.json",
+            "excerpt": "amendment № ДС-001 от 2026-10-14; контракт К-001/2026"
+          },
+          "items": [],
+          "effective_from": "2026-10-15",
+          "base_document_id": "contract",
+          "deadline": "2026-11-05",
+          "approved": true
+        }
+      ]
+    },
+    "expected": {
+      "status": "ok",
+      "required_codes": [],
+      "forbidden_codes": [
+        "OVER_DELIVERY",
+        "PRICE_MISMATCH",
+        "LATE_DELIVERY",
+        "INCOMPLETE_DELIVERY"
+      ],
+      "allowed_codes": [],
+      "delivered_quantity": "10",
+      "accepted_quantity": "10",
+      "expected_quantity": "10",
+      "applied_amendments": [
+        "amendment-1"
+      ]
+    }
+  },
+  {
+    "id": "T12",
+    "title": "Неоднозначная цифра на скане",
+    "description": "Синтетический эталон результата OCR задан вручную: количество 8 с уверенностью 0,48. Это проверка реакции правил, не измерение распознавания настоящего скана.",
+    "source_requirement": "финал финал(1).pdf, раздел 9, страница 11",
+    "synthetic": true,
+    "request": {
+      "as_of": "2026-10-31",
+      "selected_contract_id": "contract",
+      "delivery_complete": false,
+      "documents": [
+        {
+          "id": "contract",
+          "type": "contract",
+          "number": "К-001/2026",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-01",
+          "is_complete": true,
+          "filename": "contract.json",
+          "source": {
+            "document_id": "contract",
+            "filename": "contract.json",
+            "excerpt": "contract № К-001/2026 от 2026-10-01; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "contract",
+                "filename": "contract.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "contract",
+                  "filename": "contract.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "deadline": "2026-10-20"
+        },
+        {
+          "id": "delivery-1",
+          "type": "delivery",
+          "number": "Н-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-18",
+          "is_complete": true,
+          "filename": "ambiguous-scan.png",
+          "source": {
+            "document_id": "delivery-1",
+            "filename": "delivery-1.json",
+            "excerpt": "delivery № Н-001 от 2026-10-18; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "8",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "delivery-1",
+                "filename": "ambiguous-scan.png",
+                "row": 1,
+                "excerpt": "Количество: 8 (синтетический эталон: неоднозначная цифра 8 или 3)",
+                "page": 1
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "delivery-1",
+                  "filename": "ambiguous-scan.png",
+                  "row": 1,
+                  "excerpt": "Количество: 8 (синтетический эталон: неоднозначная цифра 8 или 3)",
+                  "page": 1,
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "delivery-1",
+                  "filename": "delivery-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              },
+              "confidence": {
+                "quantity": 0.48
+              }
+            }
+          ],
+          "extraction_method": "ocr"
+        },
+        {
+          "id": "acceptance-1",
+          "type": "acceptance",
+          "number": "А-001",
+          "contract_id": "К-001/2026",
+          "date": "2026-10-19",
+          "is_complete": true,
+          "filename": "acceptance-1.json",
+          "source": {
+            "document_id": "acceptance-1",
+            "filename": "acceptance-1.json",
+            "excerpt": "acceptance № А-001 от 2026-10-19; контракт К-001/2026"
+          },
+          "items": [
+            {
+              "line_id": "1",
+              "position_id": "P-01",
+              "sku": "BENCH-01",
+              "name": "Скамья парковая",
+              "unit": "шт",
+              "quantity": "10",
+              "unit_price": "1200",
+              "currency": "RUB",
+              "tax_included": true,
+              "vat_rate": "20",
+              "source": {
+                "document_id": "acceptance-1",
+                "filename": "acceptance-1.json",
+                "row": 1,
+                "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%"
+              },
+              "field_sources": {
+                "quantity": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "quantity"
+                },
+                "unit_price": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit_price"
+                },
+                "unit": {
+                  "document_id": "acceptance-1",
+                  "filename": "acceptance-1.json",
+                  "row": 1,
+                  "excerpt": "Скамья парковая; артикул BENCH-01; 10 шт; цена 1200 руб. с НДС 20%",
+                  "field": "unit"
+                }
+              }
+            }
+          ],
+          "related_delivery_ids": [
+            "delivery-1"
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "status": "incomplete",
+      "required_codes": [
+        "LOW_CONFIDENCE"
+      ],
+      "forbidden_codes": [
+        "OVER_DELIVERY",
+        "PRICE_MISMATCH",
+        "LATE_DELIVERY",
+        "INCOMPLETE_DELIVERY"
+      ],
+      "allowed_codes": [
+        "LOW_CONFIDENCE"
+      ],
+      "delivered_quantity": null,
+      "accepted_quantity": "10",
+      "expected_quantity": "10",
+      "blocked_codes": [
+        "LOW_CONFIDENCE"
+      ]
+    }
+  }
+]

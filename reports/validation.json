@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-18",
+  "python": "3.12.14",
+  "unit_tests": {
+    "passed": 71,
+    "total": 71,
+    "log": "reports/unittest.txt"
+  },
+  "acceptance_cases": {
+    "passed": 12,
+    "total": 12,
+    "report": "reports/acceptance.json"
+  },
+  "extraction_examples": {
+    "status": "ok",
+    "expected": "10 = 8 + 2 = 10",
+    "report": "reports/import_examples_result.json"
+  },
+  "cli_examples": "Three README CLI commands executed successfully",
+  "api_schema": "Checked against current app.openapi() and CheckRequest.model_json_schema()",
+  "ocr": {
+    "version": "tesseract 5.5.0",
+    "languages_available": [
+      "eng",
+      "osd"
+    ],
+    "real_english_ocr_executed": true,
+    "russian_ocr_accuracy_measured": false
+  },
+  "web": {
+    "status": "passed",
+    "checks": [
+      "syntax",
+      "home rendering",
+      "signal rendering",
+      "saved options",
+      "stale notice",
+      "editor rendering",
+      "escaping"
+    ],
+    "scope": "Node VM with minimal document stubs; not a real browser or visual test"
+  },
+  "browser_e2e": {
+    "status": "not_executed",
+    "reason": "Chromium could not launch: system socket operation not permitted. No browser visual or E2E result is claimed."
+  },
+  "docker": {
+    "status": "not_executed",
+    "reason": "Docker configuration supplied; image build and container runtime were not executed."
+  },
+  "scope": "Synthetic technical verification, not field precision/recall, legal validation, or measured productivity."
+}
