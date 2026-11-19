@@ -58,8 +58,8 @@ def normalize_name(value: str | None) -> str:
 
 def normalize_identifier(value: str | None) -> str:
     # Preserve leading zeroes, Cyrillic/Latin distinction and separators.
-    text = unicodedata.normalize("NFKC", value or "").strip().upper()
-    text = text.replace("№", "").replace("–", "-").replace("—", "-")
+    text = unicodedata.normalize("NFKC", (value or "").replace("№", "")).strip().upper()
+    text = text.replace("–", "-").replace("—", "-")
     return re.sub(r"\s+", "", text)
 
 

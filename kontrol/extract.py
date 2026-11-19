@@ -42,14 +42,18 @@ class Table:
     rows: list[list[str]]
     page: int | None = None
     row_numbers: list[int] = field(default_factory=list)
+    ocr_confidence: float | None = None
+    confidence_cap: float = 1.0
 
 
 @dataclass
 class Parsed:
     text: str = ""
+    native_text: str = ""
     tables: list[Table] = field(default_factory=list)
     pages: int | None = None
     warnings: list[str] = field(default_factory=list)
+    incomplete: bool = False
     ocr: bool = False
     ocr_confidence: float = 1.0
     method: str = "rules-text-v1"
@@ -123,7 +127,7 @@ def _is_header(cells: list[str]) -> bool:
     return len(names) >= 3 and "quantity" in names and bool(names & {"name", "sku", "position_id"})
 
 
-def _text_tables(text: str, page: int | None = None) -> list[Table]:
+def _text_tables(text: str, page: int | None = None, *, ocr_confidence: float | None = None) -> list[Table]:
     tables: list[Table] = []
     lines = text.splitlines()
     current: Table | None = None
@@ -136,7 +140,7 @@ def _text_tables(text: str, page: int | None = None) -> list[Table]:
         found = next(((sep, _cells(line, sep)) for sep in possible if _is_header(_cells(line, sep))), None)
         if found:
             delimiter, cells = found
-            current = Table(rows=[cells], page=page, row_numbers=[row_number])
+            current = Table(rows=[cells], page=page, row_numbers=[row_number], ocr_confidence=ocr_confidence)
             tables.append(current)
             continue
         if current is None or delimiter is None:
@@ -234,8 +238,26 @@ def _extract_image(path: Path, language: str) -> Parsed:
     except Exception as exc:
         raise ExtractionError("Изображение повреждено или имеет неподдерживаемый формат.") from exc
     text, confidence, warnings = _ocr(path, language)
-    return Parsed(text=text, tables=_text_tables(text, 1), pages=1, warnings=warnings,
+    return Parsed(text=text, tables=_text_tables(text, 1, ocr_confidence=confidence), pages=1, warnings=warnings,
                   ocr=True, ocr_confidence=confidence, method="tesseract-local-v1")
+
+
+def _pdf_columns(row: Any) -> tuple[tuple[float, float], ...] | None:
+    if not row.cells or any(cell is None for cell in row.cells):
+        return None
+    return tuple((cell[0], cell[2]) for cell in row.cells)
+
+
+def _same_pdf_columns(first: tuple[tuple[float, float], ...] | None,
+                      second: tuple[tuple[float, float], ...] | None) -> bool:
+    if not first or not second or len(first) != len(second):
+        return False
+    # Allow a shifted page margin, not a different distribution of column widths.
+    offset = second[0][0] - first[0][0]
+    return all(
+        abs(x0 + offset - y0) <= 2 and abs(x1 + offset - y1) <= 2
+        for (x0, x1), (y0, y1) in zip(first, second)
+    )
 
 
 def _extract_pdf(path: Path, language: str) -> Parsed:
@@ -246,8 +268,11 @@ def _extract_pdf(path: Path, language: str) -> Parsed:
         raise ExtractionError("Не удалось открыть PDF: файл повреждён, зашифрован или не является PDF.") from exc
     parsed = Parsed(method="rules-pdfplumber-v1")
     texts = []
+    native_texts = []
     ocr_confidences = []
     ocr_pages = 0
+    previous_table = None
+    unverified_pages = []
     try:
         with pdf:
             parsed.pages = len(pdf.pages)
@@ -256,12 +281,66 @@ def _extract_pdf(path: Path, language: str) -> Parsed:
             with tempfile.TemporaryDirectory(prefix="kontrol-ocr-") as tmp:
                 for n, page in enumerate(pdf.pages, 1):
                     text = page.extract_text() or ""
-                    raw_tables = page.extract_tables() or []
-                    page_tables = [Table([[str(c or "").strip() for c in row] for row in t], page=n) for t in raw_tables]
-                    usable_tables = [t for t in page_tables if any(_is_header(r) for r in t.rows)]
-                    if len(text.strip()) < 30 and page.images:
+                    native_texts.append(text)
+                    usable_tables = []
+                    unrecognized_table = False
+                    for table_index, pdf_table in enumerate(page.find_tables()):
+                        rows = [[str(c or "").strip() for c in row] for row in pdf_table.extract()]
+                        if not any(any(row) for row in rows):
+                            continue
+                        physical_rows = pdf_table.rows
+                        header_indexes = [i for i, row in enumerate(rows) if _is_header(row)]
+                        if header_indexes:
+                            usable_tables.append(Table(rows, page=n))
+                            header_index = header_indexes[-1]
+                            header = rows[header_index]
+                            mapping = _header_map(header)
+                            columns = _pdf_columns(physical_rows[header_index])
+                            previous_table = (
+                                (n, header, columns)
+                                if len(mapping) == len(set(mapping.values())) and columns is not None
+                                else None
+                            )
+                            if any(any(row) for row in rows[:header_indexes[0]]):
+                                unrecognized_table = True
+                            continue
+                        columns_match = (
+                            previous_table is not None
+                            and previous_table[0] == n - 1
+                            and table_index == 0
+                            and bool(physical_rows)
+                            and all(_same_pdf_columns(previous_table[2], _pdf_columns(row)) for row in physical_rows)
+                        )
+                        if columns_match:
+                            header = previous_table[1]
+                            usable_tables.append(Table(
+                                rows=[header, *rows], page=n,
+                                row_numbers=[1, *range(1, len(rows) + 1)], confidence_cap=0.85,
+                            ))
+                            previous_table = (n, header, previous_table[2])
+                            parsed.incomplete = True
+                            parsed.warnings.append(
+                                f"PDF_TABLE_CONTINUATION_REVIEW: страница {n}, шапка таблицы восстановлена "
+                                "по совпадению столбцов с предыдущей страницей; подтвердите строки по оригиналу."
+                            )
+                        else:
+                            unrecognized_table = True
+                    if unrecognized_table:
+                        parsed.incomplete = True
+                        parsed.warnings.append(
+                            f"PDF_TABLE_UNRECOGNIZED: страница {n} содержит таблицу или строки без надёжной шапки; "
+                            "проверьте все позиции по оригиналу."
+                        )
+                    usable_tables = usable_tables or _text_tables(text, n)
+                    if page.images:
                         parsed.ocr = True
                         ocr_pages += 1
+                        parsed.warnings.append(
+                            f"PDF_IMAGE_CONTENT_UNVERIFIED: страница {n} содержит изображение; "
+                            "проверьте, что все таблицы и строки извлечены."
+                        )
+                        for table in usable_tables:
+                            table.confidence_cap = 0.85
                         if ocr_pages > MAX_OCR_PAGES:
                             parsed.warnings.append(f"OCR_PAGE_LIMIT: страница {n} не обработана; лимит {MAX_OCR_PAGES} страниц OCR.")
                         elif not shutil.which("pdftoppm"):
@@ -271,14 +350,24 @@ def _extract_pdf(path: Path, language: str) -> Parsed:
                             try:
                                 subprocess.run(["pdftoppm", "-f", str(n), "-l", str(n), "-r", "160", "-scale-to", "2500", "-singlefile", "-png", str(path), str(prefix)],
                                                capture_output=True, timeout=30, check=True)
-                                text, confidence, warnings = _ocr(prefix.with_suffix(".png"), language)
+                                ocr_text, confidence, warnings = _ocr(prefix.with_suffix(".png"), language)
                                 ocr_confidences.append(confidence)
                                 parsed.warnings.extend(f"Страница {n}: {w}" for w in warnings)
+                                if ocr_text.strip():
+                                    text = "\n".join(part for part in (text, ocr_text) if part)
+                                    ocr_tables = _text_tables(ocr_text, n, ocr_confidence=confidence)
+                                    # Full-page OCR can repeat native rows; never merge the two blindly.
+                                    if usable_tables and ocr_tables:
+                                        parsed.warnings.append(
+                                            f"PDF_OCR_TABLES_UNMERGED: страница {n} содержит текстовые и OCR-таблицы; "
+                                            "проверьте все строки вручную, чтобы исключить пропуски и повторы."
+                                        )
+                                    elif not usable_tables:
+                                        usable_tables = ocr_tables
                             except (subprocess.TimeoutExpired, subprocess.CalledProcessError, OSError):
                                 parsed.warnings.append(f"OCR_FAILED: страницу {n} не удалось преобразовать в изображение.")
-                        usable_tables = _text_tables(text, n)
-                    else:
-                        usable_tables = usable_tables or _text_tables(text, n)
+                    elif text.strip() and not usable_tables and not unrecognized_table:
+                        unverified_pages.append(n)
                     if not text.strip():
                         parsed.warnings.append(f"EMPTY_PAGE: страница {n} не содержит извлечённого текста; проверьте полноту.")
                     texts.append(text)
@@ -287,7 +376,15 @@ def _extract_pdf(path: Path, language: str) -> Parsed:
         raise
     except Exception as exc:
         raise ExtractionError("Ошибка чтения страниц PDF; проверьте исходный файл.") from exc
+    if parsed.tables and parsed.pages and parsed.pages > 1:
+        for n in unverified_pages:
+            parsed.incomplete = True
+            parsed.warnings.append(
+                f"PDF_PAGE_TABLE_UNVERIFIED: страница {n} не содержит распознанной таблицы; "
+                "проверьте, нет ли на ней продолжения позиций."
+            )
     parsed.text = "\n\f\n".join(texts)
+    parsed.native_text = "\n\f\n".join(native_texts)
     if parsed.ocr:
         parsed.method = "rules-pdfplumber+tesseract-v1"
         parsed.ocr_confidence = min(ocr_confidences, default=0.0)
@@ -448,7 +545,7 @@ def _items(parsed: Parsed, doc_id: str, filename: str, defaults: dict[str, Any])
             for col, key in mapping.items():
                 value = cells[col].strip() if col < len(cells) else ""
                 fields_sources[key] = source.model_copy(update={"field": key})
-                base_conf = min(0.85, parsed.ocr_confidence) if parsed.ocr else 0.99
+                base_conf = min(table.confidence_cap, min(0.85, table.ocr_confidence) if table.ocr_confidence is not None else 0.99)
                 confidence[key] = base_conf
                 if not value or value in {"—", "–", "-", "?", "не указано"}:
                     values[key] = None
@@ -460,7 +557,7 @@ def _items(parsed: Parsed, doc_id: str, filename: str, defaults: dict[str, Any])
                         number = decimal_value(value)
                         if number is not None and (number < 0 or (key in {"vat_rate", "discount_percent"} and number > 100) or (key == "conversion_factor" and number <= 0)):
                             raise ValueError()
-                        if parsed.ocr and parsed.ocr_confidence < 0.60:
+                        if table.ocr_confidence is not None and table.ocr_confidence < 0.60:
                             raise ValueError()
                         values[key] = number
                     except ValueError:
@@ -578,12 +675,17 @@ def extract_document(path: Path, *, document_type: str | None = None,
         parsed = _extract_pdf(path, language)
     else:
         parsed = _extract_image(path, language)
-    dtype = explicit.get("type") or _detect_type(parsed.text)
+    dtype = explicit.get("type") or _detect_type(parsed.native_text or parsed.text) or _detect_type(parsed.text)
     if dtype not in DOCUMENT_TYPES:
         detail = " ".join(parsed.warnings)
         raise ExtractionError("Не удалось определить тип документа. Укажите document_type. " + detail)
     doc_id = "doc-" + digest[:20]
     extracted, defaults, warnings = _metadata_from_text(parsed.text, dtype)
+    if parsed.ocr and parsed.native_text.strip():
+        native_values, native_defaults, native_warnings = _metadata_from_text(parsed.native_text, dtype)
+        extracted.update(native_values)
+        defaults.update({key: value for key, value in native_defaults.items() if key != "currency" or value is not None})
+        warnings.extend(native_warnings)
     warnings = parsed.warnings + warnings
     items, item_warnings = _items(parsed, doc_id, path.name, defaults)
     warnings.extend(item_warnings)
@@ -621,7 +723,7 @@ def extract_document(path: Path, *, document_type: str | None = None,
         warnings.append("METADATA_OVERRIDE: часть реквизитов задана пользователем; эти значения не являются результатом распознавания.")
     source = SourceRef(document_id=doc_id, filename=path.name, page=1 if parsed.pages else None,
                        excerpt=parsed.text[:1800])
-    complete = not missing and not parsed.ocr and not any("EMPTY_PAGE" in w or "не включена" in w or "не прошли" in w for w in warnings)
+    complete = not missing and not parsed.ocr and not parsed.incomplete and not any("EMPTY_PAGE" in w or "не включена" in w or "не прошли" in w for w in warnings)
     if explicit.get("is_complete") is False:
         complete = False
     confidence = {key: min(parsed.ocr_confidence, 0.85) if parsed.ocr else 0.99

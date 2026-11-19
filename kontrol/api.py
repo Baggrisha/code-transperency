@@ -15,7 +15,7 @@ from fastapi.security import HTTPBearer
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
-from pydantic import Field, ValidationError
+from pydantic import Field, ValidationError, model_validator
 from starlette.concurrency import run_in_threadpool
 
 from . import __version__
@@ -23,7 +23,8 @@ from .engine import run_check
 from .exports import report_html, signals_csv
 from .extract import ExtractionError, extract_document
 from .models import CheckRequest, Day, DocType, Document, ManualLink, Model, Number, ReviewUpdate
-from .storage import ConflictError, NotFoundError, Store
+from .storage import (ConflictError, InvalidReviewError, NotFoundError, Store,
+                      validate_review_confirmations, validate_review_discards)
 
 ROOT = Path(__file__).resolve().parent.parent
 MAX_FILE_BYTES = 20 * 1024 * 1024
@@ -49,6 +50,19 @@ class DocumentUpdate(Model):
     expected_revision: int = Field(ge=1)
     reviewer: str = Field(min_length=1, max_length=200)
     comment: str = Field(min_length=1, max_length=10000)
+    confirmed_fields: list[str] = Field(default_factory=list, description="Явно подтверждённые поля документа.")
+    confirmed_items: dict[str, list[str]] = Field(
+        default_factory=dict, description="Явно подтверждённые поля строк по их line_id.")
+    discarded_confidence_fields: list[str] = Field(
+        default_factory=list, description="Ошибочные ключи уверенности, не являющиеся полями документа.")
+    discarded_item_confidence: dict[str, list[str]] = Field(
+        default_factory=dict, description="Ошибочные ключи уверенности строк по их line_id.")
+
+    @model_validator(mode="after")
+    def valid_confirmations(self) -> "DocumentUpdate":
+        validate_review_confirmations(self.document, self.confirmed_fields, self.confirmed_items)
+        validate_review_discards(self.document, self.discarded_confidence_fields, self.discarded_item_confidence)
+        return self
 
 
 def create_app(data_dir: Path | None = None) -> FastAPI:
@@ -81,6 +95,10 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
     @app.exception_handler(ConflictError)
     async def conflict(request, exc):
         return JSONResponse({"detail": str(exc)}, status_code=409)
+
+    @app.exception_handler(InvalidReviewError)
+    async def invalid_review(request, exc):
+        return JSONResponse({"detail": str(exc)}, status_code=422)
 
     @app.exception_handler(ExtractionError)
     async def extraction_error(request, exc):
@@ -205,7 +223,8 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
     @app.put("/api/cases/{case_id}/documents/{document_id}", tags=["Документы"])
     def edit_document(case_id: str, document_id: str, payload: DocumentUpdate):
         return store.update_document(case_id, document_id, payload.document, payload.expected_revision,
-                                     payload.reviewer, payload.comment)
+                                     payload.reviewer, payload.comment, payload.confirmed_fields, payload.confirmed_items,
+                                     payload.discarded_confidence_fields, payload.discarded_item_confidence)
 
     @app.get("/api/cases/{case_id}/documents/{document_id}/history", tags=["Документы"])
     def doc_history(case_id: str, document_id: str):

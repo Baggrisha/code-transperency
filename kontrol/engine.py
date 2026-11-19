@@ -97,6 +97,7 @@ class _Context:
         self.applied: list[str] = []
         self.aliases: dict[str, str] = {}
         self.blocked_types: set[str] = set()
+        self.quarantined: list[Document] = []
 
     def signal(self, code: str, title: str, explanation: str, rule: str,
                sources: list[SourceRef], *, expected: Any = None, actual: Any = None,
@@ -123,13 +124,39 @@ class _Context:
         return value
 
 
+def _low_doc_fields(ctx: _Context, doc: Document) -> set[str]:
+    low = {field for field, confidence in doc.fields_confidence.items()
+           if confidence < ctx.req.confidence_threshold}
+    for field in sorted(low):
+        ctx.signal("LOW_CONFIDENCE", "Реквизит требует подтверждения",
+                   f"Уверенность извлечения поля «{field}» = {doc.fields_confidence[field]:.2f}; порог = {ctx.req.confidence_threshold:.2f}. Проверьте исходный фрагмент.",
+                   "Низкая уверенность извлечения блокирует связанные сравнения до ручного подтверждения.",
+                   [_doc_source(doc, field)], actual=doc.fields_confidence[field], expected=ctx.req.confidence_threshold, blocks=True)
+    return low
+
+
 def _resolve_documents(ctx: _Context) -> tuple[list[Document], dict[str, Document]]:
     """Resolve re-uploads and explicit transaction revision chains conservatively."""
     groups: dict[str, list[Document]] = defaultdict(list)
     for doc in ctx.req.documents:
+        # No unconfirmed control field may decide deduplication, status,
+        # revision history, document type, or the applicability of terms.
+        if _low_doc_fields(ctx, doc):
+            ctx.quarantined.append(doc)
+            ctx.ignored.add(doc.id)
+            continue
         groups[doc.id].append(doc)
     unique: list[Document] = []
     for did, group in sorted(groups.items()):
+        uncertain_same_id = [d for d in ctx.quarantined if d.id == did]
+        if uncertain_same_id:
+            ctx.signal("DUPLICATE_ID_CONFLICT", "Не подтверждён выбор документа с этим ID",
+                       "ID используется также документом с непроверенными реквизитами. Ни одна версия не выбирается до подтверждения.",
+                       "Идентификатор и содержимое каждой версии должны быть достоверны.",
+                       [_doc_source(d) for d in group + uncertain_same_id], blocks=True)
+            ctx.quarantined.extend(group)
+            ctx.ignored.add(did)
+            continue
         signatures = {_hash(_business(d)) for d in group}
         if len(signatures) > 1:
             ctx.signal("DUPLICATE_ID_CONFLICT", "Один ID у разных документов",
@@ -290,12 +317,7 @@ def _doc_integrity(ctx: _Context, doc: Document, needs_items: bool = True) -> bo
                    "Неполные реквизиты или страницы: " + ", ".join(sorted(set(missing))) + ". Данные необходимо дополнить; итог по затронутым сравнениям не установлен.",
                    "Пустое поле и отсутствующая страница не приравниваются к нулевому значению.",
                    [_doc_source(doc)], expected="Полный документ и обязательные реквизиты", actual=sorted(set(missing)), blocks=True)
-    critical_low = [f for f, c in doc.fields_confidence.items() if c < ctx.req.confidence_threshold]
-    for field in sorted(critical_low):
-        ctx.signal("LOW_CONFIDENCE", "Реквизит требует подтверждения",
-                   f"Уверенность извлечения поля «{field}» = {doc.fields_confidence[field]:.2f}; порог = {ctx.req.confidence_threshold:.2f}. Проверьте исходный фрагмент.",
-                   "Низкая уверенность извлечения блокирует связанные сравнения до ручного подтверждения.",
-                   [_doc_source(doc, field)], actual=doc.fields_confidence[field], expected=ctx.req.confidence_threshold, blocks=True)
+    critical_low = _low_doc_fields(ctx, doc)
     return not missing and not critical_low
 
 
@@ -510,15 +532,25 @@ def _match_item(ctx: _Context, doc: Document, item: Item, target: Document, *, r
                     candidate_ids = [x[1] for x in fuzzy]
                     explanation = "Похожее название даёт только предложение связи; требуется ручное подтверждение."
         if chosen:
-            used_field = {"position_id": "position_id", "sku": "sku", "exact_name": "name"}[method]
-            if min(item.confidence.get(used_field, 1), chosen.confidence.get(used_field, 1)) < ctx.req.confidence_threshold:
-                candidate_ids = [chosen.line_id]
-                chosen = None
-                state = "needs_review"
-                explanation = "Идентификатор/название распознаны с низкой уверенностью; подтвердите связь."
-            else:
-                state = "matched"
-                explanation = {"position_id": "Совпадает явный номер позиции контракта.", "sku": "Совпадает уникальный артикул; различие названий не меняет связь.", "exact_name": "Точно совпадает уникальное нормализованное название."}[method]
+            state = "matched"
+            explanation = {"position_id": "Совпадает явный номер позиции контракта.", "sku": "Совпадает уникальный артикул; различие названий не меняет связь.", "exact_name": "Точно совпадает уникальное нормализованное название."}[method]
+    if chosen:
+        # A missing-but-unconfirmed identifier can also conceal a conflicting
+        # match; all identifiers used to establish uniqueness must be trusted.
+        fields = {"line_id"} if manual_links else {"line_id", "position_id", "sku"}
+        if method == "exact_name":
+            fields.add("name")
+        untrusted_candidates = [candidate for candidate in candidates
+                                if any(candidate.confidence.get(field, 1) < ctx.req.confidence_threshold
+                                       for field in fields)]
+        if (any(item.confidence.get(field, 1) < ctx.req.confidence_threshold for field in fields)
+                or untrusted_candidates):
+            for candidate in untrusted_candidates:
+                _low_item_fields(ctx, target, candidate)
+            candidate_ids = [chosen.line_id]
+            chosen = None
+            state = "needs_review"
+            explanation = "Идентификатор/название распознаны с низкой уверенностью; подтвердите связь."
     if record:
         ctx.matches.append(Match(document_id=doc.id, line_id=item.line_id, target_document_id=target.id,
                                  target_line_id=chosen.line_id if chosen else None, state=state,
@@ -572,47 +604,65 @@ def _low_item_fields(ctx: _Context, doc: Document, item: Item) -> set[str]:
     return low
 
 
+def _unit_conversion_required(ctx: _Context, doc: Document, item: Item,
+                              target_doc: Document, target: Item, position: str) -> None:
+    ctx.signal("UNIT_CONVERSION_REQUIRED", "Единицы нельзя сопоставить",
+               "Для этих единиц нет подтверждённого коэффициента перевода. Упаковки и штуки автоматически не приравниваются.",
+               "quantity_target = quantity_source × conversion_factor; для упаковок коэффициент должен быть задан явно.",
+               [_item_source(doc, item, "unit"), _item_source(target_doc, target, "unit")],
+               expected=target.unit, actual=item.unit, position=position, blocks=True)
+
+
+def _check_amount(ctx: _Context, doc: Document, item: Item, low: set[str], position: str) -> None:
+    fields = {"amount", "quantity", "unit_price", "tax_included", "vat_rate", "discount_percent"}
+    gross = _gross(item)
+    if item.amount is None or item.quantity is None or gross is None or low.intersection(fields):
+        return
+    expected_amount = (gross * item.quantity).quantize(CENT, rounding=ROUND_HALF_UP)
+    if abs(item.amount - expected_amount) > ctx.req.money_tolerance:
+        ctx.signal("AMOUNT_MISMATCH", "Не сходится сумма строки",
+                   "Итоговая сумма с НДС в строке не совпадает с количеством, ценой и скидкой.",
+                   "amount = ROUND_HALF_UP(quantity × сопоставимая цена за исходную единицу, 2).",
+                   [_item_source(doc, item, "amount"), _item_source(doc, item, "quantity"), _item_source(doc, item, "unit_price")],
+                   expected=str(expected_amount), actual=str(item.amount), position=position)
+
+
 def _compare_price(ctx: _Context, doc: Document, item: Item, target_doc: Document, target: Item,
-                   factor: Decimal | None, low: set[str], target_low: set[str]) -> None:
+                   factor: Decimal | None, low: set[str], target_low: set[str],
+                   position: str, date_sources: list[SourceRef]) -> None:
     fields = {"unit_price", "currency", "tax_included", "vat_rate", "discount_percent", "unit", "conversion_factor", "conversion_to"}
     if low.intersection(fields) or target_low.intersection(fields) or factor is None:
         return
     if not item.currency or not target.currency:
         ctx.signal("PRICE_BASIS_UNKNOWN", "Не определена валюта цены",
                    "Без валюты нельзя считать цены сопоставимыми.", "Валюты обеих цен должны быть известны.",
-                   [_item_source(doc, item, "currency"), _item_source(target_doc, target, "currency")], blocks=True)
+                   [_item_source(doc, item, "currency"), _item_source(target_doc, target, "currency")] + date_sources,
+                   position=position, blocks=True)
         return
     if item.currency != target.currency:
         ctx.signal("CURRENCY_MISMATCH", "Цены указаны в разных валютах",
                    "Валюты различаются; валютный курс и правило пересчёта в этом комплекте не заданы.",
                    "Цены в разных валютах автоматически не сопоставляются.",
-                   [_item_source(doc, item, "currency"), _item_source(target_doc, target, "currency")],
-                   expected=target.currency, actual=item.currency, position=target.line_id, blocks=True)
+                   [_item_source(doc, item, "currency"), _item_source(target_doc, target, "currency")] + date_sources,
+                   expected=target.currency, actual=item.currency, position=position, blocks=True)
         return
     gross, expected = _gross(item), _gross(target)
     if gross is None or expected is None:
         ctx.signal("PRICE_BASIS_UNKNOWN", "Не определена сопоставимая цена",
                    "Нужны цена, признак включения НДС и ставка НДС для цены без налога. Нельзя объявлять разницу завышением без этой структуры.",
                    "Сопоставимая цена = unit_price × (1 − discount_percent/100) × (1 + vat_rate/100 при tax_included=false).",
-                   [_item_source(doc, item, "unit_price"), _item_source(target_doc, target, "unit_price")],
+                   [_item_source(doc, item, "unit_price"), _item_source(target_doc, target, "unit_price")] + date_sources,
                    expected="Явная структура обеих цен", actual={"document_tax_included": item.tax_included, "contract_tax_included": target.tax_included},
-                   position=target.line_id, blocks=True)
+                   position=position, blocks=True)
         return
     converted = gross / factor
     if abs(converted - expected) > ctx.req.money_tolerance:
         ctx.signal("PRICE_MISMATCH", "Расходится цена за единицу",
                    "После учёта НДС, скидки и единицы измерения цены различаются. Проверьте основание цены и комплект изменений.",
                    "|цена документа после нормализации − цена действующей на дату документа спецификации| > money_tolerance.",
-                   [_item_source(doc, item, "unit_price"), _item_source(target_doc, target, "unit_price")],
-                   expected=str(expected), actual=str(converted), position=target.line_id)
-    if item.amount is not None and item.quantity is not None and not low.intersection({"amount", "quantity"}):
-        expected_amount = (gross * item.quantity).quantize(CENT, rounding=ROUND_HALF_UP)
-        if abs(item.amount - expected_amount) > ctx.req.money_tolerance:
-            ctx.signal("AMOUNT_MISMATCH", "Не сходится сумма строки",
-                       "Итоговая сумма с НДС в строке не совпадает с количеством, ценой и скидкой.",
-                       "amount = ROUND_HALF_UP(quantity × сопоставимая цена за исходную единицу, 2).",
-                       [_item_source(doc, item, "amount"), _item_source(doc, item, "quantity"), _item_source(doc, item, "unit_price")],
-                       expected=str(expected_amount), actual=str(item.amount), position=target.line_id)
+                   [_item_source(doc, item, "unit_price"), _item_source(target_doc, target, "unit_price")] + date_sources,
+                   expected=str(expected), actual=str(converted), position=position)
+
 
 
 def _run(request: CheckRequest) -> CheckResult:
@@ -625,6 +675,10 @@ def _run(request: CheckRequest) -> CheckResult:
     active, lookup = _resolve_documents(ctx)
     for link in sorted(request.manual_links, key=lambda x: (x.document_id, x.line_id, x.target_line_id)):
         linked_doc = lookup.get(ctx.alias(link.document_id) or "")
+        if not linked_doc and any(d.id == link.document_id for d in ctx.quarantined):
+            # The referenced document exists but its routing fields require
+            # confirmation; do not report its link as definitely absent.
+            continue
         if not linked_doc or not any(item.line_id == link.line_id for item in linked_doc.items):
             ctx.signal("INVALID_MANUAL_LINK", "Ручная связь не найдена в комплекте",
                        "Указанный документ или строка отсутствуют. Проверьте идентификаторы ручного сопоставления.",
@@ -635,16 +689,70 @@ def _run(request: CheckRequest) -> CheckResult:
     positions: list[PositionSummary] = []
     if contract and timeline:
         _, current_spec, _, _ = timeline[-1]
+        relevant_quarantined = [
+            d for d in ctx.quarantined
+            if (d.fields_confidence.get("type", 1) < request.confidence_threshold
+                or d.fields_confidence.get("contract_id", 1) < request.confidence_threshold
+                or normalize_identifier(d.contract_id) == normalize_identifier(contract.contract_id))
+            and not (d.status in {"cancelled", "draft"}
+                     and d.fields_confidence.get("status", 1) >= request.confidence_threshold)
+            and not (d.date and d.date > request.as_of
+                     and d.fields_confidence.get("date", 1) >= request.confidence_threshold)
+        ]
+        quarantined_ids = {d.id for d in relevant_quarantined}
+        referenced_specs = {ctx.alias(contract.specification_id)}
+        referenced_specs.update(ctx.alias(d.replacement_spec_id) for d in active
+                                if d.type == "amendment"
+                                and (not d.effective_from or d.effective_from <= request.as_of))
+        if any(d.fields_confidence.get("type", 1) < request.confidence_threshold
+               or d.type == "contract"
+               or (d.type == "amendment" and
+                   (not d.effective_from or d.effective_from <= request.as_of
+                    or d.fields_confidence.get("effective_from", 1) < request.confidence_threshold))
+               or (d.type == "specification" and
+                   (d.id in referenced_specs or d.fields_confidence.get("id", 1) < request.confidence_threshold))
+               for d in relevant_quarantined):
+            terms_valid = False
+        uncertain_document_ids = set(quarantined_ids)
+        for uncertain in relevant_quarantined:
+            if uncertain.supersedes:
+                uncertain_document_ids.add(ctx.alias(uncertain.supersedes) or uncertain.supersedes)
+            if uncertain.fields_confidence.get("type", 1) < request.confidence_threshold:
+                ctx.blocked_types.update(("delivery", "acceptance"))
+            elif uncertain.type in {"delivery", "acceptance"}:
+                ctx.blocked_types.add(uncertain.type)
+        # Rejected changes may still contain an unresolved deadline. A trusted
+        # future effective date, however, cannot alter an earlier delivery.
+        uncertain_deadline_changes = [
+            d for d in active + relevant_quarantined
+            if (d.type == "amendment" or d.fields_confidence.get("type", 1) < request.confidence_threshold)
+            and (d.approved or d.fields_confidence.get("approved", 1) < request.confidence_threshold
+                 or d.fields_confidence.get("type", 1) < request.confidence_threshold)
+            and d.id not in ctx.applied
+            and (d in relevant_quarantined
+                 or normalize_identifier(d.contract_id) == normalize_identifier(contract.contract_id))
+            and (d.id in quarantined_ids or d.deadline is not None or not d.replacement_spec_id
+                 or d.is_complete is False or d.missing_fields
+                 or (d.expected_pages is not None and
+                     (d.actual_pages is None or d.actual_pages < d.expected_pages)))
+        ]
         current_low = {x.line_id: _low_item_fields(ctx, current_spec, x) for x in sorted(current_spec.items, key=lambda x: x.line_id)}
         quantities: dict[str, dict[str, Decimal]] = {x.line_id: {"delivery": ZERO, "acceptance": ZERO} for x in current_spec.items}
         known: dict[str, dict[str, bool]] = {x.line_id: {"delivery": terms_valid, "acceptance": terms_valid} for x in current_spec.items}
         refs: dict[str, list[SourceRef]] = {x.line_id: [_item_source(current_spec, x, "quantity")] for x in current_spec.items}
         present: dict[str, bool] = {"delivery": False, "acceptance": False}
         transactions = [d for d in active if d.type in {"delivery", "acceptance"}]
-        transaction_lookup = {d.id: d for d in transactions}
+        # Quarantined deliveries remain identifiable as uncertain evidence for
+        # explicitly linked acts, but never contribute to transaction totals.
+        uncertain_deliveries = [d for d in relevant_quarantined
+                                if d.type == "delivery"
+                                or d.fields_confidence.get("type", 1) < request.confidence_threshold]
+        transaction_lookup = {d.id: d for d in sorted(uncertain_deliveries, key=lambda d: _json(_ordered_document(d)))}
+        transaction_lookup.update({d.id: d for d in transactions})
+        delivery_price_info: dict[str, tuple[set[str], list[Item], bool, tuple | None]] = {}
         doc_quantities: dict[str, dict[str, Decimal]] = {}
         doc_quantity_valid: dict[str, bool] = {}
-        valid_ids = {d.id for d in transactions if d.type == "delivery"}
+        valid_ids = {d.id for d in transactions if d.type == "delivery"} | {d.id for d in uncertain_deliveries}
         accepted_coverage: dict[str, list[Document]] = defaultdict(list)
         for doc in transactions:
             if doc.type == "acceptance":
@@ -670,7 +778,7 @@ def _run(request: CheckRequest) -> CheckResult:
                 continue
             present[doc.type] = True
             ctx.active.add(doc.id)
-            integrity = _doc_integrity(ctx, doc)
+            integrity = _doc_integrity(ctx, doc) and doc.id not in uncertain_document_ids
             if doc.type == "acceptance" and doc.acceptance_mode == "cumulative":
                 ctx.signal("CUMULATIVE_ACCEPTANCE_UNSUPPORTED", "Накопительная приёмка требует разбиения",
                            "Акт содержит накопительный итог. Для сверки нужны incremental строки либо явная история охваченных поставок; сумма не добавлена повторно.",
@@ -695,46 +803,69 @@ def _run(request: CheckRequest) -> CheckResult:
                     flags[doc.type] = False
             doc_quantities[doc.id] = {item.line_id: ZERO for item in current_spec.items}
             doc_quantity_valid[doc.id] = integrity
-            price_terms = [term] if term else []
-            price_dates_unknown = False
-            price_date_sources: list[SourceRef] = []
+            price_deliveries: list[Document] | None = None
             if doc.type == "acceptance" and doc.related_delivery_ids:
-                price_terms = []
-                for delivery_id in sorted(set(doc.related_delivery_ids)):
-                    delivery = transaction_lookup.get(ctx.alias(delivery_id) or "")
-                    delivery_term = _terms_on(timeline, delivery.date) if delivery and delivery.date else None
-                    delivery_integrity = bool(delivery and _doc_integrity(ctx, delivery)
-                                              and normalize_identifier(delivery.contract_id) == normalize_identifier(contract.contract_id))
-                    if delivery:
-                        price_date_sources.append(_doc_source(delivery, "date"))
-                    if delivery_term is None or not delivery_integrity:
-                        price_dates_unknown = True
-                    elif all(existing[1].id != delivery_term[1].id for existing in price_terms):
-                        price_terms.append(delivery_term)
+                delivery_ids = sorted({ctx.alias(did) or did for did in doc.related_delivery_ids})
+                price_deliveries = [transaction_lookup[did] for did in delivery_ids
+                                    if did in transaction_lookup and did in valid_ids]
             elif doc.type == "acceptance" and len({t[1].id for t in timeline}) > 1:
-                # Without explicit links, distinguish a known single price basis
-                # from several possible historic prices. Never invent an average.
-                for delivery in transactions:
-                    if delivery.type != "delivery" or normalize_identifier(delivery.contract_id) != normalize_identifier(contract.contract_id):
+                # Only deliveries not known to postdate the act are possible
+                # bases; an uncertain date still has to be considered.
+                price_deliveries = sorted(
+                    (d for d in transaction_lookup.values() if d.id in valid_ids
+                     and (d.id in quarantined_ids
+                          or normalize_identifier(d.contract_id) == normalize_identifier(contract.contract_id))
+                     and (d.id in uncertain_document_ids or not d.date or not doc.date or d.date <= doc.date
+                          or d.fields_confidence.get("date", 1) < request.confidence_threshold
+                          or d.is_complete is False or "date" in d.missing_fields
+                          or (d.expected_pages is not None
+                              and (d.actual_pages is None or d.actual_pages < d.expected_pages)))),
+                    key=lambda d: d.id,
+                )
+            if price_deliveries is not None and term and integrity and terms_valid:
+                for delivery in price_deliveries:
+                    if delivery.id in delivery_price_info:
                         continue
+                    matched_positions: set[str] = set()
+                    unmatched_items: list[Item] = []
+                    for delivered_item in sorted(delivery.items, key=lambda x: x.line_id):
+                        matched = _match_item(ctx, delivery, delivered_item, current_spec, record=False)
+                        if matched is None:
+                            unmatched_items.append(delivered_item)
+                        else:
+                            matched_positions.add(matched.line_id)
                     delivery_term = _terms_on(timeline, delivery.date) if delivery.date else None
-                    if not delivery_term or not _doc_integrity(ctx, delivery):
-                        price_dates_unknown = True
-                        price_date_sources.append(_doc_source(delivery, "date"))
-                    elif all(existing[1].id != delivery_term[1].id for existing in price_terms):
-                        price_terms.append(delivery_term)
+                    delivery_integrity = (delivery.id not in uncertain_document_ids and _doc_integrity(ctx, delivery)
+                                          and normalize_identifier(delivery.contract_id) == normalize_identifier(contract.contract_id))
+                    delivery_price_info[delivery.id] = (matched_positions, unmatched_items, delivery_integrity, delivery_term)
             date_trusted = doc.fields_confidence.get("date", 1) >= request.confidence_threshold
             deadline_owner = _deadline_source(timeline, doc.date, contract)
-            deadline_trusted = deadline_owner.fields_confidence.get("deadline", 1) >= request.confidence_threshold
-            if doc.type == "delivery" and term and term[2] and date_trusted and deadline_trusted and doc.date > term[2]:
+            deadline_trusted = (deadline_owner.fields_confidence.get("deadline", 1) >= request.confidence_threshold
+                                and _doc_integrity(ctx, deadline_owner, needs_items=False))
+            if doc.type == "delivery" and integrity and term and term[2] and date_trusted and deadline_trusted and doc.date > term[2]:
                 deadline_sources = [_doc_source(doc, "date"), _doc_source(deadline_owner, "deadline")]
-                ctx.signal("LATE_DELIVERY", "Дата поставки позже срока",
-                           "Дата документа поставки позже срока, действовавшего на эту дату. Проверьте фактическую дату передачи и основания изменений.",
-                           "Дата документа поставки > deadline действующей на дату поставки редакции.", deadline_sources,
-                           expected=term[2].isoformat(), actual=doc.date.isoformat())
+                uncertain_changes = [
+                    change for change in uncertain_deadline_changes
+                    if not change.effective_from
+                    or change.fields_confidence.get("effective_from", 1) < request.confidence_threshold
+                    or change.effective_from <= doc.date
+                ]
+                if uncertain_changes:
+                    ctx.signal("DEADLINE_BASIS_UNKNOWN", "Не определён действующий срок поставки",
+                               "В комплекте есть неразрешённое изменение срока, которое могло действовать на дату поставки. Старый срок не подтверждает просрочку до проверки изменения.",
+                               "Срок на дату поставки должен учитывать все применимые подтверждённые изменения.",
+                               deadline_sources + [_doc_source(change, "deadline") for change in uncertain_changes],
+                               expected="Подтверждённый срок на дату поставки", actual=None, blocks=True)
+                else:
+                    ctx.signal("LATE_DELIVERY", "Дата поставки позже срока",
+                               "Дата документа поставки позже срока, действовавшего на эту дату. Проверьте фактическую дату передачи и основания изменений.",
+                               "Дата документа поставки > deadline действующей на дату поставки редакции.", deadline_sources,
+                               expected=term[2].isoformat(), actual=doc.date.isoformat())
             for item in sorted(doc.items, key=lambda x: x.line_id):
                 low = _low_item_fields(ctx, doc, item)
                 current = _match_item(ctx, doc, item, current_spec)
+                if doc.id not in uncertain_document_ids:
+                    _check_amount(ctx, doc, item, low, current.line_id if current else item.position_id or item.line_id)
                 if current is None:
                     doc_quantity_valid[doc.id] = False
                     for flags in known.values():
@@ -742,13 +873,11 @@ def _run(request: CheckRequest) -> CheckResult:
                     continue
                 refs[current.line_id].append(_item_source(doc, item, "quantity"))
                 factor = _factor(item, current)
+                unit_low = low.intersection({"unit", "conversion_factor", "conversion_to"}) or "unit" in current_low[current.line_id]
                 if factor is None:
                     doc_quantity_valid[doc.id] = False
-                    ctx.signal("UNIT_CONVERSION_REQUIRED", "Единицы нельзя сопоставить",
-                               "Для этих единиц нет подтверждённого коэффициента перевода. Упаковки и штуки автоматически не приравниваются.",
-                               "quantity_target = quantity_source × conversion_factor; для упаковок коэффициент должен быть задан явно.",
-                               [_item_source(doc, item, "unit"), _item_source(current_spec, current, "unit")],
-                               expected=current.unit, actual=item.unit, position=current.line_id, blocks=True)
+                    if not unit_low:
+                        _unit_conversion_required(ctx, doc, item, current_spec, current, current.line_id)
                     known[current.line_id][doc.type] = False
                 if item.quantity is None:
                     doc_quantity_valid[doc.id] = False
@@ -757,33 +886,84 @@ def _run(request: CheckRequest) -> CheckResult:
                                "Для количественной сверки требуется подтверждённое quantity.", [_item_source(doc, item, "quantity")],
                                position=current.line_id, blocks=True)
                     known[current.line_id][doc.type] = False
-                if low.intersection({"quantity", "unit", "conversion_factor", "conversion_to"}):
+                if low.intersection({"quantity", "unit", "conversion_factor", "conversion_to"}) or unit_low:
                     known[current.line_id][doc.type] = False
                     doc_quantity_valid[doc.id] = False
-                if factor is not None and item.quantity is not None and integrity and not low.intersection({"quantity", "unit", "conversion_factor", "conversion_to"}):
+                if (factor is not None and item.quantity is not None and integrity and not unit_low
+                        and "quantity" not in low):
                     quantities[current.line_id][doc.type] += item.quantity * factor
                     doc_quantities[doc.id][current.line_id] += item.quantity * factor
                 if term and integrity and terms_valid:
+                    price_terms = [term]
+                    price_dates_unknown = False
+                    matching_uncertain = False
+                    price_date_sources: list[SourceRef] = []
+                    if price_deliveries is not None:
+                        price_terms = []
+                        has_relevant_delivery = False
+                        for delivery in price_deliveries:
+                            matched_positions, unmatched_items, delivery_integrity, delivery_term = delivery_price_info[delivery.id]
+                            if unmatched_items:
+                                matching_uncertain = True
+                                price_dates_unknown = True
+                                price_date_sources.extend(_item_source(delivery, row) for row in unmatched_items)
+                            if current.line_id not in matched_positions:
+                                may_hide_items = (delivery.is_complete is False
+                                                  or "items" in delivery.missing_fields
+                                                  or "pages" in delivery.missing_fields
+                                                  or delivery.fields_confidence.get("items", 1) < request.confidence_threshold
+                                                  or (delivery.expected_pages is not None
+                                                      and (delivery.actual_pages is None or delivery.actual_pages < delivery.expected_pages)))
+                                if may_hide_items:
+                                    matching_uncertain = True
+                                    price_dates_unknown = True
+                                    price_date_sources.append(_doc_source(delivery))
+                                continue
+                            has_relevant_delivery = True
+                            price_date_sources.append(_doc_source(delivery, "date"))
+                            if delivery_term is None or not delivery_integrity:
+                                price_dates_unknown = True
+                            elif all(existing[1].id != delivery_term[1].id for existing in price_terms):
+                                price_terms.append(delivery_term)
+                        if not has_relevant_delivery:
+                            matching_uncertain = True
+                            price_dates_unknown = True
+                            price_date_sources.extend(_doc_source(delivery, "items") for delivery in price_deliveries)
+                            if not price_deliveries:
+                                price_date_sources.append(_doc_source(doc, "related_delivery_ids"))
                     chosen_price_term = price_terms[0] if price_terms else term
                     historical_spec = chosen_price_term[1]
                     historical = current if historical_spec.id == current_spec.id else _match_item(ctx, doc, item, historical_spec, record=False, manual=False)
-                    price_bases: set[tuple] = set()
+                    price_bases: set[tuple[str, Decimal]] = set()
                     price_basis_missing = price_dates_unknown
+                    price_fields = {"unit_price", "currency", "tax_included", "vat_rate", "discount_percent",
+                                    "unit", "conversion_factor", "conversion_to"}
                     for possible in price_terms:
                         possible_spec = possible[1]
                         possible_item = current if possible_spec.id == current_spec.id else _match_item(ctx, doc, item, possible_spec, record=False, manual=False)
                         if possible_item is None:
                             price_basis_missing = True
+                            continue
+                        possible_low = current_low[current.line_id] if possible_spec.id == current_spec.id else _low_item_fields(ctx, possible_spec, possible_item)
+                        basis_factor = _factor(item, possible_item)
+                        gross_value = _gross(possible_item)
+                        if basis_factor is None:
+                            price_basis_missing = True
+                            if (possible_spec.id != current_spec.id
+                                    and not low.intersection({"unit", "conversion_factor", "conversion_to"})
+                                    and "unit" not in possible_low):
+                                _unit_conversion_required(ctx, doc, item, possible_spec, possible_item, current.line_id)
+                        elif (gross_value is None or not possible_item.currency or low.intersection(price_fields)
+                              or possible_low.intersection(price_fields)):
+                            price_basis_missing = True
                         else:
-                            basis_factor = _factor(possible_item, current)
-                            gross_value = _gross(possible_item)
-                            if basis_factor is None or gross_value is None:
-                                price_basis_missing = True
-                            else:
-                                price_bases.add((possible_item.currency, str(gross_value / basis_factor)))
+                            # Express each historic price in the act's original
+                            # unit; Decimal equality ignores insignificant zeros.
+                            price_bases.add((possible_item.currency, gross_value * basis_factor))
                     ambiguous_price = doc.type == "acceptance" and (len(price_bases) > 1 or price_dates_unknown)
                     if ambiguous_price:
-                        if price_dates_unknown and len({t[1].id for t in timeline}) == 1 and len(price_bases) <= 1:
+                        if (price_dates_unknown and not matching_uncertain
+                                and len({t[1].id for t in timeline}) == 1 and len(price_bases) <= 1):
                             # The underlying incompleteness/low-confidence signal
                             # already explains this block. Avoid cascading a
                             # second price warning when no competing price exists.
@@ -791,19 +971,25 @@ def _run(request: CheckRequest) -> CheckResult:
                                       "Цена акта не проверена: данные связанной поставки не подтверждены; причина указана в сигнале неполноты или низкой уверенности.")
                         else:
                             ctx.signal("PRICE_BASIS_UNKNOWN", "Не определена цена связанной поставки",
-                                       "Акт охватывает поставки с разными ценовыми условиями либо даты связанных поставок не подтверждены. Разделите строки по поставкам или уточните связи; средняя цена не подставляется.",
-                                       "Цена приёмки сравнивается с однозначными условиями связанных поставок, а не с поздней датой акта.",
+                                       "Позицию акта нельзя однозначно отнести к связанным поставкам или условиям их цены. Разделите строки по поставкам либо уточните связи; средняя цена не подставляется.",
+                                       "Цена приёмки сравнивается с однозначными условиями поставок этой позиции, а не с поздней датой акта.",
                                        [_item_source(doc, item, "unit_price")] + [_doc_source(t[1]) for t in price_terms] + price_date_sources,
-                                       expected="Однозначная цена связанных поставок", actual=sorted(price_bases), position=current.line_id, blocks=True)
+                                       expected="Однозначная цена связанных поставок",
+                                       actual=sorted((currency, str(price)) for currency, price in price_bases),
+                                       position=current.line_id, blocks=True)
                     elif historical is None or (doc.type == "acceptance" and price_basis_missing and len(price_terms) > 1):
                         ctx.signal("HISTORICAL_POSITION_UNRESOLVED", "Нет однозначной исторической позиции",
                                    "Текущая связь установлена, но цену нельзя отнести к позиции редакции на дату документа. Подтвердите историю изменения позиции.",
                                    "Цена сравнивается с исторической спецификацией, а не автоматически с последней редакцией.",
-                                   [_item_source(doc, item), _doc_source(historical_spec)], position=current.line_id, blocks=True)
+                                   [_item_source(doc, item)] + [_doc_source(t[1]) for t in price_terms] + price_date_sources,
+                                   position=current.line_id, blocks=True)
                     else:
                         historical_low = current_low[current.line_id] if historical_spec.id == current_spec.id else _low_item_fields(ctx, historical_spec, historical)
-                        _compare_price(ctx, doc, item, historical_spec, historical, _factor(item, historical), low, historical_low)
-                        for key, value in sorted(historical.attributes.items()):
+                        _compare_price(ctx, doc, item, historical_spec, historical, _factor(item, historical),
+                                       low, historical_low, current.line_id,
+                                       price_date_sources or [_doc_source(doc, "date")])
+                        for key, value in (sorted(historical.attributes.items())
+                                           if "attributes" not in low and "attributes" not in historical_low else []):
                             got = item.attributes.get(key)
                             if got is None:
                                 ctx.signal("ATTRIBUTE_MISSING", "Не хватает характеристики товара",
@@ -895,7 +1081,8 @@ def _run(request: CheckRequest) -> CheckResult:
                            "Пользователь отметил комплект поставки завершённым, но накладные покрывают не всё количество. Уточните полноту комплекта; это не автоматический вывод о нарушении.",
                            "delivery_complete=true и Σ поставлено < контрактное количество.", evidence,
                            expected=str(expected), actual=str(delivered), position=item.line_id)
-            positions.append(PositionSummary(line_id=item.line_id, name=item.name, unit=item.unit,
+            positions.append(PositionSummary(line_id=item.line_id, name=item.name,
+                                             unit=item.unit if "unit" not in low else None,
                                              expected_quantity=expected, delivered_quantity=delivered,
                                              accepted_quantity=accepted, remaining_quantity=remaining,
                                              complete=complete, sources=evidence))

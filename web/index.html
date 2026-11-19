@@ -2,9 +2,10 @@
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Контроль исполнения</title>
 <style>
 :root{--ink:#16344c;--muted:#627b90;--line:#dce6ee;--blue:#155dfb;--bg:#f4f7fb;--green:#127b59;--amber:#a65b0a}*{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}button,input,select,textarea{font:inherit}button,a,input,select,textarea{outline-offset:3px}button{cursor:pointer;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);padding:10px 14px}button:hover{border-color:#99b7d2;background:#f7faff}button:disabled{opacity:.5;cursor:wait}.primary{background:var(--blue);border-color:var(--blue);color:#fff}.primary:hover{background:#0c4ee1;color:#fff}a{color:var(--blue)}header{height:74px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px;gap:20px}.brand{display:flex;gap:12px;align-items:center;font-size:17px;font-weight:700}.mark{display:grid;place-items:center;background:#155dfb;width:34px;height:34px;color:white;border-radius:10px;font-size:20px}.label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}.shell{display:grid;grid-template-columns:275px minmax(0,1fr);min-height:calc(100vh - 74px)}aside{background:#fff;padding:24px 16px;border-right:1px solid var(--line)}aside .title{display:flex;align-items:center;justify-content:space-between;margin:0 8px 18px}aside .case{display:block;text-align:left;width:100%;margin-bottom:8px;border-color:transparent;padding:14px 12px}.case.active{background:#eef4ff;border-color:#c7daff}.case small{display:block;margin-top:5px;color:var(--muted)}main{padding:32px;max-width:1450px;width:100%;margin:auto}h1{font-size:28px;letter-spacing:-.03em;line-height:1.2;margin:0 0 10px}h2{font-size:18px;margin:0 0 18px}h3{font-size:16px;margin:10px 0}p{margin:0 0 14px}.muted{color:var(--muted)}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.card{background:white;border:1px solid var(--line);border-radius:13px;padding:24px;margin:20px 0}.empty{padding:55px 30px;background:#fff;border:1px solid var(--line);border-radius:16px;max-width:800px}.empty h1{font-size:36px;max-width:540px}.empty p{max-width:640px}.empty .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:30px 0}.step{border-top:2px solid #d2e1ef;padding-top:14px}.step b{display:block;margin:8px 0}.step span{color:var(--muted)}.demo{background:#edf4ff;border:1px solid #d6e5ff;border-radius:12px;padding:20px;margin-top:24px}input,select,textarea{border:1px solid #ccd9e3;border-radius:7px;padding:10px 12px;background:#fff;color:var(--ink);min-width:0}textarea{width:100%;min-height:75px;resize:vertical}label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted)}label.check{flex-direction:row;align-items:center;font-size:13px}input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue)}.grow{flex:1}.upload{border:1px dashed #aac1d7;border-radius:10px;background:#f8fbff;padding:22px;margin-top:16px}.upload input{background:transparent;border:0;padding:5px 0;max-width:100%}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;min-width:580px;font-size:13px}th{font-weight:500;color:var(--muted);text-align:left;background:#f8fafc}td,th{padding:12px 10px;border-bottom:1px solid #e4ebf2;vertical-align:middle}td small{display:block;color:var(--muted);font-size:11px}td button{padding:6px 10px;font-size:12px}.badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:600;background:#f0f4f8;color:#526c82}.badge.ok{color:#13724e;background:#e7f7ee}.badge.warning{color:#9a5708;background:#fff3de}.badge.blue{color:#154fb7;background:#eaf1ff}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}.stat{border:1px solid var(--line);padding:18px;border-radius:11px;background:#fff}.stat b{display:block;font-size:25px;margin:6px 0}.signal{border:1px solid var(--line);border-radius:10px;padding:20px;margin:14px 0}.signal .badge{margin-right:8px}.signal p{margin-top:10px}.values{display:flex;gap:35px;margin:15px 0}.values b{display:block;font-size:17px}.source{font-size:12px;padding:12px;background:#f6f9fc;border-radius:7px;margin:8px 0;white-space:pre-wrap;overflow-wrap:anywhere}.source .row{white-space:normal;margin-bottom:8px}.review{border-top:1px solid var(--line);padding-top:15px;margin-top:18px}.review form{display:flex;align-items:end;gap:10px;flex-wrap:wrap}.review input{max-width:175px}.review .comment{flex:1;min-width:200px}.review .comment input{max-width:none;width:100%}.notice{padding:14px 18px;background:#fff3de;border-radius:8px;color:#854e0c;margin:15px 0}.audit li{margin:9px 0}.audit{padding-left:20px}.hash{overflow-wrap:anywhere;font-family:ui-monospace,monospace;font-size:11px;color:var(--muted)}details summary{cursor:pointer;font-size:13px;color:var(--muted)}dialog{border:1px solid var(--line);border-radius:14px;padding:25px;width:min(1100px,calc(100% - 30px));max-height:90vh;color:var(--ink)}dialog::backdrop{background:#14314c66}dialog input{width:100%}dialog table{margin:15px 0}dialog table input{min-width:85px;width:100%}dialog table select{min-width:90px}.formgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.small{font-size:12px}.footer{margin-top:25px;color:var(--muted);font-size:12px}#toast{position:fixed;right:25px;bottom:25px;max-width:500px;background:#15354d;color:white;padding:14px 18px;border-radius:10px;box-shadow:0 10px 35px #16344c33;display:none;z-index:100}#toast.error{background:#913b32}#busy{display:none;font-size:12px;color:var(--muted)}.emptylist{padding:15px 8px;color:var(--muted);font-size:13px}@media(max-width:900px){.shell{grid-template-columns:210px minmax(0,1fr)}main{padding:22px}.formgrid{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){header{height:auto;min-height:70px;padding:14px;flex-wrap:wrap}.shell{display:block}aside{border-right:0;border-bottom:1px solid var(--line);padding:12px}#case-list{max-height:130px;overflow:auto}aside .title{margin-bottom:8px}main{padding:18px}.card{padding:18px}.empty{padding:24px}.empty h1{font-size:29px}.empty .steps{grid-template-columns:1fr;gap:10px}.stats{gap:8px}.stat{padding:13px}.stat b{font-size:21px}.formgrid{grid-template-columns:1fr}.review form{display:block}.review label{margin:8px 0}.review input{max-width:none}.review button{margin-top:8px}.row>input,.row>select{max-width:100%}}
+dialog input[type=checkbox]{width:16px;min-width:16px;flex:none}.editor-item{border:1px solid var(--line);border-radius:10px;padding:18px;margin:16px 0;min-width:0}.editor-item legend{font-weight:600;padding:0 6px}.editor-field{min-width:0}.editor-field>input,.editor-field>select,.editor-field>textarea{width:100%}.editor-field .check{margin-top:7px}.editor-field .check input{margin:0}.editor-confidence{font-size:11px;color:var(--amber)}.editor-list{display:grid;gap:8px;margin:12px 0}.editor-list .check{align-items:flex-start}.editor-list .check input{margin:2px 0 0}.editor-id{overflow-wrap:anywhere}
 </style></head><body>
 <header><div class="brand"><span class="mark">✓</span><span>Контроль исполнения</span></div><div class="row"><span id="busy">Обработка…</span><span class="badge blue">Локальный прототип</span><button data-action="token">Доступ</button><a href="/docs" target="_blank" rel="noopener">API</a></div></header>
-<div class="shell"><aside><div class="title"><b>Проверки</b><button data-action="new" aria-label="Новая проверка">＋</button></div><div id="case-list"></div></aside><main id="main"></main></div><dialog id="editor"></dialog><div id="toast" role="status" aria-live="polite"></div>
+<div class="shell"><aside><div class="title"><b>Проверки</b><button data-action="new" aria-label="Новая проверка">＋</button></div><div id="case-list"></div></aside><main id="main"></main></div><dialog id="editor" aria-label="Редактирование документа"></dialog><div id="toast" role="status" aria-live="polite"></div>
 <script>
 'use strict';
 const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])), enc=encodeURIComponent;
@@ -22,7 +23,198 @@ function render(){const c=state.current;if(!c)return home();const r=state.run?.r
 function renderResult(run){const r=run.result;const headings={ok:'Расхождения не обнаружены',needs_review:'Комплект требует проверки',incomplete:'Нужно уточнить данные'};const latest=Object.fromEntries((run.reviews||[]).map(x=>[x.signal_id,x]));return `${run.stale?'<div class="notice"><b>Документы изменены после этой проверки.</b> Выполните сверку ещё раз. Ниже показан сохранённый результат.</div>':''}<div class="row between"><h2 style="margin:0">${headings[r.status]}</h2><div class="row"><button data-action="export" data-format="html">Отчёт</button><button data-action="export" data-format="csv">CSV</button><button data-action="export" data-format="json">JSON</button></div></div><div class="stats"><div class="stat"><span class="muted">Сигналы</span><b>${r.signals.length}</b><span class="small">к рассмотрению</span></div><div class="stat"><span class="muted">Связанные строки</span><b>${r.matches.filter(x=>x.state==='matched').length}</b><span class="small">из ${r.matches.length}</span></div><div class="stat"><span class="muted">Позиции</span><b>${r.positions.length}</b><span class="small">в спецификации</span></div></div><section class="card"><h2>Количество по позициям</h2><div class="scroll"><table><thead><tr><th>Товар</th><th>Ед.</th><th>По условиям</th><th>Поставлено</th><th>Принято</th><th>Остаток</th></tr></thead><tbody>${r.positions.map(p=>`<tr><td>${esc(p.name||p.line_id)}${!p.complete?'<small>Сравнение ограничено</small>':''}</td><td>${esc(p.unit)}</td><td>${esc(number(p.expected_quantity))}</td><td>${esc(number(p.delivered_quantity))}</td><td>${esc(number(p.accepted_quantity))}</td><td>${esc(number(p.remaining_quantity))}</td></tr>`).join('')||'<tr><td colspan="6">Нет достаточных данных для сводки</td></tr>'}</tbody></table></div></section><section class="card"><h2>Сигналы и источники</h2>${r.signals.map(s=>`<article class="signal"><span class="badge ${s.blocks_comparison?'warning':'blue'}">${s.blocks_comparison?'Сравнение ограничено':'Проверить'}</span><span class="muted small">${esc(s.code)}</span><h3>${esc(s.title)}</h3><p>${esc(s.explanation)}</p><div class="values"><div><span class="muted small">Ожидается</span><b>${esc(showValue(s.expected))}</b></div><div><span class="muted small">В комплекте</span><b>${esc(showValue(s.actual))}</b></div></div><p class="small muted">Правило: ${esc(s.rule)}</p><details><summary>Исходные данные · ${s.sources.length} фрагментов</summary>${s.sources.map(x=>`<div class="source"><div class="row between"><b>${esc(x.filename||x.document_id)}${x.page?' · стр. '+x.page:''}${x.row?' · строка '+x.row:''}</b><button data-action="edit" data-id="${esc(x.document_id)}">Открыть реквизиты</button></div>${esc(x.excerpt)}</div>`).join('')}</details><div class="review">${latest[s.id]?`<p class="small"><b>${reviewNames[latest[s.id].status]}</b> · ${esc(latest[s.id].reviewer)}<br>${esc(latest[s.id].comment)}</p>`:''}<form data-signal="${esc(s.id)}"><label>Решение<select name="status">${Object.entries(reviewNames).map(([k,v])=>`<option value="${k}" ${latest[s.id]?.status===k?'selected':''}>${v}</option>`).join('')}</select></label><label>Проверяющий<input name="reviewer" required placeholder="Имя или роль"></label><label class="comment">Комментарий<input name="comment" required placeholder="Что проверено по документам"></label><button type="submit">Сохранить</button></form></div></article>`).join('')||'<span class="badge ok">Сигналов нет в пределах выполненных проверок</span>'}</section>${renderLinks(r)}<details class="card"><summary>Учёт версий и воспроизводимость</summary><ul class="audit">${r.audit.map(a=>`<li>${esc(a.explanation)} <span class="muted small">${esc(a.document_ids.join(', '))}</span></li>`).join('')||'<li>Корректировки не применялись.</li>'}</ul><p class="small">Правила ${esc(r.engine_version)} · срез ${esc(r.as_of)}</p><p class="hash">Вход: ${r.input_hash}<br>Результат: ${r.result_hash}</p></details>`}
 function showValue(v){if(v===null||v===undefined)return '—';return typeof v==='object'?JSON.stringify(v):v}
 function renderLinks(r){const m=r.matches.filter(x=>x.state!=='matched');if(!m.length)return '';return `<section class="card"><h2>Уточнить связи строк</h2><p class="muted small">Выберите позицию спецификации после просмотра исходника.</p>${m.map(x=>`<div class="row" style="margin-bottom:12px"><span class="grow">${esc(x.document_id)} · строка ${esc(x.line_id)}<small class="muted"> · ${esc(x.explanation)}</small></span><select data-link-document="${esc(x.document_id)}" data-link-line="${esc(x.line_id)}"><option value="">Оставить без подтверждения</option>${r.positions.map(p=>`<option value="${esc(p.line_id)}">${esc(p.name||p.line_id)}</option>`).join('')}</select></div>`).join('')}<div class="row"><input id="link-reviewer" placeholder="Проверяющий" aria-label="Проверяющий связи"><input id="link-comment" class="grow" placeholder="Основание сопоставления" aria-label="Основание сопоставления"><button data-action="links">Применить и пересчитать</button></div></section>`}
-function editDocument(id){const record=state.current.documents.find(d=>d.id===id);if(!record)return toast('Этого документа нет в текущем комплекте',true);const d=record.document;const inp=(label,name,value,type='text')=>`<label>${label}<input name="${name}" type="${type}" value="${esc(value)}"></label>`;const options=selected=>'<option value="">Не задано</option>'+state.current.documents.filter(x=>x.id!==id).map(x=>`<option value="${esc(x.id)}" ${selected===x.id?'selected':''}>${esc(types[x.document.type]+' '+(x.document.number||x.id))}</option>`).join('');$('#editor').innerHTML=`<form id="document-form"><div class="row between"><h2>Реквизиты документа</h2><button type="button" data-action="close">Закрыть</button></div><p class="small muted">Исправления сохраняются с автором и комментарием. Исходный файл остаётся доступен.</p><div class="formgrid">${inp('Номер','number',d.number)}${inp('Дата','date',d.date,'date')}${inp('Номер контракта','contract_id',d.contract_id)}<label>Статус<select name="status">${Object.entries({active:'Действует',cancelled:'Отменён',superseded:'Заменён',draft:'Черновик'}).map(([k,v])=>`<option value="${k}" ${d.status===k?'selected':''}>${v}</option>`).join('')}</select></label><label>Полнота документа<select name="is_complete"><option value="" ${d.is_complete===null?'selected':''}>Не подтверждена</option><option value="true" ${d.is_complete===true?'selected':''}>Подтверждена</option><option value="false" ${d.is_complete===false?'selected':''}>Неполный</option></select></label>${inp('Срок поставки','deadline',d.deadline,'date')}</div><div class="scroll"><table><thead><tr><th>Наименование</th><th>Артикул</th><th>Ед.</th><th>Количество</th><th>Цена</th><th>НДС %</th><th>Цена с НДС</th><th>Подтвердить</th></tr></thead><tbody>${d.items.map((x,i)=>`<tr>${['name','sku','unit','quantity','unit_price','vat_rate'].map(f=>`<td><input data-item="${i}" data-field="${f}" value="${esc(x[f])}" aria-label="${esc(f)} строки ${i+1}"></td>`).join('')}<td><select data-item="${i}" data-field="tax_included"><option value="" ${x.tax_included===null?'selected':''}>Неясно</option><option value="true" ${x.tax_included===true?'selected':''}>Да</option><option value="false" ${x.tax_included===false?'selected':''}>Нет</option></select></td><td><input type="checkbox" data-confirm="${i}" aria-label="Подтвердить значения строки ${i+1}"></td></tr>`).join('')}</tbody></table></div><details><summary>Связи исправлений и допсоглашений</summary><div class="formgrid" style="margin-top:14px"><label>Заменяет документ<select name="supersedes">${options(d.supersedes)}</select></label><label>Базовая спецификация<select name="specification_id">${options(d.specification_id)}</select></label><label>Новая спецификация<select name="replacement_spec_id">${options(d.replacement_spec_id)}</select></label>${inp('Действует с','effective_from',d.effective_from,'date')}<label class="check"><input name="approved" type="checkbox" ${d.approved?'checked':''}>Допсоглашение подтверждено</label></div></details>${d.extraction_warnings.length?`<div class="notice small">${d.extraction_warnings.map(esc).join('<br>')}</div>`:''}<div class="formgrid" style="margin-top:20px">${inp('Проверяющий','reviewer','')}${inp('Комментарий к исправлению','comment','')}<label class="check"><input name="clear_warnings" type="checkbox">Замечания извлечения разобраны</label></div><div class="row between" style="margin-top:20px"><div class="row"><button type="button" data-action="source" data-id="${esc(id)}">Исходный файл</button><button type="button" data-action="history" data-id="${esc(id)}">История</button></div><button class="primary" type="submit">Сохранить исправления</button></div><div id="history"></div></form>`;$('#editor').showModal();$('#document-form').onsubmit=async e=>{e.preventDefault();try{const form=e.target;const updated=structuredClone(d);for(const key of ['number','date','contract_id','deadline','status','supersedes','specification_id','replacement_spec_id','effective_from'])updated[key]=form.elements[key].value||null;updated.is_complete=form.elements.is_complete.value===''?null:form.elements.is_complete.value==='true';updated.approved=form.elements.approved.checked;form.querySelectorAll('[data-item]').forEach(el=>{const f=el.dataset.field;updated.items[+el.dataset.item][f]=f==='tax_included'?(el.value===''?null:el.value==='true'):(el.value||null)});form.querySelectorAll('[data-confirm]:checked').forEach(el=>{const x=updated.items[+el.dataset.confirm];for(const f of ['name','sku','unit','quantity','unit_price','vat_rate','tax_included'])x.confidence[f]=1});if(form.elements.clear_warnings.checked){updated.extraction_warnings=[];updated.missing_fields=[];for(const f of Object.keys(updated.fields_confidence))updated.fields_confidence[f]=1}const reviewer=form.elements.reviewer.value.trim(),comment=form.elements.comment.value.trim();if(!reviewer||!comment)throw new Error('Укажите проверяющего и комментарий');await api(`/api/cases/${enc(state.current.id)}/documents/${enc(id)}`,{method:'PUT',body:JSON.stringify({document:updated,expected_revision:record.revision,reviewer,comment})});$('#editor').close();await openCase(state.current.id,state.options);toast('Исправление сохранено. Выполните сверку ещё раз.')}catch(e){toast(e.message,true)}}}
+const editorDocumentFields=[
+  {key:'id',label:'ID документа',kind:'readonly'},
+  {key:'type',label:'Тип документа',kind:'select',options:Object.entries(types)},
+  {key:'number',label:'Номер'},
+  {key:'date',label:'Дата',kind:'date'},
+  {key:'contract_id',label:'Номер контракта'},
+  {key:'status',label:'Статус',kind:'select',options:[['active','Действует'],['cancelled','Отменён'],['superseded','Заменён'],['draft','Черновик']]},
+  {key:'is_complete',label:'Полнота документа',kind:'nullableBool',options:[['','Не подтверждена'],['true','Подтверждена'],['false','Неполный']]},
+  {key:'deadline',label:'Срок поставки',kind:'date'},
+  {key:'effective_from',label:'Действует с',kind:'date'},
+  {key:'revision',label:'Редакция документа',kind:'integer',min:1},
+  {key:'logical_id',label:'Общий ID документа'},
+  {key:'supersedes',label:'ID заменяемого документа'},
+  {key:'specification_id',label:'ID базовой спецификации'},
+  {key:'base_document_id',label:'ID документа-основания'},
+  {key:'replacement_spec_id',label:'ID новой спецификации'},
+  {key:'approved',label:'Допсоглашение подтверждено',kind:'bool',options:[['false','Нет'],['true','Да']]},
+  {key:'acceptance_mode',label:'Режим приёмки',kind:'select',options:[['incremental','Отдельная'],['cumulative','Накопительная']]},
+  {key:'related_delivery_ids',label:'ID связанных поставок, по одному в строке',kind:'list'},
+  {key:'expected_pages',label:'Ожидается страниц',kind:'optionalInteger',min:1},
+  {key:'actual_pages',label:'Получено страниц',kind:'optionalInteger',min:0}
+];
+const editorItemFields=[
+  {key:'line_id',label:'ID строки',kind:'readonly'},
+  {key:'position_id',label:'Номер позиции'},
+  {key:'sku',label:'Артикул'},
+  {key:'name',label:'Наименование'},
+  {key:'unit',label:'Единица измерения'},
+  {key:'quantity',label:'Количество',kind:'decimal'},
+  {key:'unit_price',label:'Цена за единицу',kind:'decimal'},
+  {key:'amount',label:'Сумма',kind:'decimal'},
+  {key:'currency',label:'Валюта'},
+  {key:'tax_included',label:'Цена включает НДС',kind:'nullableBool',options:[['','Неясно'],['true','Да'],['false','Нет']]},
+  {key:'vat_rate',label:'НДС, %',kind:'decimal'},
+  {key:'discount_percent',label:'Скидка, %',kind:'decimal'},
+  {key:'conversion_factor',label:'Коэффициент перевода',kind:'decimal'},
+  {key:'conversion_to',label:'Единица перевода'},
+  {key:'attributes',label:'Характеристики (JSON: название и значение)',kind:'json'}
+];
+function editorValue(def,value){if(def.kind==='json')return JSON.stringify(value??{},null,2);if(def.kind==='list')return (value||[]).join('\n');return value===null||value===undefined?'':String(value)}
+function editorControl(def,scope,index,value,confidence,identity){
+  const id=`editor-${scope}-${index}-${def.key}`,raw=editorValue(def,value),data=`data-${scope}-field="${def.key}"`;
+  let control;
+  if(def.options)control=`<select id="${id}" ${data}>${def.options.map(([key,label])=>`<option value="${esc(key)}" ${raw===key?'selected':''}>${esc(label)}</option>`).join('')}</select>`;
+  else if(def.kind==='list'||def.kind==='json')control=`<textarea id="${id}" ${data} rows="3">${esc(raw)}</textarea>`;
+  else control=`<input id="${id}" ${data} type="${def.kind==='date'?'date':'text'}" ${def.kind==='readonly'?'readonly':''} ${def.kind==='decimal'?'inputmode="decimal"':''} ${def.kind==='integer'||def.kind==='optionalInteger'?'inputmode="numeric"':''} value="${esc(raw)}">`;
+  const estimate=Object.hasOwn(confidence,def.key)?` <span class="editor-confidence">Уверенность: ${esc(Math.round(confidence[def.key]*100))}%</span>`:'';
+  return `<div class="editor-field"><label for="${id}">${esc(def.label)}${estimate}</label>${control}<label class="check"><input type="checkbox" data-${scope}-confirm="${def.key}" aria-label="Подтвердить по оригиналу: ${esc(def.label)}${scope==='item'?', строка '+esc(identity):', документ'}">Проверено по оригиналу</label></div>`;
+}
+function editorSource(source,fieldSources={}){
+  const refs=[['Исходный фрагмент',source],...Object.entries(fieldSources).map(([field,ref])=>[field,ref])].filter(([,ref])=>ref);
+  if(!refs.length)return '';
+  return `<details><summary>Фрагменты источника</summary>${refs.map(([label,ref])=>`<div class="source"><b>${esc(label)}</b> · ${esc(ref.filename||ref.document_id)}${ref.page?' · стр. '+esc(ref.page):''}${ref.row?' · строка '+esc(ref.row):''}\n${esc(ref.excerpt)}</div>`).join('')}</details>`;
+}
+function editorUnknownConfidence(subject,confidence,fields,scope){
+  const keys=Object.keys(confidence),unknown=keys.filter(key=>!fields.includes(key));
+  const invalid=unknown.filter(key=>!Object.hasOwn(subject,key)),unsupported=unknown.filter(key=>Object.hasOwn(subject,key));
+  if(!unknown.length)return '';
+  return `<div class="notice small">${invalid.length?`Обнаружены оценки уверенности для несуществующих полей. Отметьте только ошибочные записи для удаления; это не подтверждает значения документа.<div class="editor-list">${invalid.map(key=>`<label class="check"><input type="checkbox" data-${scope}-discard="${keys.indexOf(key)}"><span>Удалить ошибочную оценку «${esc(key)}» (${esc(Math.round(confidence[key]*100))}%)</span></label>`).join('')}</div>`:''}${unsupported.length?`Оценки для служебных полей нельзя подтвердить или удалить в редакторе: ${unsupported.map(key=>`${esc(key)} (${esc(Math.round(confidence[key]*100))}%)`).join(', ')}. Они сохранены без изменений; оценки ниже порога продолжат блокировать сверку.`:''}</div>`;
+}
+function editorRow(item,index){
+  const confidence=item.confidence||{};
+  return `<fieldset class="editor-item" data-item-row="${index}"><legend class="editor-id">Строка ${esc(item.line_id)}</legend><div class="row between"><span class="small muted">ID строки используется в ручных связях и не изменяется.</span><button type="button" data-editor-action="remove" aria-label="Удалить строку ${esc(item.line_id)}">Удалить строку</button></div><div class="formgrid">${editorItemFields.map(def=>editorControl(def,'item',index,item[def.key],confidence,item.line_id)).join('')}</div>${editorSource(item.source,item.field_sources||{})}${editorUnknownConfidence(item,confidence,editorItemFields.map(def=>def.key),'item')}</fieldset>`;
+}
+function editorParse(def,value){
+  if(def.kind==='list')return value.split('\n').map(x=>x.trim()).filter(Boolean);
+  if(def.kind==='json'){
+    let parsed;try{parsed=JSON.parse(value)}catch{throw new Error('Характеристики должны быть объектом JSON с текстовыми значениями')}
+    if(!parsed||Array.isArray(parsed)||typeof parsed!=='object'||Object.values(parsed).some(x=>typeof x!=='string'))throw new Error('Характеристики должны быть объектом JSON с текстовыми значениями');
+    return parsed;
+  }
+  if(def.kind==='nullableBool')return value===''?null:value==='true';
+  if(def.kind==='bool')return value==='true';
+  if(def.kind==='integer'||def.kind==='optionalInteger'){
+    if(value===''&&def.kind==='optionalInteger')return null;
+    const number=Number(value);
+    if(!/^\d+$/.test(value)||!Number.isSafeInteger(number)||number<def.min)throw new Error(`Поле «${def.label}» должно быть целым числом не меньше ${def.min}`);
+    return number;
+  }
+  if(def.key==='discount_percent'&&value.trim()==='')return '0';
+  return value||null;
+}
+function editorError(error){
+  let details;try{details=JSON.parse(error.message)}catch{return error.message}
+  if(!Array.isArray(details))return error.message;
+  return details.map(detail=>{
+    const loc=Array.isArray(detail.loc)?detail.loc:[],itemIndex=loc.indexOf('items');
+    const fields=itemIndex>=0?editorItemFields:editorDocumentFields,def=fields.find(field=>field.key===loc[loc.length-1]);
+    const row=itemIndex>=0&&Number.isInteger(loc[itemIndex+1])?`Строка ${loc[itemIndex+1]+1}: `:'';
+    return `${row}${def?def.label+': ':''}${detail.msg||'Некорректные данные'}`;
+  }).join('; ');
+}
+function editDocument(id){
+  const record=state.current.documents.find(d=>d.id===id);
+  if(!record)return toast('Этого документа нет в текущем комплекте',true);
+  const d=record.document,originals=new Map(d.items.map((item,index)=>[String(index),item])),usedIds=new Set(d.items.map(item=>item.line_id));
+  let nextIndex=d.items.length,nextManual=1;
+  const missing=d.missing_fields||[],warnings=d.extraction_warnings||[],confidence=d.fields_confidence||{};
+  $('#editor').innerHTML=`<form id="document-form">
+    <div class="row between"><h2>Реквизиты документа</h2><button type="button" data-action="close">Закрыть</button></div>
+    <p class="small muted">Изменённые, но не отмеченные поля сохраняются неподтверждёнными. Отмечайте только то, что проверили по оригиналу. Исходный файл и история исправлений сохраняются.</p>
+    <div class="formgrid">${editorDocumentFields.map(def=>editorControl(def,'doc',0,d[def.key],confidence)).join('')}</div>
+    ${editorSource(d.source)}${editorUnknownConfidence(d,confidence,[...editorDocumentFields.map(def=>def.key),'missing_fields','items'],'doc')}
+    <details><summary>ID документов комплекта</summary><ul class="small">${state.current.documents.map(x=>`<li>${esc(types[x.document.type]||x.document.type)} · ${esc(x.document.number||'без номера')} · <span class="editor-id">${esc(x.id)}</span></li>`).join('')}</ul></details>
+    <div class="row between" style="margin-top:20px"><h3>Товарные строки</h3><button type="button" data-editor-action="add">Добавить строку</button></div>
+    <p class="small muted">Для новой строки нулевая скидка остаётся неподтверждённой до проверки. Удаление строки может потребовать повторного подтверждения ручных связей.</p>
+    <label class="check"><input type="checkbox" data-doc-confirm="items">Весь состав товарных строк проверен по оригиналу${Object.hasOwn(confidence,'items')?` · уверенность ${esc(Math.round(confidence.items*100))}%`:''}</label>
+    <div data-items>${d.items.map((item,index)=>editorRow(item,index)).join('')}</div>
+    <h3>Пропущенные данные и замечания извлечения</h3>
+    <p class="small muted">Отметьте только устранённые пропуски и разобранные замечания. Их удаление не подтверждает другие поля.</p>
+    ${missing.length?`<div class="editor-list">${missing.map((value,index)=>`<label class="check"><input type="checkbox" data-resolve-missing="${index}"><span>Пропуск устранён: ${esc(value)}</span></label>`).join('')}</div>`:'<p class="small muted">Пропуски не указаны.</p>'}
+    <label class="check"><input type="checkbox" data-doc-confirm="missing_fields">Проверен список оставшихся пропусков${Object.hasOwn(confidence,'missing_fields')?` · уверенность ${esc(Math.round(confidence.missing_fields*100))}%`:''}</label>
+    ${warnings.length?`<div class="editor-list">${warnings.map((value,index)=>`<label class="check"><input type="checkbox" data-resolve-warning="${index}"><span>Замечание разобрано: ${esc(value)}</span></label>`).join('')}</div>`:'<p class="small muted">Замечаний извлечения нет.</p>'}
+    <div class="formgrid" style="margin-top:20px"><label>Проверяющий<input name="reviewer" required maxlength="200"></label><label>Комментарий к исправлению<input name="comment" required maxlength="10000"></label></div>
+    <div class="row between" style="margin-top:20px"><div class="row"><button type="button" data-action="source" data-id="${esc(id)}">Исходный файл</button><button type="button" data-action="history" data-id="${esc(id)}">История</button></div><button class="primary" type="submit">Сохранить исправления</button></div><div id="history"></div>
+  </form>`;
+  $('#editor').showModal();
+  const form=$('#document-form');
+  const clearChangedConfirmation=event=>{
+    const control=event.target;
+    if(Object.hasOwn(control.dataset,'docField'))form.querySelector(`[data-doc-confirm="${control.dataset.docField}"]`).checked=false;
+    if(Object.hasOwn(control.dataset,'itemField'))control.closest('[data-item-row]').querySelector(`[data-item-confirm="${control.dataset.itemField}"]`).checked=false;
+    if(Object.hasOwn(control.dataset,'resolveMissing'))form.querySelector('[data-doc-confirm="missing_fields"]').checked=false;
+  };
+  form.oninput=clearChangedConfirmation;
+  form.onchange=clearChangedConfirmation;
+  form.onclick=event=>{
+    const button=event.target.closest('[data-editor-action]');
+    if(!button)return;
+    if(button.dataset.editorAction==='add'){
+      while(usedIds.has(`manual-${nextManual}`))nextManual++;
+      const line_id=`manual-${nextManual++}`,index=String(nextIndex++);
+      usedIds.add(line_id);
+      const item={line_id,position_id:null,sku:null,name:null,unit:null,quantity:null,unit_price:null,amount:null,currency:null,tax_included:null,vat_rate:null,discount_percent:'0',conversion_factor:null,conversion_to:null,attributes:{},confidence:{discount_percent:0},source:null,field_sources:{}};
+      originals.set(index,item);
+      form.querySelector('[data-items]').insertAdjacentHTML('beforeend',editorRow(item,index));
+      form.querySelector('[data-doc-confirm="items"]').checked=false;
+    }
+    if(button.dataset.editorAction==='remove'&&confirm('Удалить эту строку? Изменение вступит в силу после сохранения документа.')){
+      button.closest('[data-item-row]').remove();
+      form.querySelector('[data-doc-confirm="items"]').checked=false;
+      form.querySelector('[data-editor-action="add"]').focus();
+    }
+  };
+  form.onsubmit=async event=>{
+    event.preventDefault();
+    const submit=form.querySelector('[type="submit"]');
+    submit.disabled=true;
+    form.inert=true;
+    let saved=false;
+    try{
+      const reviewer=form.elements.reviewer.value.trim(),comment=form.elements.comment.value.trim();
+      if(!reviewer||!comment)throw new Error('Укажите проверяющего и комментарий');
+      const updated=structuredClone(d),confirmed_fields=[],confirmed_items=Object.create(null),discarded_item_confidence=Object.create(null);
+      updated.fields_confidence=updated.fields_confidence||{};
+      const discarded_confidence_fields=[...form.querySelectorAll('[data-doc-discard]:checked')].map(control=>Object.keys(confidence)[+control.dataset.docDiscard]);
+      discarded_confidence_fields.forEach(key=>delete updated.fields_confidence[key]);
+      form.querySelectorAll('[data-doc-field]').forEach(control=>{
+        const def=editorDocumentFields.find(field=>field.key===control.dataset.docField),checked=form.querySelector(`[data-doc-confirm="${def.key}"]`).checked;
+        if(def.kind!=='readonly'&&control.value!==editorValue(def,d[def.key])){updated[def.key]=editorParse(def,control.value);updated.fields_confidence[def.key]=0}
+        if(checked){updated.fields_confidence[def.key]=1;confirmed_fields.push(def.key)}
+      });
+      const resolvedMissing=new Set([...form.querySelectorAll('[data-resolve-missing]:checked')].map(control=>+control.dataset.resolveMissing));
+      updated.missing_fields=missing.filter((_,index)=>!resolvedMissing.has(index));
+      if(resolvedMissing.size)updated.fields_confidence.missing_fields=0;
+      if(form.querySelector('[data-doc-confirm="missing_fields"]').checked){updated.fields_confidence.missing_fields=1;confirmed_fields.push('missing_fields')}
+      const resolvedWarnings=new Set([...form.querySelectorAll('[data-resolve-warning]:checked')].map(control=>+control.dataset.resolveWarning));
+      updated.extraction_warnings=warnings.filter((_,index)=>!resolvedWarnings.has(index));
+      updated.items=[...form.querySelectorAll('[data-item-row]')].map(row=>{
+        const original=originals.get(row.dataset.itemRow),item=structuredClone(original),confirmed=[];
+        item.confidence=item.confidence||{};
+        row.querySelectorAll('[data-item-field]').forEach(control=>{
+          const def=editorItemFields.find(field=>field.key===control.dataset.itemField),checked=row.querySelector(`[data-item-confirm="${def.key}"]`).checked;
+          if(def.key==='discount_percent'&&checked&&!control.value.trim())throw new Error('Укажите скидку в процентах, прежде чем её подтвердить');
+          if(def.kind!=='readonly'&&control.value!==editorValue(def,original[def.key])){item[def.key]=editorParse(def,control.value);item.confidence[def.key]=0}
+          if(checked){item.confidence[def.key]=1;confirmed.push(def.key)}
+        });
+        const discarded=[...row.querySelectorAll('[data-item-discard]:checked')].map(control=>Object.keys(original.confidence||{})[+control.dataset.itemDiscard]);
+        if(discarded.length){discarded_item_confidence[item.line_id]=discarded;discarded.forEach(key=>delete item.confidence[key])}
+        if(confirmed.length)confirmed_items[item.line_id]=confirmed;
+        return item;
+      });
+      if(JSON.stringify(updated.items.map(item=>item.line_id))!==JSON.stringify(d.items.map(item=>item.line_id)))updated.fields_confidence.items=0;
+      if(form.querySelector('[data-doc-confirm="items"]').checked){updated.fields_confidence.items=1;confirmed_fields.push('items')}
+      await api(`/api/cases/${enc(state.current.id)}/documents/${enc(id)}`,{method:'PUT',body:JSON.stringify({document:updated,expected_revision:record.revision,reviewer,comment,confirmed_fields,confirmed_items,discarded_confidence_fields,discarded_item_confidence})});
+      saved=true;
+      $('#editor').close();
+      await openCase(state.current.id,state.options);
+      toast('Исправление сохранено. Выполните сверку ещё раз.');
+    }catch(e){const message=editorError(e);toast(saved?'Исправление сохранено, но не удалось обновить комплект. Откройте его заново: '+message:message,true)}finally{submit.disabled=false;form.inert=false}
+  };
+}
 async function run(){state.options={...state.options,as_of:$('#asof').value,delivery_complete:$('#complete').checked};if(!state.options.as_of)throw new Error('Укажите дату среза');const r=await api(`/api/cases/${state.current.id}/runs`,{method:'POST',body:JSON.stringify(state.options)});state.run=await api('/api/runs/'+r.id);render();await refreshList()}
 async function download(url,name){const blob=await api(url,{blob:true}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 document.addEventListener('click',async event=>{const b=event.target.closest('[data-action]');if(!b)return;const action=b.dataset.action;b.disabled=true;try{if(action==='new'){const title=prompt('Название проверки','Проверка исполнения контракта');if(title?.trim()){const c=await api('/api/cases',{method:'POST',body:JSON.stringify({title:title.trim()})});await openCase(c.id)}}if(action==='open')await openCase(b.dataset.id);if(action==='demo'){const d=await api('/api/demo/'+$('#demo-choice').value,{method:'POST'});await openCase(d.case.id,d.options);await run()}if(action==='upload'){const files=[...$('#files').files];if(!files.length)throw new Error('Выберите файлы');for(const file of files){const data=new FormData();data.append('file',file);if($('#upload-type').value)data.append('document_type',$('#upload-type').value);if($('#upload-contract').value.trim())data.append('contract_id',$('#upload-contract').value.trim());const r=await api(`/api/cases/${state.current.id}/documents`,{method:'POST',body:data});if(r.duplicate)toast('Повторный файл исключён: '+file.name)}await openCase(state.current.id,state.options);toast('Документы загружены')}if(action==='run')await run();if(action==='edit')editDocument(b.dataset.id);if(action==='close')$('#editor').close();if(action==='export')await download(`/api/runs/${state.run.id}/export?format=${b.dataset.format}`,'proverka.'+b.dataset.format);if(action==='source')await download(`/api/cases/${state.current.id}/documents/${enc(b.dataset.id)}/file`,state.current.documents.find(x=>x.id===b.dataset.id)?.document.filename||'document');if(action==='history'){const rows=await api(`/api/cases/${state.current.id}/documents/${enc(b.dataset.id)}/history`);$('#history').innerHTML='<h3>История исправлений</h3>'+rows.map(x=>`<p class="small">Редакция ${x.revision} · ${esc(x.reviewer)} · ${esc(x.created_at)}<br>${esc(x.comment)}</p>`).join('')}if(action==='events'){const events=await api(`/api/cases/${state.current.id}/events`);$('#events').innerHTML='<ul class="audit small">'+events.map(x=>`<li>${esc(x.created_at)} · ${esc(x.action)}<br><span class="muted">${esc(JSON.stringify(x.payload))}</span></li>`).join('')+'</ul>'}if(action==='links'){const reviewer=$('#link-reviewer').value.trim(),comment=$('#link-comment').value.trim();if(!reviewer||!comment)throw new Error('Укажите проверяющего и основание');const links=[...document.querySelectorAll('[data-link-document]')].filter(x=>x.value).map(x=>({document_id:x.dataset.linkDocument,line_id:x.dataset.linkLine,target_line_id:x.value,reviewer,comment}));state.options.manual_links=[...(state.options.manual_links||[]).filter(old=>!links.some(n=>n.document_id===old.document_id&&n.line_id===old.line_id)),...links];await run()}if(action==='token'){const v=prompt('Bearer-токен локального сервера. Оставьте пустым, если токен не настроен.',state.token);if(v!==null){state.token=v.trim();sessionStorage.setItem('kontrol_token',state.token);state.demos=await api('/api/demo');await refreshList();if(state.current)render();else home();toast('Настройка доступа сохранена в этой вкладке')}}}catch(e){toast(e.message,true)}finally{b.disabled=false}});

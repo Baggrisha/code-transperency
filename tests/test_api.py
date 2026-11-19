@@ -75,7 +75,9 @@ class APIScenarios(unittest.TestCase):
         corrected = copy.deepcopy(source['documents'][1])
         corrected['items'][0]['quantity'] = '10'
         endpoint = f'/api/cases/{case_id}/documents/{corrected["id"]}'
-        body = {'document': corrected, 'expected_revision': 1, 'reviewer': 'Тестовый специалист', 'comment': 'Проверено исходное количество: 10.'}
+        body = {'document': corrected, 'expected_revision': 1, 'reviewer': 'Тестовый специалист',
+                'comment': 'Проверено исходное количество: 10.',
+                'confirmed_items': {corrected['items'][0]['line_id']: ['quantity']}}
         update = self.client.put(endpoint, json=body)
         self.assertEqual(200, update.status_code, update.text)
         self.assertEqual(2, update.json()['revision'])

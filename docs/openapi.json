@@ -1362,6 +1362,44 @@
             "maxLength": 10000,
             "minLength": 1,
             "title": "Comment"
+          },
+          "confirmed_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Confirmed Fields",
+            "description": "Явно подтверждённые поля документа."
+          },
+          "confirmed_items": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Confirmed Items",
+            "description": "Явно подтверждённые поля строк по их line_id."
+          },
+          "discarded_confidence_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Discarded Confidence Fields",
+            "description": "Ошибочные ключи уверенности, не являющиеся полями документа."
+          },
+          "discarded_item_confidence": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Discarded Item Confidence",
+            "description": "Ошибочные ключи уверенности строк по их line_id."
           }
         },
         "additionalProperties": false,

@@ -9,7 +9,58 @@ from pathlib import Path
 from typing import Any, Iterator
 from uuid import uuid4
 
-from .models import CheckRequest, CheckResult, Document, ReviewUpdate, SourceRef
+from .models import CheckRequest, CheckResult, Document, Item, ReviewUpdate, SourceRef
+
+
+DOCUMENT_REVIEW_FIELDS = (
+    "id", "type", "number", "contract_id", "date", "effective_from", "deadline",
+    "revision", "logical_id", "status", "supersedes", "specification_id",
+    "base_document_id", "replacement_spec_id", "approved", "related_delivery_ids",
+    "acceptance_mode", "is_complete", "missing_fields", "expected_pages", "actual_pages", "items",
+)
+ITEM_REVIEW_FIELDS = (
+    "line_id", "position_id", "sku", "name", "unit", "quantity", "unit_price",
+    "amount", "currency", "tax_included", "vat_rate", "discount_percent",
+    "conversion_factor", "conversion_to", "attributes",
+)
+
+
+def validate_review_confirmations(document: Document, confirmed_fields: list[str],
+                                  confirmed_items: dict[str, list[str]]) -> None:
+    unknown = set(confirmed_fields) - set(DOCUMENT_REVIEW_FIELDS)
+    if unknown:
+        raise ValueError(f"Неизвестные поля подтверждения документа: {', '.join(sorted(unknown))}")
+    line_ids = {item.line_id for item in document.items}
+    unknown_lines = set(confirmed_items) - line_ids
+    if unknown_lines:
+        raise ValueError(f"Строки подтверждения отсутствуют в документе: {', '.join(sorted(unknown_lines))}")
+    for line_id, fields in confirmed_items.items():
+        unknown = set(fields) - set(ITEM_REVIEW_FIELDS)
+        if unknown:
+            raise ValueError(f"Неизвестные поля подтверждения строки {line_id}: {', '.join(sorted(unknown))}")
+
+
+def validate_review_discards(document: Document, discarded_confidence_fields: list[str],
+                             discarded_item_confidence: dict[str, list[str]]) -> None:
+    real_fields = set(discarded_confidence_fields) & set(Document.model_fields)
+    if real_fields:
+        raise ValueError(f"Нельзя удалить уверенность реальных полей документа: {', '.join(sorted(real_fields))}")
+    missing_lines = set(discarded_item_confidence) - {item.line_id for item in document.items}
+    if missing_lines:
+        raise ValueError(f"Строки удаления уверенности отсутствуют в документе: {', '.join(sorted(missing_lines))}")
+    for line_id, fields in discarded_item_confidence.items():
+        real_fields = set(fields) & set(Item.model_fields)
+        if real_fields:
+            raise ValueError(f"Нельзя удалить уверенность реальных полей строки {line_id}: {', '.join(sorted(real_fields))}")
+
+
+def _retained_confidence(original: dict[str, float], supplied: dict[str, float]) -> dict[str, float]:
+    """A full-document update may lower confidence but cannot silently raise it."""
+    result = original.copy()
+    for field, value in supplied.items():
+        if value < original.get(field, 1.0):
+            result[field] = value
+    return result
 
 
 def now() -> str:
@@ -21,6 +72,10 @@ class ConflictError(ValueError):
 
 
 class NotFoundError(KeyError):
+    pass
+
+
+class InvalidReviewError(ValueError):
     pass
 
 
@@ -159,7 +214,17 @@ class Store:
             self._event(conn, case_id, "duplicate_upload", {"document_id": document_id, "file_hash": file_hash})
 
     def update_document(self, case_id: str, document_id: str, document: Document,
-                        expected_revision: int, reviewer: str, comment: str) -> dict:
+                        expected_revision: int, reviewer: str, comment: str,
+                        confirmed_fields: list[str] | None = None,
+                        confirmed_items: dict[str, list[str]] | None = None,
+                        discarded_confidence_fields: list[str] | None = None,
+                        discarded_item_confidence: dict[str, list[str]] | None = None) -> dict:
+        confirmed_fields = confirmed_fields or []
+        confirmed_items = confirmed_items or {}
+        discarded_confidence_fields = discarded_confidence_fields or []
+        discarded_item_confidence = discarded_item_confidence or {}
+        validate_review_confirmations(document, confirmed_fields, confirmed_items)
+        validate_review_discards(document, discarded_confidence_fields, discarded_item_confidence)
         if document.id != document_id:
             raise ConflictError("ID документа нельзя менять при исправлении извлечения")
         with self.connect() as conn:
@@ -170,38 +235,107 @@ class Store:
             if old["revision"] != expected_revision:
                 raise ConflictError("Документ уже изменён. Обновите данные и повторите исправление.")
             original = Document.model_validate_json(old["data"])
+            missing_keys = set(discarded_confidence_fields) - set(original.fields_confidence)
+            if missing_keys:
+                raise InvalidReviewError(f"Ключи уверенности отсутствуют в сохранённом документе: {', '.join(sorted(missing_keys))}")
+            old_lines = {item.line_id: item for item in original.items}
+            for line_id, fields in discarded_item_confidence.items():
+                if line_id not in old_lines:
+                    raise InvalidReviewError(f"Строка отсутствует в сохранённом документе: {line_id}")
+                missing_keys = set(fields) - set(old_lines[line_id].confidence)
+                if missing_keys:
+                    raise InvalidReviewError(f"Ключи уверенности отсутствуют в сохранённой строке {line_id}: {', '.join(sorted(missing_keys))}")
             document = document.model_copy(deep=True)
             document.content_hash = original.content_hash
             document.filename = original.filename
-            document.extraction_method = "manual_review"
-            # A reviewed number must not keep an excerpt claiming the old number.
-            # Keep original versions unchanged; tag the new field's human origin.
-            old_lines = {item.line_id: item for item in original.items}
+            document.extraction_method = original.extraction_method
+            document.source = original.source.model_copy(deep=True) if original.source else None
+            supplied_confidence = document.fields_confidence
+            document.fields_confidence = _retained_confidence(original.fields_confidence, supplied_confidence)
+            changes = []
+            for field in sorted(set(discarded_confidence_fields)):
+                value = document.fields_confidence.pop(field)
+                changes.append(f"удалён ошибочный ключ уверенности документа {field!r}: {value}")
+            for field in DOCUMENT_REVIEW_FIELDS:
+                if field == "items":
+                    before = [item.line_id for item in original.items]
+                    after = [item.line_id for item in document.items]
+                else:
+                    before, after = getattr(original, field), getattr(document, field)
+                confirmed = field in confirmed_fields
+                changed = before != after
+                if confirmed:
+                    document.fields_confidence[field] = 1.0
+                elif changed:
+                    document.fields_confidence[field] = 0.0
+                lowered = document.fields_confidence.get(field, 1.0) < original.fields_confidence.get(field, 1.0)
+                if changed or confirmed:
+                    state = "подтверждено" if confirmed else "не подтверждено"
+                    changes.append(f"{field}: {before} → {after} ({state})")
+                elif lowered:
+                    changes.append(f"{field}: уверенность {original.fields_confidence.get(field, 1.0)} → "
+                                   f"{document.fields_confidence[field]}")
+            for field in sorted(set(document.fields_confidence) - set(DOCUMENT_REVIEW_FIELDS)):
+                before = original.fields_confidence.get(field, 1.0)
+                after = document.fields_confidence[field]
+                if after < before:
+                    changes.append(f"{field}: уверенность {before} → {after}")
+            if original.extraction_warnings != document.extraction_warnings:
+                changes.append(f"extraction_warnings: {original.extraction_warnings} → {document.extraction_warnings}")
+
+            for line_id, fields in discarded_item_confidence.items():
+                for field in sorted(set(fields)):
+                    value = old_lines[line_id].confidence[field]
+                    changes.append(f"удалён ошибочный ключ уверенности строки {line_id!r} {field!r}: {value}")
+            new_lines = {item.line_id for item in document.items}
+            for line_id in sorted(old_lines.keys() - new_lines):
+                changes.append(f"строка удалена: {line_id}")
             for item in document.items:
                 previous = old_lines.get(item.line_id)
-                for field in ("name", "position_id", "sku", "unit", "quantity", "unit_price", "amount",
-                              "currency", "tax_included", "vat_rate", "discount_percent",
-                              "conversion_factor", "conversion_to", "attributes"):
+                supplied_confidence = item.confidence
+                item.confidence = _retained_confidence(previous.confidence if previous else {}, supplied_confidence)
+                for field in discarded_item_confidence.get(item.line_id, []):
+                    item.confidence.pop(field, None)
+                item.source = previous.source.model_copy(deep=True) if previous and previous.source else None
+                item.field_sources = ({field: ref.model_copy(deep=True) for field, ref in previous.field_sources.items()}
+                                      if previous else {})
+                if previous is None:
+                    changes.append(f"строка добавлена: {item.line_id}")
+                for field in ITEM_REVIEW_FIELDS:
                     before = getattr(previous, field) if previous else None
                     after = getattr(item, field)
-                    confirmed = previous and item.confidence.get(field) != previous.confidence.get(field) and item.confidence.get(field) == 1
-                    if before != after or confirmed:
-                        old_ref = previous.field_sources.get(field) or previous.source if previous else None
+                    confirmed = field in confirmed_items.get(item.line_id, [])
+                    changed = previous is not None and before != after
+                    created = (previous is None and field != "line_id" and
+                               (after is not None and after != {} or field in supplied_confidence))
+                    if confirmed:
+                        item.confidence[field] = 1.0
+                    elif changed or created or (previous is None and field == "line_id" and field in supplied_confidence):
+                        item.confidence[field] = 0.0
+                    old_confidence = previous.confidence.get(field, 1.0) if previous else 1.0
+                    lowered = item.confidence.get(field, 1.0) < old_confidence
+                    if changed or created or confirmed or lowered:
+                        old_ref = (previous.field_sources.get(field) or previous.source) if previous else None
+                        excerpt = old_ref.excerpt + "\n" if old_ref and old_ref.excerpt else ""
+                        state = "подтверждено" if confirmed else "не подтверждено"
+                        excerpt += (f"Ручное изменение ({reviewer}): {field}: {before} → {after} "
+                                    f"({state}). {comment}")
                         item.field_sources[field] = SourceRef(document_id=document_id, filename=document.filename,
                             page=old_ref.page if old_ref else None, row=old_ref.row if old_ref else None,
-                            field=field, excerpt=f"Ручное уточнение ({reviewer}): {field}={after}. Ранее: {before}. {comment}")
-                        item.confidence[field] = 1.0
-            changes = []
-            for field in ("type", "number", "contract_id", "date", "effective_from", "deadline", "status",
-                          "supersedes", "specification_id", "replacement_spec_id", "approved", "is_complete"):
-                before, after = getattr(original, field), getattr(document, field)
-                confirmed = document.fields_confidence.get(field) == 1 and original.fields_confidence.get(field, 1) < 1
-                if before != after or confirmed:
-                    changes.append(f"{field}: {before} → {after}")
-                    document.fields_confidence[field] = 1.0
+                            field=field, excerpt=excerpt)
+                for field in sorted(set(item.confidence) - set(ITEM_REVIEW_FIELDS)):
+                    before = previous.confidence.get(field, 1.0) if previous else 1.0
+                    if item.confidence[field] < before:
+                        old_ref = (previous.field_sources.get(field) or previous.source) if previous else None
+                        excerpt = old_ref.excerpt + "\n" if old_ref and old_ref.excerpt else ""
+                        excerpt += (f"Уверенность снижена ({reviewer}): {field}: {before} → "
+                                    f"{item.confidence[field]}. {comment}")
+                        item.field_sources[field] = SourceRef(document_id=document_id, filename=document.filename,
+                            page=old_ref.page if old_ref else None, row=old_ref.row if old_ref else None,
+                            field=field, excerpt=excerpt)
             if changes:
-                ref = original.source.model_copy(deep=True) if original.source else SourceRef(document_id=document_id, filename=document.filename)
-                ref.excerpt += f"\nРучное уточнение ({reviewer}): {'; '.join(changes)}. {comment}"
+                ref = document.source or SourceRef(document_id=document_id, filename=document.filename)
+                ref.excerpt += f"\nРучное изменение ({reviewer}): {'; '.join(changes)}. {comment}"
                 document.source = ref
             revision = expected_revision + 1
             data = document.model_dump_json()
