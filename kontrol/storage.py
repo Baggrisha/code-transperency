@@ -79,6 +79,14 @@ class InvalidReviewError(ValueError):
     pass
 
 
+RUN_SUMMARY_SQL = """r.id, r.case_id, r.case_revision, r.created_at,
+    json_extract(r.result,'$.status') AS status,
+    json_extract(r.result,'$.as_of') AS as_of,
+    json_array_length(json_extract(r.result,'$.signals')) AS signal_count,
+    json_extract(r.result,'$.result_hash') AS result_hash,
+    (r.case_revision != c.revision) AS stale"""
+
+
 class Store:
     def __init__(self, root: Path):
         self.root = root.resolve()
@@ -154,9 +162,21 @@ class Store:
     def list_cases(self) -> list[dict]:
         with self.connect() as conn:
             rows = conn.execute("""SELECT c.*, (SELECT COUNT(*) FROM documents d WHERE d.case_id=c.id) AS document_count,
-                (SELECT id FROM runs r WHERE r.case_id=c.id ORDER BY created_at DESC LIMIT 1) AS last_run_id
+                (SELECT id FROM runs r WHERE r.case_id=c.id ORDER BY created_at DESC LIMIT 1) AS last_run_id,
+                (SELECT json_extract(r.result,'$.status') FROM runs r WHERE r.case_id=c.id
+                    ORDER BY created_at DESC LIMIT 1) AS last_run_status,
+                (SELECT r.created_at FROM runs r WHERE r.case_id=c.id ORDER BY created_at DESC LIMIT 1) AS last_run_at,
+                (SELECT COUNT(*) FROM runs r WHERE r.case_id=c.id) AS run_count,
+                (SELECT r.case_revision != c.revision FROM runs r WHERE r.case_id=c.id
+                    ORDER BY created_at DESC LIMIT 1) AS last_run_stale
                 FROM cases c ORDER BY created_at DESC, id""").fetchall()
-        return [dict(r) for r in rows]
+        result = []
+        for row in rows:
+            item = dict(row)
+            if item["last_run_stale"] is not None:
+                item["last_run_stale"] = bool(item["last_run_stale"])
+            result.append(item)
+        return result
 
     def case(self, case_id: str) -> dict:
         with self.connect() as conn:
@@ -166,8 +186,37 @@ class Store:
             if row is None:
                 raise NotFoundError(case_id)
             docs = conn.execute("SELECT * FROM documents WHERE case_id=? ORDER BY id", (case_id,)).fetchall()
-            runs = conn.execute("SELECT id,case_revision,created_at FROM runs WHERE case_id=? ORDER BY created_at DESC", (case_id,)).fetchall()
-        return {**dict(row), "documents": [self._doc_record(r) for r in docs], "runs": [dict(r) for r in runs]}
+            runs = conn.execute(f"SELECT {RUN_SUMMARY_SQL} FROM runs r JOIN cases c ON c.id=r.case_id "
+                                "WHERE r.case_id=? ORDER BY r.created_at DESC", (case_id,)).fetchall()
+        return {**dict(row), "documents": [self._doc_record(r) for r in docs],
+                "runs": [self._run_summary(r) for r in runs]}
+
+    @staticmethod
+    def _run_summary(row: sqlite3.Row) -> dict:
+        result = dict(row)
+        result["stale"] = bool(result["stale"])
+        return result
+
+    def list_runs(self, case_id: str | None = None, status: str | None = None,
+                  limit: int = 100, offset: int = 0) -> dict:
+        """Журнал проверок: краткие сводки запусков, новые сверху."""
+        where, params = [], []
+        if case_id:
+            self.case(case_id)
+            where.append("r.case_id=?")
+            params.append(case_id)
+        if status:
+            where.append("json_extract(r.result,'$.status')=?")
+            params.append(status)
+        clause = ("WHERE " + " AND ".join(where)) if where else ""
+        with self.connect() as conn:
+            total = conn.execute(f"SELECT COUNT(*) FROM runs r {clause}", params).fetchone()[0]
+            rows = conn.execute(f"SELECT {RUN_SUMMARY_SQL}, c.title AS case_title, "
+                                "(SELECT COUNT(*) FROM reviews v WHERE v.run_id=r.id) AS review_count "
+                                f"FROM runs r JOIN cases c ON c.id=r.case_id {clause} "
+                                "ORDER BY r.created_at DESC, r.id LIMIT ? OFFSET ?",
+                                [*params, limit, offset]).fetchall()
+        return {"total": total, "limit": limit, "offset": offset, "items": [self._run_summary(r) for r in rows]}
 
     @staticmethod
     def _doc_record(row: sqlite3.Row) -> dict:
@@ -200,14 +249,23 @@ class Store:
                 raise ConflictError("ID документа уже занят другим содержимым. Укажите новый ID и supersedes либо отредактируйте реквизиты с сохранением истории.")
             timestamp = now()
             data = document.model_dump_json()
+            stored_path = self._relative_file(file_path) if file_path else None
             conn.execute("INSERT INTO documents VALUES (?,?,?,?,?,?,?,?)",
-                         (case_id, document.id, 1, data, file_path, file_hash, original_name, timestamp))
+                         (case_id, document.id, 1, data, stored_path, file_hash, original_name, timestamp))
             conn.execute("INSERT INTO document_versions VALUES (?,?,?,?,?,?,?)",
                          (case_id, document.id, 1, data, "import", "Исходное извлечение", timestamp))
             conn.execute("UPDATE cases SET revision=revision+1 WHERE id=?", (case_id,))
             self._event(conn, case_id, "document_added", {"document_id": document.id, "file_hash": file_hash})
         return {"id": document.id, "case_id": case_id, "revision": 1,
                 "document": document.model_dump(mode="json"), "duplicate": False}
+
+    def _relative_file(self, file_path: str) -> str:
+        """Пути хранятся относительно каталога данных, чтобы его можно было переносить."""
+        path = Path(file_path).resolve()
+        try:
+            return path.relative_to(self.root).as_posix()
+        except ValueError:
+            return str(path)
 
     def record_duplicate(self, case_id: str, document_id: str, file_hash: str) -> None:
         with self.connect() as conn:
@@ -360,7 +418,15 @@ class Store:
             row = conn.execute("SELECT file_path,original_name FROM documents WHERE case_id=? AND id=?", (case_id, document_id)).fetchone()
         if not row or not row["file_path"]:
             raise NotFoundError(document_id)
-        path = Path(row["file_path"]).resolve()
+        stored = Path(row["file_path"])
+        if stored.is_absolute():
+            # Совместимость с базами, созданными до перехода на относительные пути:
+            # если каталог данных перенесли, ищем файл по имени в текущем files/.
+            path = stored.resolve()
+            if not path.is_file() or not path.is_relative_to(self.root / "files"):
+                path = (self.root / "files" / stored.name).resolve()
+        else:
+            path = (self.root / stored).resolve()
         if not path.is_relative_to(self.root / "files") or not path.is_file():
             raise NotFoundError(document_id)
         return path, row["original_name"] or path.name
@@ -382,9 +448,26 @@ class Store:
                 raise NotFoundError(run_id)
             reviews = conn.execute("SELECT * FROM reviews WHERE run_id=? ORDER BY sequence", (run_id,)).fetchall()
             case_revision = conn.execute("SELECT revision FROM cases WHERE id=?", (row["case_id"],)).fetchone()[0]
+            prior = conn.execute("""SELECT v.* FROM reviews v JOIN runs r ON r.id=v.run_id
+                WHERE r.case_id=? AND v.run_id<>? AND r.created_at<=? ORDER BY r.created_at, v.sequence""",
+                (row["case_id"], run_id, row["created_at"])).fetchall()
+        result = json.loads(row["result"])
+        signal_ids = {s["id"] for s in result["signals"]}
+        review_list = [dict(r) for r in reviews]
+        latest = {r["signal_id"]: r for r in review_list}
+        # Идентификатор сигнала — хеш его содержания, поэтому совпадение id означает
+        # тот же самый вывод алгоритма. Прежнее решение показывается как подсказка,
+        # но не копируется в reviews этого запуска.
+        prior_latest = {r["signal_id"]: dict(r) for r in prior if r["signal_id"] in signal_ids}
         return {**{k: row[k] for k in row.keys() if k not in ("request", "result")},
-                "request": json.loads(row["request"]), "result": json.loads(row["result"]),
-                "reviews": [dict(r) for r in reviews], "stale": row["case_revision"] != case_revision}
+                "request": json.loads(row["request"]), "result": result,
+                "reviews": review_list, "stale": row["case_revision"] != case_revision,
+                "latest_reviews": latest,
+                "prior_reviews": {k: v for k, v in prior_latest.items() if k not in latest}}
+
+    def record_export(self, run: dict, fmt: str) -> None:
+        with self.connect() as conn:
+            self._event(conn, run["case_id"], "report_exported", {"run_id": run["id"], "format": fmt})
 
     def review(self, run_id: str, signal_id: str, update: ReviewUpdate) -> dict:
         run = self.run(run_id)
@@ -399,8 +482,23 @@ class Store:
         return {"sequence": cursor.lastrowid, "run_id": run_id, "signal_id": signal_id,
                 **update.model_dump(), "created_at": timestamp}
 
-    def events(self, case_id: str) -> list[dict]:
+    def events(self, case_id: str, action: list[str] | None = None, since: str | None = None,
+               after_sequence: int | None = None, limit: int | None = None) -> list[dict]:
         self.case(case_id)
+        where, params = ["case_id=?"], [case_id]
+        if action:
+            where.append(f"action IN ({','.join('?' * len(action))})")
+            params.extend(action)
+        if since:
+            where.append("created_at>=?")
+            params.append(since)
+        if after_sequence is not None:
+            where.append("sequence>?")
+            params.append(after_sequence)
+        sql = f"SELECT * FROM events WHERE {' AND '.join(where)} ORDER BY sequence"
+        if limit:
+            sql += " LIMIT ?"
+            params.append(limit)
         with self.connect() as conn:
-            rows = conn.execute("SELECT * FROM events WHERE case_id=? ORDER BY sequence", (case_id,)).fetchall()
+            rows = conn.execute(sql, params).fetchall()
         return [{**dict(row), "payload": json.loads(row["payload"])} for row in rows]

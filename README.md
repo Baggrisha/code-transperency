@@ -6,10 +6,27 @@
 
 ## Быстрый запуск
 
-Проверено на Python 3.12.14. Минимальная версия Python – 3.11. После распаковки откройте терминал в папке `kontrol-ispolneniya`.
+### macOS (Apple Silicon и Intel)
 
 ```bash
-python -m venv .venv
+xcode-select --install                 # один раз, если git ещё не установлен
+brew install python@3.13               # если python3 --version ниже 3.11
+git clone https://github.com/Baggrisha/code-transperency.git
+cd code-transperency
+./scripts/setup.sh                     # создаёт .venv и ставит зависимости из requirements-lock.txt
+./scripts/start.sh                     # http://127.0.0.1:8000, порт можно передать: ./scripts/start.sh 8001
+```
+
+Для сканов (PNG/JPG/TIFF и PDF без текстового слоя) дополнительно: `brew install tesseract tesseract-lang poppler`. Текстовые PDF, DOCX, TXT, CSV и JSON работают без этого. Все зависимости из `requirements-lock.txt` имеют готовые колёса `macosx arm64` для Python 3.12–3.14, компилятор не нужен. В macOS нет команды `python` вне виртуального окружения — используйте `python3` или скрипты выше. Если порт 8000 занят, запустите на другом: `./scripts/start.sh 8001`.
+
+Данные лежат в `data/` рядом с проектом (`kontrol.sqlite3` и `files/`) и сохраняются между перезапусками. Каталог можно перенести или указать другой через `KONTROL_DATA_DIR`: пути к исходным файлам хранятся относительно него.
+
+### Вручную (Linux, Windows, macOS)
+
+Проверено на Python 3.12.14 и 3.13. Минимальная версия Python – 3.11. Откройте терминал в папке репозитория.
+
+```bash
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements-lock.txt
 python -m uvicorn kontrol.api:app --host 127.0.0.1 --port 8000
@@ -42,7 +59,7 @@ python -m uvicorn kontrol.api:app --host 127.0.0.1 --port 8000
 
 Через «Реквизиты» можно исправить номер, дату и значения строк, указать отмену или замену документа. Нужны имя проверяющего и комментарий. Галочка подтверждения строки отмечает проверенные значения; пункт «Замечания извлечения разобраны» подтверждает рассмотрение реквизитов. После изменения повторите сверку: старый результат остаётся в истории и помечается как устаревший.
 
-Панель служит для демонстрации основного сценария. Все поля расширенной схемы, включая характеристики, коэффициенты перевода и сложные связи документов, доступны в API. Для собственной фронтенд-реализации используйте `docs/openapi.json` и маршруты ниже.
+Панель служит для демонстрации основного сценария. Краткое руководство для фронтенда с примерами запросов и ответов: `docs/frontend-api.md`. Все поля расширенной схемы, включая характеристики, коэффициенты перевода и сложные связи документов, доступны в API. Для собственной фронтенд-реализации используйте `docs/openapi.json` и маршруты ниже.
 
 ## Что проверяет алгоритм
 
@@ -136,10 +153,11 @@ const run = await fetch(`/api/cases/${dossier.id}/runs`, {
 | `POST /api/cases/{id}/runs` | Сверка сохранённого дела |
 | `POST /api/check` | Сверка массива документов без записи в БД |
 | `POST /api/extract` | Извлечение файла без сохранения |
-| `GET /api/runs/{id}` | Исходный запрос, результат, решения и признак `stale` |
+| `GET /api/runs` | Журнал проверок: статус, число сигналов, актуальность; фильтры `case_id`, `status`, `limit`, `offset` |
+| `GET /api/runs/{id}` | Исходный запрос, результат, решения, `latest_reviews`, `prior_reviews` и признак `stale` |
 | `POST /api/runs/{id}/signals/{signal_id}/reviews` | Новая запись рассмотрения |
-| `GET /api/runs/{id}/export?format=json` | Полный снимок с решениями; также `csv` и `html` |
-| `GET /api/cases/{id}/events` | Журнал действий |
+| `GET /api/runs/{id}/export?format=json` | Полный снимок с решениями; также `csv`, `html` и `pdf` (кириллица, шрифт DejaVu Sans в `kontrol/fonts`) |
+| `GET /api/cases/{id}/events` | Журнал действий; фильтры `action`, `since`, `after_sequence`, `limit` |
 
 Результат имеет статус `ok`, `needs_review` или `incomplete`. `ok` означает отсутствие сигнала в пределах выполненных проверок, а не доказанную полноту реальной закупки. Ручные решения `confirmed`, `resolved`, `dismissed` и `needs_review` хранятся отдельными записями. Последнее решение можно получить из последней записи `reviews` с соответствующим `signal_id`; исходный `result.signals[].status` не изменяется.
 
@@ -155,9 +173,9 @@ const run = await fetch(`/api/cases/${dossier.id}/runs`, {
 | --- | --- |
 | `KONTROL_DATA_DIR` | Каталог SQLite и исходников; по умолчанию `data` рядом с проектом |
 | `KONTROL_API_TOKEN` | Необязательный общий Bearer-токен для `/api/*` |
-| `KONTROL_CORS_ORIGINS` | Разрешённые origin через запятую, если фронтенд на другом порту |
+| `KONTROL_CORS_ORIGINS` | Разрешённые origin через запятую. Не задана — разрешены `localhost`/`127.0.0.1` на любом порту; пустая строка — CORS выключен |
 
-Если задан токен, передавайте `Authorization: Bearer ...`. В демонстрационной панели есть кнопка «Доступ», в Swagger – Authorize. Токен панели хранится только в sessionStorage текущей вкладки. Для локальной разработки с отдельным фронтендом можно задать, например, `KONTROL_CORS_ORIGINS=http://localhost:5173`.
+Если задан токен, передавайте `Authorization: Bearer ...`. В демонстрационной панели есть кнопка «Доступ», в Swagger – Authorize. Токен панели хранится только в sessionStorage текущей вкладки. Фронтенд, запущенный локально на другом порту (например, Vite на `5173`), работает без настройки. Для другого адреса задайте, например, `KONTROL_CORS_ORIGINS=https://demo.example`.
 
 Файлы до 20 МиБ принимаются API; остальные лимиты описаны в документации извлечения. Долгая обработка выполняется в рабочем потоке; сервис предназначен для локального пилота с одним процессом Uvicorn.
 
@@ -166,6 +184,7 @@ const run = await fetch(`/api/cases/${dossier.id}/runs`, {
 ```bash
 python -m unittest discover -s tests -v
 python scripts/run_cases.py --output reports/acceptance.json
+python scripts/export_openapi.py   # после изменения API; тест сверяет docs/openapi.json с приложением
 ```
 
 Файл `reports/acceptance.json` содержит сохранённый протокол T01–T12 с версией правил и хешем набора; при изменении кода запустите его повторно. `reports/unittest.txt` относится к предыдущей версии правил. Ключевые ожидания зафиксированы в `tests/acceptance_spec.md`, а эталон не вычисляется производственным кодом.

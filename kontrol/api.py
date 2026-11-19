@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.security import HTTPBearer
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,7 +20,7 @@ from starlette.concurrency import run_in_threadpool
 
 from . import __version__
 from .engine import run_check
-from .exports import report_html, signals_csv
+from .exports import PdfUnavailableError, report_html, report_pdf, signals_csv
 from .extract import ExtractionError, extract_document
 from .models import CheckRequest, Day, DocType, Document, ManualLink, Model, Number, ReviewUpdate
 from .storage import (ConflictError, InvalidReviewError, NotFoundError, Store,
@@ -28,6 +28,9 @@ from .storage import (ConflictError, InvalidReviewError, NotFoundError, Store,
 
 ROOT = Path(__file__).resolve().parent.parent
 MAX_FILE_BYTES = 20 * 1024 * 1024
+# Без KONTROL_CORS_ORIGINS разрешены только локальные фронтенды (Vite, CRA, Live Server и т. п.)
+# на любом порту localhost/127.0.0.1. Удалённые сайты доступа не получают.
+LOCAL_ORIGIN_REGEX = r"^https?://(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$"
 ALLOWED_SUFFIXES = {".json", ".txt", ".csv", ".tsv", ".pdf", ".docx", ".png", ".jpg", ".jpeg", ".tif", ".tiff"}
 
 
@@ -72,14 +75,13 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
                   description="Объяснимая сверка документов одного контракта. Локальный демонстрационный модуль.")
     app.state.store = store
     token = os.environ.get("KONTROL_API_TOKEN", "")
-    origins = [x.strip() for x in os.environ.get("KONTROL_CORS_ORIGINS", "").split(",") if x.strip()]
-    if origins:
-        app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "PUT"],
-                           allow_headers=["Authorization", "Content-Type"])
+    cors_setting = os.environ.get("KONTROL_CORS_ORIGINS")
+    origins = [x.strip() for x in (cors_setting or "").split(",") if x.strip()]
 
     @app.middleware("http")
     async def authentication(request, call_next):
-        if token and request.url.path.startswith("/api/"):
+        # Предзапрос CORS (OPTIONS) не содержит Authorization по стандарту, поэтому не требует токена.
+        if token and request.url.path.startswith("/api/") and request.method != "OPTIONS":
             provided = request.headers.get("authorization", "")
             if not secrets.compare_digest(provided, "Bearer " + token):
                 return JSONResponse({"detail": "Требуется Bearer-токен"}, status_code=401)
@@ -88,9 +90,25 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
         response.headers["Cache-Control"] = "no-store"
         return response
 
+    # CORS добавляется после проверки токена, чтобы стать внешним слоем: тогда и ответы 401
+    # содержат заголовки CORS, и браузер показывает фронтенду настоящую ошибку.
+    # KONTROL_CORS_ORIGINS="" (пустая строка) отключает CORS полностью.
+    if origins or cors_setting is None:
+        app.add_middleware(CORSMiddleware, allow_origins=origins,
+                           allow_origin_regex=None if origins else LOCAL_ORIGIN_REGEX,
+                           allow_methods=["GET", "POST", "PUT", "OPTIONS"],
+                           allow_headers=["Authorization", "Content-Type"],
+                           expose_headers=["Content-Disposition"])
+
     @app.exception_handler(NotFoundError)
     async def not_found(request, exc):
-        return JSONResponse({"detail": "Объект не найден"}, status_code=404)
+        missing = exc.args[0] if exc.args else ""
+        detail = f"Объект не найден: {missing}" if missing else "Объект не найден"
+        return JSONResponse({"detail": detail}, status_code=404)
+
+    @app.exception_handler(PdfUnavailableError)
+    async def pdf_unavailable(request, exc):
+        return JSONResponse({"detail": str(exc)}, status_code=501)
 
     @app.exception_handler(ConflictError)
     async def conflict(request, exc):
@@ -241,7 +259,16 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
         request = CheckRequest(documents=[Document.model_validate(d["document"]) for d in case["documents"]],
                                **options.model_dump())
         result = run_check(request)
-        return store.save_run(case_id, case["revision"], request, result)
+        saved = store.save_run(case_id, case["revision"], request, result)
+        # Тот же формат, что у GET /api/runs/{id}: фронтенду не нужен второй запрос.
+        return store.run(saved["id"])
+
+    @app.get("/api/runs", tags=["Сверка"])
+    def list_runs(case_id: str | None = None,
+                  status: Literal["ok", "needs_review", "incomplete"] | None = None,
+                  limit: int = Query(100, ge=1, le=500), offset: int = Query(0, ge=0)):
+        """Журнал проверок: краткие сводки запусков (статус, число сигналов, актуальность), новые сверху."""
+        return store.list_runs(case_id=case_id, status=status, limit=limit, offset=offset)
 
     @app.get("/api/runs/{run_id}", tags=["Сверка"])
     def get_run(run_id: str):
@@ -252,12 +279,22 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
         return store.review(run_id, signal_id, update)
 
     @app.get("/api/cases/{case_id}/events", tags=["Рассмотрение"])
-    def events(case_id: str):
-        return store.events(case_id)
+    def events(case_id: str, action: list[str] | None = Query(None, description="Фильтр по типу действия, можно несколько"),
+               since: str | None = Query(None, description="ISO-время, не раньше которого показать события"),
+               after_sequence: int | None = Query(None, ge=0, description="Только события с sequence больше указанного"),
+               limit: int | None = Query(None, ge=1, le=1000)):
+        return store.events(case_id, action=action, since=since, after_sequence=after_sequence, limit=limit)
 
     @app.get("/api/runs/{run_id}/export", tags=["Экспорт"])
-    def export(run_id: str, format: Literal["json", "csv", "html"] = "json"):
+    def export(run_id: str, format: Literal["json", "csv", "html", "pdf"] = "json"):
         run = store.run(run_id)
+        if format == "pdf":
+            case = store.case(run["case_id"])
+            content = report_pdf(run, case)
+            store.record_export(run, "pdf")
+            return Response(content, media_type="application/pdf",
+                            headers={"Content-Disposition": f'attachment; filename="check-{run_id}.pdf"'})
+        store.record_export(run, format)
         if format == "csv":
             return Response(signals_csv(run), media_type="text/csv; charset=utf-8",
                             headers={"Content-Disposition": f'attachment; filename="check-{run_id}.csv"'})

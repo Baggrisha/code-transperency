@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "engine_version": "rules-1.1.0",
   "oracle_version": "1.0",
-  "python_version": "3.14.7",
+  "python_version": "3.13.18",
   "dataset_sha256": "82f85b14d30a7fa4d37fa4d19919d7416c9a06252a9c4f309818b239083e244f",
   "dataset": "synthetic",
   "as_of": "2026-10-31",
