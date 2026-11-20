@@ -251,3 +251,19 @@ test('the skip link moves focus without changing the workspace route', async t =
   assert.equal(page.url(),url);
   await expect(page.getByRole('tab',{name:'Сопоставление'})).toHaveAttribute('aria-selected','true');
 });
+
+test('a click outside a dialog closes it without closing on clicks inside', async t => {
+  const {page} = await setup(t);
+  await page.getByRole('button',{name:'+ Новая проверка'}).click();
+  const dialog = page.getByRole('dialog',{name:'Данные контракта'});
+  await expect(dialog).toBeVisible();
+  await dialog.getByLabel('Наименование').fill('Тестовая проверка');
+  const box = await dialog.boundingBox();
+  assert.ok(box && box.x > 0 && box.y > 0, 'Dialog must leave a clickable backdrop');
+  await page.mouse.click(box.x + 3, box.y + 3);
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel('Наименование')).toHaveValue('Тестовая проверка');
+  await page.mouse.click(box.x - 2, box.y - 2);
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole('heading',{name:'Проверки контрактов'})).toBeVisible();
+});

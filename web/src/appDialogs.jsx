@@ -5,7 +5,11 @@ import {Editor} from './appEditor.jsx';
 function Dialog({id, className, label, labelledBy, onClose, children}) {
   const ref = useRef(null);
   useEffect(() => { const node = ref.current; if (!node.open) node.showModal(); return () => { if (node.open) node.close(); }; }, []);
-  return <dialog ref={ref} id={id} className={className} aria-label={label} aria-labelledby={labelledBy} onCancel={event => {event.preventDefault(); onClose();}} onClose={() => onClose()}>{children}</dialog>;
+  return <dialog ref={ref} id={id} className={className} aria-label={label} aria-labelledby={labelledBy} onCancel={event => {event.preventDefault(); onClose();}} onClose={() => onClose()} onClick={event => {
+    if (event.target !== event.currentTarget) return;
+    const {left, right, top, bottom} = event.currentTarget.getBoundingClientRect();
+    if (event.clientX < left || event.clientX > right || event.clientY < top || event.clientY > bottom) onClose();
+  }}>{children}</dialog>;
 }
 function ModalHeader({app, eyebrow, title}) { return <div className="modal-header"><div><div className="modal-eyebrow">{eyebrow}</div><h2 id="modal-title">{title}</h2></div><button type="button" className="ghost" onClick={app.closeModal} aria-label="Закрыть диалог">Закрыть ×</button></div>; }
 export function Dialogs({app}) {
