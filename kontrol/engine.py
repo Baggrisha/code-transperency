@@ -98,6 +98,7 @@ class _Context:
         self.aliases: dict[str, str] = {}
         self.blocked_types: set[str] = set()
         self.quarantined: list[Document] = []
+        self.resolved_contracts: dict[str, str] = {}
 
     def signal(self, code: str, title: str, explanation: str, rule: str,
                sources: list[SourceRef], *, expected: Any = None, actual: Any = None,
@@ -127,6 +128,8 @@ class _Context:
 def _low_doc_fields(ctx: _Context, doc: Document) -> set[str]:
     low = {field for field, confidence in doc.fields_confidence.items()
            if confidence < ctx.req.confidence_threshold}
+    if doc.id in ctx.resolved_contracts:
+        low.discard("contract_id")
     for field in sorted(low):
         ctx.signal("LOW_CONFIDENCE", "Реквизит требует подтверждения",
                    f"Уверенность извлечения поля «{field}» = {doc.fields_confidence[field]:.2f}; порог = {ctx.req.confidence_threshold:.2f}. Проверьте исходный фрагмент.",
@@ -343,12 +346,14 @@ def _term_timeline(ctx: _Context, active: list[Document], lookup: dict[str, Docu
                        "Начальная спецификация выбирается по specification_id контракта.",
                        [_doc_source(contract, "specification_id")], actual=contract.specification_id, blocks=True)
             return contract, [], False
-        if normalize_identifier(terms.contract_id) != normalize_identifier(contract.contract_id):
+        if not _same_contract(ctx, contract, terms):
             ctx.signal("CONTRACT_MISMATCH", "Спецификация другого контракта",
                        "Номер контракта в исходной спецификации не совпадает с выбранным контрактом.",
                        "Начальная спецификация должна относиться к выбранному контракту.",
                        [_doc_source(contract, "contract_id"), _doc_source(terms, "contract_id")], blocks=True)
             valid = False
+        else:
+            _record_contract_match(ctx, contract, terms)
         valid = _doc_integrity(ctx, terms) and valid
     elif not contract.items:
         ctx.signal("MISSING_DOCUMENT", "Не определена спецификация",
@@ -362,7 +367,7 @@ def _term_timeline(ctx: _Context, active: list[Document], lookup: dict[str, Docu
     amendments = [d for d in active if d.type == "amendment"]
     relevant: list[Document] = []
     for amendment in sorted(amendments, key=lambda d: (d.effective_from or date.max, d.id)):
-        if normalize_identifier(amendment.contract_id) != normalize_identifier(contract.contract_id):
+        if not _same_contract(ctx, contract, amendment):
             ctx.signal("CONTRACT_MISMATCH", "Допсоглашение другого контракта",
                        "Допсоглашение относится к другому номеру контракта и не применяется.",
                        "Изменение должно принадлежать выбранному контракту.",
@@ -370,6 +375,7 @@ def _term_timeline(ctx: _Context, active: list[Document], lookup: dict[str, Docu
             ctx.ignored.add(amendment.id)
             valid = False
             continue
+        _record_contract_match(ctx, contract, amendment)
         if amendment.effective_from and amendment.effective_from > ctx.req.as_of:
             ctx.event("FUTURE_AMENDMENT_IGNORED", [amendment.id], "Изменение ещё не вступило в силу на дату среза.")
             ctx.ignored.add(amendment.id)
@@ -425,7 +431,7 @@ def _term_timeline(ctx: _Context, active: list[Document], lookup: dict[str, Docu
         if amendment.replacement_spec_id:
             new_spec = lookup.get(ctx.alias(amendment.replacement_spec_id) or "")
             if (not new_spec or new_spec.type != "specification" or new_spec.status in {"cancelled", "draft"}
-                    or normalize_identifier(new_spec.contract_id) != normalize_identifier(contract.contract_id)
+                    or not _same_contract(ctx, contract, new_spec)
                     or (new_spec.date and new_spec.date > ctx.req.as_of)):
                 ctx.signal("AMENDMENT_INVALID", "Нет действительной новой спецификации",
                            "Замена не найдена, отменена либо относится к другому контракту. Применение изменения остановлено.",
@@ -433,6 +439,7 @@ def _term_timeline(ctx: _Context, active: list[Document], lookup: dict[str, Docu
                            [_doc_source(amendment, "replacement_spec_id")], actual=amendment.replacement_spec_id, blocks=True)
                 valid = False
                 continue
+            _record_contract_match(ctx, contract, new_spec)
             if not _doc_integrity(ctx, new_spec):
                 valid = False
                 continue
@@ -474,6 +481,45 @@ def _deadline_source(timeline: list[tuple], when: date | None, contract: Documen
     return owner
 
 
+_SKU_CONFUSABLES = str.maketrans({
+    **dict.fromkeys("OО0", "0"), **dict.fromkeys("IL1", "1"),
+    **dict(zip("АВЕКМНРСТУХ", "ABEKMH PCTYX".replace(" ", ""))),
+})
+
+
+def _similar_sku(left: str, right: str) -> bool:
+    """Look for visually confusable characters without changing identifiers."""
+    return bool(left and right and left != right and left.translate(_SKU_CONFUSABLES) == right.translate(_SKU_CONFUSABLES))
+
+
+def _infer_contracts(ctx: _Context) -> None:
+    """Resolve a visually ambiguous reference only when there is one active contract."""
+    documents = ctx.req.documents
+    contracts = [d for d in documents if d.type == "contract" and d.status == "active"]
+    if len(contracts) != 1:
+        return
+    contract = contracts[0]
+    if not contract.contract_id or contract.fields_confidence.get("contract_id", 1) < ctx.req.confidence_threshold:
+        return
+    ids = [d.id for d in documents]
+    for doc in documents:
+        if (doc.type != "contract" and doc.status == "active"
+                and ids.count(doc.id) == 1
+                and _similar_sku(normalize_identifier(doc.contract_id), normalize_identifier(contract.contract_id))):
+            ctx.resolved_contracts[doc.id] = contract.id
+
+
+def _same_contract(ctx: _Context, contract: Document, doc: Document) -> bool:
+    return (normalize_identifier(doc.contract_id) == normalize_identifier(contract.contract_id)
+            or ctx.resolved_contracts.get(doc.id) == contract.id)
+
+
+def _record_contract_match(ctx: _Context, contract: Document, doc: Document) -> None:
+    if ctx.resolved_contracts.get(doc.id) == contract.id:
+        ctx.event("SIMILAR_CONTRACT_ID", [contract.id, doc.id],
+                  f"Номер договора {doc.contract_id} сопоставлен с {contract.contract_id}: различаются только похожие символы.")
+
+
 def _match_item(ctx: _Context, doc: Document, item: Item, target: Document, *, record: bool = True, manual: bool = True) -> Item | None:
     candidates = list(sorted(target.items, key=lambda x: x.line_id))
     chosen: Item | None = None
@@ -498,7 +544,17 @@ def _match_item(ctx: _Context, doc: Document, item: Item, target: Document, *, r
         sku = normalize_identifier(item.sku)
         pitems = [x for x in candidates if pid and normalize_identifier(x.position_id) == pid]
         sitems = [x for x in candidates if sku and normalize_identifier(x.sku) == sku]
-        if pid:
+        similar = [x for x in candidates if _similar_sku(sku, normalize_identifier(x.sku))] if sku and not sitems else []
+        if similar:
+            candidate_ids = [x.line_id for x in similar]
+            eligible = len(similar) == 1 and (not pid or (len(pitems) == 1 and pitems[0].line_id == similar[0].line_id))
+            if eligible:
+                chosen, method, score = similar[0], "similar_sku_auto", 1.0
+                explanation = f"Артикулы {item.sku} и {chosen.sku} различаются только похожими символами."
+            else:
+                method, state = "similar_sku", "needs_review"
+                explanation = f"Артикул {item.sku} похож на другие артикулы, но связь нельзя подтвердить автоматически; проверьте оригиналы."
+        elif pid:
             if len(pitems) == 1 and (not sku or not pitems[0].sku or normalize_identifier(pitems[0].sku) == sku):
                 chosen, method, score = pitems[0], "position_id", 1.0
             else:
@@ -533,7 +589,8 @@ def _match_item(ctx: _Context, doc: Document, item: Item, target: Document, *, r
                     explanation = "Похожее название даёт только предложение связи; требуется ручное подтверждение."
         if chosen:
             state = "matched"
-            explanation = {"position_id": "Совпадает явный номер позиции контракта.", "sku": "Совпадает уникальный артикул; различие названий не меняет связь.", "exact_name": "Точно совпадает уникальное нормализованное название."}[method]
+            if method != "similar_sku_auto":
+                explanation = {"position_id": "Совпадает явный номер позиции контракта.", "sku": "Совпадает уникальный артикул; различие названий не меняет связь.", "exact_name": "Точно совпадает уникальное нормализованное название."}[method]
     if chosen:
         # A missing-but-unconfirmed identifier can also conceal a conflicting
         # match; all identifiers used to establish uniqueness must be trusted.
@@ -543,7 +600,8 @@ def _match_item(ctx: _Context, doc: Document, item: Item, target: Document, *, r
         untrusted_candidates = [candidate for candidate in candidates
                                 if any(candidate.confidence.get(field, 1) < ctx.req.confidence_threshold
                                        for field in fields)]
-        if (any(item.confidence.get(field, 1) < ctx.req.confidence_threshold for field in fields)
+        source_fields = fields - {"sku"} if method == "similar_sku_auto" else fields
+        if (any(item.confidence.get(field, 1) < ctx.req.confidence_threshold for field in source_fields)
                 or untrusted_candidates):
             for candidate in untrusted_candidates:
                 _low_item_fields(ctx, target, candidate)
@@ -555,6 +613,8 @@ def _match_item(ctx: _Context, doc: Document, item: Item, target: Document, *, r
         ctx.matches.append(Match(document_id=doc.id, line_id=item.line_id, target_document_id=target.id,
                                  target_line_id=chosen.line_id if chosen else None, state=state,
                                  method=method, score=score, candidates=candidate_ids, explanation=explanation))
+        if chosen and method == "similar_sku_auto":
+            ctx.event("SIMILAR_SKU", [doc.id, target.id], explanation)
         if not chosen:
             ctx.signal("AMBIGUOUS_MATCH" if state == "needs_review" else "UNMATCHED_ITEM", "Позиция требует сопоставления",
                        explanation + " Суммы по возможным затронутым позициям не считаются полными.",
@@ -593,9 +653,9 @@ def _gross(item: Item) -> Decimal | None:
     return value
 
 
-def _low_item_fields(ctx: _Context, doc: Document, item: Item) -> set[str]:
+def _low_item_fields(ctx: _Context, doc: Document, item: Item, *, resolved_sku: bool = False) -> set[str]:
     low = {field for field, confidence in item.confidence.items() if confidence < ctx.req.confidence_threshold}
-    for field in sorted(low):
+    for field in sorted(low - ({"sku"} if resolved_sku else set())):
         ctx.signal("LOW_CONFIDENCE", "Значение требует подтверждения",
                    f"В строке {item.line_id} уверенность поля «{field}» = {item.confidence[field]:.2f}; порог = {ctx.req.confidence_threshold:.2f}. Проверьте исходный фрагмент.",
                    "Низкая уверенность блокирует сравнение затронутого поля, но не превращает значение в ноль.",
@@ -672,6 +732,7 @@ def _run(request: CheckRequest) -> CheckResult:
     payload["manual_links"] = sorted(payload["manual_links"], key=_json)
     payload["required_types"] = sorted(set(payload["required_types"]))
     input_hash = _hash({"engine_version": ENGINE_VERSION, "request": payload})
+    _infer_contracts(ctx)
     active, lookup = _resolve_documents(ctx)
     for link in sorted(request.manual_links, key=lambda x: (x.document_id, x.line_id, x.target_line_id)):
         linked_doc = lookup.get(ctx.alias(link.document_id) or "")
@@ -766,7 +827,7 @@ def _run(request: CheckRequest) -> CheckResult:
                 ctx.event("SHARED_DELIVERY_REFERENCE", [did] + [d.id for d in acts],
                           "Несколько актов ссылаются на одну поставку; суммируются только явно incremental строки приёмки.")
         for doc in sorted(transactions, key=lambda d: (d.date or date.min, d.id)):
-            if normalize_identifier(doc.contract_id) != normalize_identifier(contract.contract_id):
+            if not _same_contract(ctx, contract, doc):
                 ctx.signal("CONTRACT_MISMATCH", "Документ другого контракта",
                            "Реквизит контракта не совпадает. Документ исключён из сумм; подтвердите принадлежность или исправьте извлечение.",
                            "contract_id всех документов должен совпадать с выбранным контрактом после нормализации.",
@@ -776,6 +837,7 @@ def _run(request: CheckRequest) -> CheckResult:
                 for flags in known.values():
                     flags[doc.type] = False
                 continue
+            _record_contract_match(ctx, contract, doc)
             present[doc.type] = True
             ctx.active.add(doc.id)
             integrity = _doc_integrity(ctx, doc) and doc.id not in uncertain_document_ids
@@ -814,7 +876,7 @@ def _run(request: CheckRequest) -> CheckResult:
                 price_deliveries = sorted(
                     (d for d in transaction_lookup.values() if d.id in valid_ids
                      and (d.id in quarantined_ids
-                          or normalize_identifier(d.contract_id) == normalize_identifier(contract.contract_id))
+                          or _same_contract(ctx, contract, d))
                      and (d.id in uncertain_document_ids or not d.date or not doc.date or d.date <= doc.date
                           or d.fields_confidence.get("date", 1) < request.confidence_threshold
                           or d.is_complete is False or "date" in d.missing_fields
@@ -836,7 +898,7 @@ def _run(request: CheckRequest) -> CheckResult:
                             matched_positions.add(matched.line_id)
                     delivery_term = _terms_on(timeline, delivery.date) if delivery.date else None
                     delivery_integrity = (delivery.id not in uncertain_document_ids and _doc_integrity(ctx, delivery)
-                                          and normalize_identifier(delivery.contract_id) == normalize_identifier(contract.contract_id))
+                                          and _same_contract(ctx, contract, delivery))
                     delivery_price_info[delivery.id] = (matched_positions, unmatched_items, delivery_integrity, delivery_term)
             date_trusted = doc.fields_confidence.get("date", 1) >= request.confidence_threshold
             deadline_owner = _deadline_source(timeline, doc.date, contract)
@@ -862,8 +924,9 @@ def _run(request: CheckRequest) -> CheckResult:
                                "Дата документа поставки > deadline действующей на дату поставки редакции.", deadline_sources,
                                expected=term[2].isoformat(), actual=doc.date.isoformat())
             for item in sorted(doc.items, key=lambda x: x.line_id):
-                low = _low_item_fields(ctx, doc, item)
                 current = _match_item(ctx, doc, item, current_spec)
+                auto_sku = current is not None and ctx.matches[-1].method == "similar_sku_auto"
+                low = _low_item_fields(ctx, doc, item, resolved_sku=auto_sku)
                 if doc.id not in uncertain_document_ids:
                     _check_amount(ctx, doc, item, low, current.line_id if current else item.position_id or item.line_id)
                 if current is None:

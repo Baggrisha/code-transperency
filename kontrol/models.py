@@ -10,7 +10,7 @@ from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, field_valida
 from .normalize import date_value, decimal_value, normalize_currency, normalize_unit
 
 SCHEMA_VERSION = "1.0"
-ENGINE_VERSION = "rules-1.1.0"
+ENGINE_VERSION = "rules-1.2.0"
 Number = Annotated[Decimal, BeforeValidator(decimal_value)]
 Day = Annotated[date, BeforeValidator(date_value)]
 DocType = Literal["contract", "specification", "delivery", "acceptance", "amendment"]

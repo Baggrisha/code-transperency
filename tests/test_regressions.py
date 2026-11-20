@@ -43,6 +43,141 @@ def renamed(document, new_id, number):
 
 
 class IndependentRegressions(unittest.TestCase):
+    def test_confusable_sku_is_linked_when_other_characters_match(self):
+        for reference, observed in (('A01', 'AO1'), ('A1', 'АI'), ('B1', 'Bl')):
+            with self.subTest(reference=reference, observed=observed):
+                data = request()
+                data['documents'][0]['items'][0]['sku'] = reference
+                data['documents'][1]['items'][0]['sku'] = observed
+                data['documents'][1]['items'][0]['confidence'] = {'sku': 0.49}
+                data['documents'][2]['items'][0]['sku'] = reference
+                result = evaluate(data)
+                match = next(m for m in result.matches if m.document_id == 'delivery-1')
+                self.assertEqual(('matched', 'similar_sku_auto'), (match.state, match.method))
+                self.assertIn(observed, match.explanation)
+                self.assertIn(reference, match.explanation)
+                self.assertTrue(any(e.code == 'SIMILAR_SKU' and observed in e.explanation
+                                    and reference in e.explanation for e in result.audit))
+                self.assertEqual('ok', result.status)
+                self.assertEqual(Decimal('10'), result.positions[0].delivered_quantity)
+                self.assertEqual(observed, data['documents'][1]['items'][0]['sku'])
+
+    def test_confusable_sku_does_not_hide_other_differences(self):
+        for field, value in (('name', 'Другая позиция'), ('quantity', '9'), ('unit_price', '999'),
+                             ('unit', 'кг'), ('currency', None)):
+            with self.subTest(field=field):
+                data = request()
+                data['documents'][0]['items'][0]['sku'] = 'A01'
+                data['documents'][1]['items'][0]['sku'] = 'AO1'
+                data['documents'][2]['items'][0]['sku'] = 'A01'
+                data['documents'][1]['items'][0][field] = value
+                result = evaluate(data)
+                match = next(m for m in result.matches if m.document_id == 'delivery-1')
+                self.assertEqual(('matched', 'similar_sku_auto'), (match.state, match.method))
+                self.assertEqual('1', match.target_line_id)
+                if field == 'quantity':
+                    self.assertIn('QUANTITY_MISMATCH', codes(result))
+                if field == 'unit_price':
+                    self.assertIn('PRICE_MISMATCH', codes(result))
+                if field in {'unit', 'currency'}:
+                    self.assertNotEqual('ok', result.status)
+
+    def test_confusable_sku_multiple_candidates_never_automatches(self):
+        data = request()
+        item = data['documents'][0]['items'][0]
+        item['sku'] = 'A01'
+        alternative = copy.deepcopy(item)
+        alternative.update(line_id='2', position_id='P-02', sku='AOI')
+        data['documents'][0]['items'].append(alternative)
+        data['documents'][1]['items'][0].update(position_id=None, sku='A0I')
+        result = evaluate(data)
+        match = next(m for m in result.matches if m.document_id == 'delivery-1')
+        self.assertEqual('needs_review', match.state)
+        self.assertEqual(['1', '2'], match.candidates)
+        self.assertIsNone(match.target_line_id)
+
+    def test_confusable_contract_reference_is_linked_by_characters(self):
+        data = request()
+        for doc in data['documents']:
+            doc['contract_id'] = 'a1lgc'
+        delivery = data['documents'][1]
+        delivery['contract_id'] = 'аIlgс'
+        delivery['fields_confidence'] = {'contract_id': 0.49}
+        result = evaluate(data)
+        self.assertEqual('ok', result.status)
+        self.assertEqual(Decimal('10'), result.positions[0].delivered_quantity)
+        self.assertNotIn('CONTRACT_MISMATCH', codes(result))
+        event = next(e for e in result.audit if e.code == 'SIMILAR_CONTRACT_ID')
+        self.assertIn('аIlgс', event.explanation)
+        self.assertIn('a1lgc', event.explanation)
+        self.assertEqual('аIlgс', delivery['contract_id'])
+
+    def test_confusable_contract_reference_does_not_hide_price_difference(self):
+        data = request()
+        for doc in data['documents']:
+            doc['contract_id'] = 'a1lgc'
+        data['documents'][1]['contract_id'] = 'аIlgс'
+        data['documents'][1]['items'][0]['unit_price'] = '500'
+        result = evaluate(data)
+        self.assertNotIn('CONTRACT_MISMATCH', codes(result))
+        self.assertIn('PRICE_MISMATCH', codes(result))
+        self.assertIn('SIMILAR_CONTRACT_ID', {e.code for e in result.audit})
+
+    def test_confusable_contract_reference_in_specs_and_amendments(self):
+        data = request('T04')
+        for doc in data['documents']:
+            doc['contract_id'] = 'a1lgc' if doc['type'] == 'contract' else 'аIlgс'
+        result = evaluate(data)
+        self.assertEqual('ok', result.status)
+        self.assertNotIn('CONTRACT_MISMATCH', codes(result))
+        self.assertEqual(Decimal('12'), result.positions[0].expected_quantity)
+        references = {doc_id for event in result.audit if event.code == 'SIMILAR_CONTRACT_ID'
+                      for doc_id in event.document_ids}
+        self.assertTrue({'spec-v1', 'spec-v2', 'amendment-1', 'delivery-1', 'acceptance-1'} <= references)
+
+    def test_confusable_sku_does_not_clear_unverified_quantity(self):
+        data = request()
+        data['documents'][0]['items'][0]['sku'] = 'A01'
+        data['documents'][1]['items'][0]['sku'] = 'AO1'
+        data['documents'][2]['items'][0]['sku'] = 'A01'
+        data['documents'][1]['items'][0]['confidence'] = {'quantity': 0.49}
+        result = evaluate(data)
+        match = next(m for m in result.matches if m.document_id == 'delivery-1')
+        self.assertEqual(('matched', 'similar_sku_auto'), (match.state, match.method))
+        self.assertIn('LOW_CONFIDENCE', codes(result))
+        self.assertNotEqual('ok', result.status)
+
+    def test_nonconfusable_sku_is_never_automatched(self):
+        data = request()
+        data['documents'][1]['items'][0].update(position_id=None, sku='BENCH-02')
+        result = evaluate(data)
+        match = next(m for m in result.matches if m.document_id == 'delivery-1')
+        self.assertEqual('unmatched', match.state)
+        self.assertIsNone(match.target_line_id)
+
+    def test_manual_link_remains_available_for_uncertain_similar_sku(self):
+        data = request()
+        data['documents'][0]['items'][0]['sku'] = 'A01'
+        data['documents'][1]['items'][0].update(sku='AO1', quantity='9')
+        data['documents'][2]['items'][0]['sku'] = 'A01'
+        data['manual_links'] = [{'document_id': 'delivery-1', 'line_id': '1', 'target_line_id': '1',
+                                 'reviewer': 'Проверяющий', 'comment': 'Сопоставлено по оригиналу'}]
+        result = evaluate(data)
+        match = next(m for m in result.matches if m.document_id == 'delivery-1')
+        self.assertEqual(('matched', 'manual', '1'), (match.state, match.method, match.target_line_id))
+        self.assertEqual(Decimal('9'), result.positions[0].delivered_quantity)
+
+    def test_confusable_contract_does_not_clear_unverified_quantity(self):
+        data = request()
+        for doc in data['documents']:
+            doc['contract_id'] = 'a1lgc'
+        data['documents'][1]['contract_id'] = 'аIlgс'
+        data['documents'][1]['items'][0]['confidence'] = {'quantity': 0.49}
+        result = evaluate(data)
+        self.assertNotIn('CONTRACT_MISMATCH', codes(result))
+        self.assertIn('SIMILAR_CONTRACT_ID', {e.code for e in result.audit})
+        self.assertIn('LOW_CONFIDENCE', codes(result))
+
     def test_repeated_run_is_identical(self):
         source = request('T02')
         first = evaluate(source)
