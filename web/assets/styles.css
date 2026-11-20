@@ -187,7 +187,7 @@ td button { min-height: 38px; padding: 8px 11px; font-size: 15px; }
 .documents-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 1399px; align-items: stretch; margin-bottom: 24px; }
 .documents-grid > .card { margin-bottom: 0; }
 .documents-grid h2 { margin-bottom: 30px; font-size: 25px; }
-.documents-grid h2 span, .documents-grid h2 b { color: var(--green); }
+.documents-grid h2 .accent { color: var(--green); }
 .upload-panel { min-height: 555px; }
 .dropzone { display: flex; flex-direction: column; align-items: center; min-height: 347px; padding: 28px 18px 27px; border: 1px solid var(--line); border-radius: 15px; background: var(--panel-raised); text-align: center; }
 .dropzone.dragover, .dropzone.is-dragover { background: #203229; border-color: var(--green); }

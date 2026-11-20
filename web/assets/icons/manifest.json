@@ -1,0 +1,169 @@
+{
+  "source": "reference-sheet.png",
+  "width": 1280,
+  "height": 720,
+  "source_sha256": "fe35728422699f1bc26c34709edceac5baacdef08da4878a96324c23caa4fcbb",
+  "crop_size": 112,
+  "icons": [
+    {
+      "name": "search",
+      "label": "Поиск",
+      "x": 86,
+      "y": 82,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "alarm",
+      "label": "Будильник",
+      "x": 258,
+      "y": 82,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "wallet",
+      "label": "Кошелёк",
+      "x": 438,
+      "y": 82,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "image",
+      "label": "Изображение",
+      "x": 615,
+      "y": 82,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "bell",
+      "label": "Уведомления",
+      "x": 788,
+      "y": 82,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "tag",
+      "label": "Категория",
+      "x": 86,
+      "y": 227,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "video",
+      "label": "Видео",
+      "x": 258,
+      "y": 227,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "plant",
+      "label": "Растение",
+      "x": 438,
+      "y": 227,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "chat",
+      "label": "Комментарии",
+      "x": 615,
+      "y": 227,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "home",
+      "label": "Главная",
+      "x": 788,
+      "y": 227,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "heart",
+      "label": "Избранное",
+      "x": 86,
+      "y": 376,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "lock",
+      "label": "Доступ",
+      "x": 258,
+      "y": 376,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "folder",
+      "label": "Документы",
+      "x": 438,
+      "y": 376,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "layers",
+      "label": "Сопоставление",
+      "x": 615,
+      "y": 376,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "phone",
+      "label": "Телефон",
+      "x": 788,
+      "y": 376,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "chip",
+      "label": "Распознавание",
+      "x": 86,
+      "y": 527,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "location",
+      "label": "Местоположение",
+      "x": 258,
+      "y": 527,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "users",
+      "label": "Специалисты",
+      "x": 438,
+      "y": 527,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "storm",
+      "label": "Сигнал",
+      "x": 615,
+      "y": 527,
+      "width": 112,
+      "height": 112
+    },
+    {
+      "name": "award",
+      "label": "Результат",
+      "x": 788,
+      "y": 527,
+      "width": 112,
+      "height": 112
+    }
+  ]
+}

@@ -31,7 +31,7 @@ def preview_seed() -> dict:
     documents.insert(1, specification)
     names = {"contract":"Контракт_0142.pdf", "specification":"Спецификация.pdf",
              "delivery-1":"Накладная_8.pdf", "acceptance-1":"Акт_10.pdf"}
-    sizes = {"contract":146, "specification":80, "delivery-1":117, "acceptance-1":93}
+    sizes = {"contract":150000, "specification":82000, "delivery-1":120000, "acceptance-1":95000}
     for document in documents:
         document["contract_id"] = "ГК-2026/0142"
         document["filename"] = names[document["id"]]
@@ -53,11 +53,11 @@ def preview_seed() -> dict:
         raise RuntimeError("The visual demo must preserve the single T02 quantity signal")
     normalized_json = normalized.model_dump(mode="json")
     timestamp = "2026-11-18T10:00:00Z"
-    dossier = {"id":"demo-001", "title":"Поставка уличных скамеек", "description":"Синтетические данные",
+    dossier = {"id":"demo-001", "title":"Поставка уличных скамеек", "description":"Учебный кейс T02. Синтетические данные.",
                "contract_number":"ГК-2026/0142", "created_at":timestamp, "updated_at":timestamp,
                "revision":4, "metadata_revision":0, "is_demo":True,
                "documents":[{"id":doc["id"], "revision":1, "document":doc,
-                             "size_bytes":sizes[doc["id"]]*1024} for doc in normalized_json["documents"]],
+                             "size_bytes":sizes[doc["id"]]} for doc in normalized_json["documents"]],
                "runs":[{"id":"demo-run-001", "created_at":timestamp, "status":result["status"]}]}
     run = {"id":"demo-run-001", "case_id":"demo-001", "created_at":timestamp, "stale":False,
            "request":normalized_json, "result":result, "reviews":[], "latest_reviews":{}, "prior_reviews":{}}
@@ -69,8 +69,11 @@ def preview_seed() -> dict:
 def export(output: Path) -> Path:
     html = (ROOT / "web/index.html").read_text(encoding="utf-8")
     fonts = ("Unbounded-Variable.woff2", "Involve-Variable.woff2", "Montserrat-Variable.woff2")
-    for stylesheet in ("styles.css", "brand.css"):
+    for stylesheet in ("styles.css", "icons.css", "brand.css"):
         css = (ROOT / "web/assets" / stylesheet).read_text(encoding="utf-8")
+        if stylesheet == "icons.css":
+            source = base64.b64encode((ROOT / "web/assets/icons/reference-sheet.png").read_bytes()).decode("ascii")
+            css = css.replace("icons/reference-sheet.png", "data:image/png;base64," + source)
         for name in fonts:
             content = base64.b64encode((ROOT / "web/assets/fonts" / name).read_bytes()).decode("ascii")
             css = css.replace(f'fonts/{name}', "data:font/woff2;base64," + content)

@@ -1,0 +1,22 @@
+/* Exact windows from the user-supplied icon sheet; the source pixels are unchanged. */
+.identity-icon { display: inline-block; flex-shrink: 0; width: 48px; height: 48px; background-image: url("icons/reference-sheet.png"); background-repeat: no-repeat; background-size: 1142.857143% 642.857143%; border-radius: 10px; overflow: hidden; vertical-align: middle; }
+.identity-icon--search { background-position: 7.36301370% 13.48684211%; }
+.identity-icon--alarm { background-position: 22.08904110% 13.48684211%; }
+.identity-icon--wallet { background-position: 37.50000000% 13.48684211%; }
+.identity-icon--image { background-position: 52.65410959% 13.48684211%; }
+.identity-icon--bell { background-position: 67.46575342% 13.48684211%; }
+.identity-icon--tag { background-position: 7.36301370% 37.33552632%; }
+.identity-icon--video { background-position: 22.08904110% 37.33552632%; }
+.identity-icon--plant { background-position: 37.50000000% 37.33552632%; }
+.identity-icon--chat { background-position: 52.65410959% 37.33552632%; }
+.identity-icon--home { background-position: 67.46575342% 37.33552632%; }
+.identity-icon--heart { background-position: 7.36301370% 61.84210526%; }
+.identity-icon--lock { background-position: 22.08904110% 61.84210526%; }
+.identity-icon--folder { background-position: 37.50000000% 61.84210526%; }
+.identity-icon--layers { background-position: 52.65410959% 61.84210526%; }
+.identity-icon--phone { background-position: 67.46575342% 61.84210526%; }
+.identity-icon--chip { background-position: 7.36301370% 86.67763158%; }
+.identity-icon--location { background-position: 22.08904110% 86.67763158%; }
+.identity-icon--users { background-position: 37.50000000% 86.67763158%; }
+.identity-icon--storm { background-position: 52.65410959% 86.67763158%; }
+.identity-icon--award { background-position: 67.46575342% 86.67763158%; }

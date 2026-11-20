@@ -17,8 +17,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def export(output: Path) -> Path:
     html = (ROOT / "web/prototype.html").read_text(encoding="utf-8")
-    for stylesheet in ("styles.css", "prototype.css", "brand.css"):
+    for stylesheet in ("styles.css", "prototype.css", "icons.css", "brand.css"):
         css = (ROOT / "web/assets" / stylesheet).read_text(encoding="utf-8")
+        if stylesheet == "icons.css":
+            source = base64.b64encode((ROOT / "web/assets/icons/reference-sheet.png").read_bytes()).decode("ascii")
+            css = css.replace("icons/reference-sheet.png", "data:image/png;base64," + source)
         for font in ("Unbounded-Variable.woff2", "Involve-Variable.woff2", "Montserrat-Variable.woff2"):
             encoded = base64.b64encode((ROOT / "web/assets/fonts" / font).read_bytes()).decode("ascii")
             css = css.replace(f'fonts/{font}', "data:font/woff2;base64," + encoded)

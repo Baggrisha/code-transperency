@@ -9,6 +9,7 @@ const prototypePath = process.env.KONTROL_PROTOTYPE_FILE || path.join(__dirname,
 const html = fs.readFileSync(prototypePath,'utf8');
 const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(match=>match[1]).join('\n');
 const KEY = 'control-execution-demo-v1';
+const suppliedSource = JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/prototype_source.json'),'utf8'));
 
 function setup(saved = new Map(), storageAccess = {}) {
   const storage = new Map(saved), elements = new Map(), listeners = {}, blobs = new Map();
@@ -72,6 +73,77 @@ test('standalone startup renders the supplied demonstration without a server',()
   assert.match(app.element('root').innerHTML,/Проверки контрактов/);
   assert.match(app.element('root').innerHTML,/ГК-2026\/0142/);
   assert.match(app.element('root').innerHTML,/Демо-кейс/);
+});
+
+test('the initial case and all four synthetic document previews retain the supplied source values',()=>{
+  const app=setup();
+  assert.deepEqual(JSON.parse(app.evaluate('JSON.stringify(initial)')),suppliedSource.initial);
+  assert.deepEqual(JSON.parse(app.evaluate('JSON.stringify(state.cases)')),suppliedSource.initial);
+  assert.deepEqual(JSON.parse(app.evaluate('JSON.stringify(demoContents)')),suppliedSource.demoContents);
+  assert.equal(app.evaluate('c().history.length'),0);
+  assert.equal(app.evaluate('c().signals[0].history.length'),0);
+  assert.equal(app.evaluate('c().signals[0].comments.length'),0);
+});
+
+test('overview and recognition render the original form values, case identifier and demonstration marker',()=>{
+  const app=setup(),original=suppliedSource.initial[0];
+  for(const tab of ['overview','extract']){
+    app.evaluate(`openCase("DEMO-001");go("case","${tab}")`);
+    const markup=app.element('root').innerHTML;
+    for(const [id,value] of [['caseNumber',original.number],['caseName',original.name]]){
+      const input=[...markup.matchAll(/<input\b[^>]*>/g)].map(match=>match[0]).find(tag=>tag.includes(`id="${id}"`));
+      assert.ok(input,`${tab}: ${id} is rendered`);
+      assert.equal(input.match(/\bvalue="([^"]*)"/)?.[1],value,`${tab}: ${id} value`);
+    }
+    const textarea=[...markup.matchAll(/<textarea\b([^>]*)>([\s\S]*?)<\/textarea>/g)].find(match=>match[1].includes('id="caseDescription"'));
+    assert.equal(textarea?.[2],original.description,`${tab}: complete description`);
+    assert.match(markup,/РАБОЧАЯ ОБЛАСТЬ \/ DEMO-001/);
+    assert.match(markup,/ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ/);
+    assert.match(markup,/Контроль исполнения · Демонстрационный интерфейс · Не принимает юридически значимых решений/);
+  }
+});
+
+test('opening the original demo preserves edited legacy data, uploaded files and other cases',()=>{
+  const app=setup();
+  app.evaluate('openCase("DEMO-001")');
+  app.element('caseNumber').value='';app.element('caseName').value='';app.element('caseDescription').value='';
+  app.evaluate('updateCase();openSignal("SIG-001")');
+  app.element('signalStatus').value='В работе';app.element('comment').value='Решение ещё уточняется';
+  app.evaluate('saveSignal();removeDoc("d2")');
+  app.create('USER-42','Пользовательское дело');const fileId=app.add('пользовательский.txt','Сохранённый исходник');
+  const userId=app.evaluate('c().id'),before=JSON.parse(app.evaluate('JSON.stringify(state.cases)'));
+  const stored=setup(app.storage);
+  assert.equal(stored.evaluate('state.cases.find(x=>x.id==="DEMO-001").number'),'');
+  assert.equal(stored.evaluate('state.cases.length'),2);
+  assert.equal(app.evaluate('initial[0].description'),suppliedSource.initial[0].description);
+  app.evaluate('openOriginalDemo()');
+  assert.equal(app.evaluate('state.cases.length'),3);
+  assert.notEqual(app.evaluate('c().id'),'DEMO-001');
+  const fresh=JSON.parse(app.evaluate('JSON.stringify(c())'));
+  assert.deepEqual({...fresh,id:'DEMO-001'},suppliedSource.initial[0]);
+  for(const item of before)
+    assert.deepEqual(JSON.parse(app.evaluate(`JSON.stringify(state.cases.find(x=>x.id===${JSON.stringify(item.id)}))`)),item);
+  assert.equal(app.evaluate(`ephemeralFiles[${JSON.stringify(fileId)}].name`),'пользовательский.txt');
+  const freshId=app.evaluate('c().id');
+  app.evaluate('openOriginalDemo()');
+  assert.equal(app.evaluate('c().id'),freshId);
+  assert.equal(app.evaluate('state.cases.length'),3);
+  const restored=setup(app.storage);
+  assert.equal(restored.evaluate('state.selected'),freshId);
+  assert.equal(restored.evaluate(`state.cases.find(x=>x.id===${JSON.stringify(userId)}).docs.length`),1);
+  assert.equal(restored.evaluate('state.cases.find(x=>x.id==="DEMO-001").signals[0].comments[0].text'),'Решение ещё уточняется');
+});
+
+test('opening the original demo restores a missing example and reuses an untouched example',()=>{
+  const app=setup();app.create('USER-ONLY','Оставшееся дело');
+  app.evaluate('state.cases=state.cases.filter(x=>!x.demo);save()');
+  const originalUser=app.evaluate('JSON.stringify(c())');
+  const restored=setup(app.storage);restored.evaluate('openOriginalDemo()');
+  assert.equal(restored.evaluate('state.cases.length'),2);
+  assert.equal(restored.evaluate('c().id'),'DEMO-001');
+  assert.equal(restored.evaluate('JSON.stringify(state.cases.find(x=>!x.demo))'),originalUser);
+  restored.evaluate('openOriginalDemo()');
+  assert.equal(restored.evaluate('state.cases.length'),2);
 });
 
 test('all workspace tabs and the separate signal page remain reachable',()=>{

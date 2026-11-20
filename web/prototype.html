@@ -9,6 +9,7 @@
   <link rel="preload" href="assets/fonts/Montserrat-Variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/styles.css">
   <link rel="stylesheet" href="assets/prototype.css">
+  <link rel="stylesheet" href="assets/icons.css">
   <link rel="stylesheet" href="assets/brand.css">
 </head>
 <body>
@@ -20,7 +21,7 @@ const initial = [{
   id: 'DEMO-001',
   number: 'ГК-2026/0142',
   name: 'Поставка уличных скамеек',
-  description: 'Синтетические данные.',
+  description: 'Учебный кейс T02. Синтетические данные.',
   created: '18.11.2026',
   updated: '18.11.2026',
   status: 'Требует рассмотрения',
@@ -67,23 +68,18 @@ const initial = [{
   history: [],
   demo: true
 }];
+const initialState = () => ({
+  cases: JSON.parse(JSON.stringify(initial)),
+  selected: null,
+  tab: 'overview',
+  page: 'home',
+  signal: null
+});
 let state;
 try {
-  state = JSON.parse(localStorage.getItem(KEY)) || {
-    cases: initial,
-    selected: null,
-    tab: 'overview',
-    page: 'home',
-    signal: null
-  }
+  state = JSON.parse(localStorage.getItem(KEY)) || initialState()
 } catch {
-  state = {
-    cases: initial,
-    selected: null,
-    tab: 'overview',
-    page: 'home',
-    signal: null
-  }
+  state = initialState()
 };
 if (!state.selected && state.cases?.length) state.selected = state.cases[0].id;
 let ephemeralFiles = {};
@@ -125,12 +121,12 @@ function layout(content) {
     <aside class="sidebar" aria-label="Основная навигация">
       <a class="brand" href="#" onclick="event.preventDefault();go('home')" aria-label="uzniki’s project, все проверки"><span>uzniki’s</span><span class="brand-accent">project</span></a>
       <nav class="prototype-nav">
-        <button class="nav ${state.page==='home'?'active':''}" onclick="go('home')" ${state.page==='home'?'aria-current="page"':''}><span class="glass-icon" aria-hidden="true"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h18v18H3zM9 3v18M15 3v18M3 9h18M3 15h18"/></svg></span><span>Все проверки</span></button>
-        <button class="nav ${active?'active':''}" onclick="${c()?"go('case','overview')":"go('home')"}" ${active?'aria-current="page"':''}><span class="glass-icon" aria-hidden="true"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h18v18H3zM9 3v18M14 3v18"/></svg></span><span>Рабочая область</span></button>
-        <button class="nav ${state.page==='history'?'active':''}" onclick="go('history')" ${state.page==='history'?'aria-current="page"':''}><span class="glass-icon" aria-hidden="true"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l5 2"/></svg></span><span>История проверок</span></button>
+        <button class="nav ${state.page==='home'?'active':''}" onclick="go('home')" ${state.page==='home'?'aria-current="page"':''}><span class="identity-icon identity-icon--layers" aria-hidden="true"></span><span>Все проверки</span></button>
+        <button class="nav ${active?'active':''}" onclick="${c()?"go('case','overview')":"go('home')"}" ${active?'aria-current="page"':''}><span class="identity-icon identity-icon--home" aria-hidden="true"></span><span>Рабочая область</span></button>
+        <button class="nav ${state.page==='history'?'active':''}" onclick="go('history')" ${state.page==='history'?'aria-current="page"':''}><span class="identity-icon identity-icon--alarm" aria-hidden="true"></span><span>История проверок</span></button>
       </nav>
       <div class="sidefoot"><strong>ПРОТОТИП</strong><p>Локальный режим<br>Результаты демонстрационных<br>кейсов не являются реальной<br>сверкой</p></div>
-    </aside><main class="main" id="prototype-main">${content}</main></div>`;
+    </aside><main class="main" id="prototype-main">${content}<footer class="footer">Контроль исполнения · Демонстрационный интерфейс · Не принимает юридически значимых решений</footer></main></div>`;
 }
 const title = (e, t, s, action = '') =>
   `<header class="top"><div class="header-copy"><div class="eyebrow">${e}</div><h1 class="heading">${esc(t)}</h1><p class="sub">${s}</p></div>${action?`<div class="header-action">${action}</div>`:''}</header>`;
@@ -139,7 +135,7 @@ function home(history = false) {
   const list = state.cases.filter(x => !history || x.status === 'Завершена');
   layout(title(history ? 'ИСТОРИЯ ПРОВЕРОК' : 'ВСЕ ПРОВЕРКИ', history ? 'История проверок' : 'Проверки контрактов',
       history ? 'Завершённые дела и решения специалистов' : 'Реестр проверочных дел и состояние рассмотрения',
-      `<button class="btn primary" onclick="createCase()">+ Новая проверка</button>`) +
+      `<button class="btn primary" onclick="createCase()">+ Новая проверка</button><button class="btn" onclick="openOriginalDemo()">Открыть исходное демо</button>`) +
     `
   <div class="grid registry-metrics">
     <div class="metric"><span>Всего проверок</span><strong>${state.cases.length}</strong></div>
@@ -196,6 +192,25 @@ function openCase(id) {
   go('case', 'overview')
 }
 
+function openOriginalDemo() {
+  const original = JSON.parse(JSON.stringify(initial[0]));
+  let demo = state.cases.find(item => item.demo &&
+    JSON.stringify({ ...item, id: original.id }) === JSON.stringify(original));
+  if (!demo) {
+    if (state.cases.some(item => item.id === original.id)) {
+      const prefix = 'DEMO-T02-' + Date.now();
+      original.id = prefix;
+      let suffix = 1;
+      while (state.cases.some(item => item.id === original.id)) original.id = prefix + '-' + suffix++;
+    }
+    state.cases.unshift(original);
+    demo = original;
+  }
+  state.signal = null;
+  openCase(demo.id);
+  prototypeNotice('Открыто исходное демо. Существующие дела и изменения сохранены.');
+}
+
 function casePage() {
   const x = c();
   if (!x) return go('home');
@@ -207,8 +222,8 @@ function casePage() {
     ['results', 'Результаты'],
     ['history', 'История действий']
   ];
-  const sub = `Контракт <b>${esc(x.number||'номер не указан')}</b> — ${esc(x.status.toLowerCase())}`;
-  const header = title('РАБОЧАЯ ОБЛАСТЬ', x.name || 'Новая проверка', sub,
+  const sub = `Контракт <b>${esc(x.number||'номер не указан')}</b> — ${esc(x.status.toLowerCase())}${x.demo?' · ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ':''}`;
+  const header = title('РАБОЧАЯ ОБЛАСТЬ / ' + esc(x.id), x.name || 'Новая проверка', sub,
       `<button class="btn" onclick="go('home')">← К списку</button>`) +
     `<nav class="steps" aria-label="Разделы проверки">${tabs.map(([k,v])=>`<button class="step ${state.tab===k?'active':''}" ${state.tab===k?'aria-current="page"':''} onclick="go('case','${k}')">${v}</button>`).join('')}</nav>`;
   const body = state.tab === 'overview' ? overview(x) : state.tab === 'docs' ? docs(x) : state.tab === 'extract' ?
@@ -222,7 +237,7 @@ function overview(x) {
   <div class="metric"><span>Сигналов</span><strong>${x.signals.length}</strong></div>
   <div class="metric"><span>Ожидают решения</span><strong>${x.signals.filter(s=>s.status==='Требует проверки').length}</strong></div>
   <div class="metric"><span>Рассмотрено</span><strong>${x.signals.filter(s=>['Подтверждено специалистом','Не подтверждено'].includes(s.status)).length}</strong></div></div>
-  <section class="panel contract-panel"><h2 class="sectionTitle">Данные контракта</h2>
+  <section class="panel contract-panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--wallet section-icon" aria-hidden="true"></span><span>Данные контракта</span></h2>
   <div class="field"><label for="caseNumber">Номер</label><input id="caseNumber" value="${esc(x.number)}"></div>
   <div class="field"><label for="caseName">Наименование</label><input id="caseName" value="${esc(x.name)}"></div>
   <div class="field"><label for="caseDescription">Описание</label><textarea id="caseDescription" rows="3">${esc(x.description)}</textarea></div>
@@ -244,13 +259,13 @@ const types = ['Контракт', 'Накладная', 'Спецификаци
 ];
 
 function docs(x) {
-  return `<div class="cols docs-cols"><section class="panel upload-card"><h2 class="sectionTitle">Загрузка документов</h2>
+  return `<div class="cols docs-cols"><section class="panel upload-card"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--folder section-icon" aria-hidden="true"></span><span>Загрузка документов</span></h2>
   <div id="drop" class="drop" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="dropFiles(event)">
-  <div class="upload-arrow" aria-hidden="true">↑</div><h3>Перетащите файлы сюда</h3><p class="upload-hint">или выберите файлы на устройстве (<b>PDF, PNG, JPEG, TXT</b>)</p>
+  <span class="identity-icon identity-icon--folder upload-icon" aria-hidden="true"></span><h3>Перетащите файлы сюда</h3><p class="upload-hint">или выберите файлы на устройстве (<b>PDF, PNG, JPEG, TXT</b>)</p>
   <div class="file-picker-row"><button type="button" class="btn" onclick="document.getElementById('files').click()">Выбрать файлы</button><span>Файлы не выбраны</span></div>
   <input class="visually-hidden" type="file" id="files" multiple accept=".pdf,.png,.jpg,.jpeg,.txt" aria-label="Выбрать файлы" onchange="addFiles(this.files)"></div>
   <p class="note storage-note">Файлы сохраняются только в памяти открытой вкладки. Метаданные и решения — в локальном хранилище браузера. Для постоянного хранения файлов требуется сервер</p></section>
-  <section class="panel document-card"><h2 class="sectionTitle">Комплект документов: <span class="accent">${x.docs.length}</span></h2>${x.docs.length?x.docs.map(d=>`<div class="doc"><div class="document-info"><div class="docname"><b>${esc(d.name)}</b></div><div class="sub">${esc(d.type)} – ${Math.round(d.size/1024)} КБ – версия ${d.version}</div></div><div class="actions"><button class="btn small" onclick="changeDocType('${d.id}')">Тип</button><button class="btn small" onclick="viewDoc('${d.id}')">Открыть</button><button class="btn small" aria-label="Удалить ${esc(d.name)} из комплекта" onclick="removeDoc('${d.id}')">×</button></div></div>`).join(''):'<div class="empty">Документы ещё не добавлены</div>'}</section></div>
+  <section class="panel document-card"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--folder section-icon" aria-hidden="true"></span><span>Комплект документов: <span class="accent">${x.docs.length}</span></span></h2>${x.docs.length?x.docs.map(d=>`<div class="doc"><div class="document-info"><div class="docname"><b>${esc(d.name)}</b></div><div class="sub">${esc(d.type)} – ${Math.round(d.size/1024)} КБ – версия ${d.version}</div></div><div class="actions"><button class="btn small" onclick="changeDocType('${d.id}')">Тип</button><button class="btn small" onclick="viewDoc('${d.id}')">Открыть</button><button class="btn small" aria-label="Удалить ${esc(d.name)} из комплекта" onclick="removeDoc('${d.id}')">×</button></div></div>`).join(''):'<div class="empty">Документы ещё не добавлены</div>'}</section></div>
   <div class="warn documents-warning">Если в загруженном комплекте отсутствует документ, это не означает, что он отсутствует у сторон контракта</div><div class="actions"><button class="btn primary" onclick="go('case','extract')">К распознаванию →</button></div>`;
 }
 
@@ -301,8 +316,8 @@ function removeDoc(id) {
 }
 
 function extract(x) {
-  return `<section class="panel recognition-panel"><h2 class="sectionTitle">Распознавание реквизитов</h2><div class="warn">Модуль OCR и извлечения данных ещё не подключён. Ниже доступны редактируемые реквизиты проверки, но значения из загруженных файлов автоматически не извлекаются.</div>
-  <div class="cols recognition-cols"><section class="recognition-sources"><h2 class="sectionTitle">Исходные документы</h2>${x.docs.map(d=>`<div class="doc"><span class="docname">${esc(d.name)}</span><button class="btn small" onclick="viewDoc('${d.id}')">Просмотреть</button></div>`).join('')||'<p class="muted">Документы ещё не добавлены</p>'}</section><section class="recognition-fields">
+  return `<section class="panel recognition-panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--chip section-icon" aria-hidden="true"></span><span>Распознавание реквизитов</span></h2><div class="warn">Модуль OCR и извлечения данных ещё не подключён. Ниже доступны редактируемые реквизиты проверки, но значения из загруженных файлов автоматически не извлекаются.</div>
+  <div class="cols recognition-cols"><section class="recognition-sources"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--folder section-icon" aria-hidden="true"></span><span>Исходные документы</span></h2>${x.docs.map(d=>`<div class="doc"><span class="docname">${esc(d.name)}</span><button class="btn small" onclick="viewDoc('${d.id}')">Просмотреть</button></div>`).join('')||'<p class="muted">Документы ещё не добавлены</p>'}</section><section class="recognition-fields">
   <div class="field"><label for="caseNumber">Номер</label><input id="caseNumber" value="${esc(x.number)}"></div>
   <div class="field"><label for="caseName">Наименование</label><input id="caseName" value="${esc(x.name)}"></div>
   <div class="field"><label for="caseDescription">Описание</label><textarea id="caseDescription" rows="3">${esc(x.description)}</textarea></div>
@@ -310,7 +325,7 @@ function extract(x) {
 }
 
 function match(x) {
-  return '<div class="panel"><h2 class="sectionTitle">Сопоставление позиций</h2><div class="warn">Автоматическое связывание товарных позиций ожидает подключения серверного модуля. Система не выполняет сравнение единиц измерения без подтверждённого коэффициента пересчёта.</div>' +
+  return '<div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--layers section-icon" aria-hidden="true"></span><span>Сопоставление позиций</span></h2><div class="warn">Автоматическое связывание товарных позиций ожидает подключения серверного модуля. Система не выполняет сравнение единиц измерения без подтверждённого коэффициента пересчёта.</div>' +
     (x.demo ?
       '<div class="scroll"><table class="matching-table"><thead><tr><th>Позиция</th><th>Контракт</th><th>Накладная</th><th>Приёмка</th><th>Состояние</th></tr></thead><tbody><tr><td>Скамейка парковая</td><td>10 шт.</td><td>8 шт.</td><td>10 шт.</td><td>' +
       pill('Требует проверки') +
@@ -329,7 +344,7 @@ function results(x) {
       '<div class="warn">Результаты ниже подготовлены для учебного кейса T02 и не получены автоматической обработкой загруженных документов.</div>' :
       '<div class="warn">Реальная автоматическая сверка ещё не подключена. Отсутствие сигналов здесь не означает, что расхождений нет.</div>'
       ) +
-    '<div class="panel"><h2 class="sectionTitle">Реестр расхождений</h2><div class="toolbar"><input id="signalSearch" placeholder="Поиск по позиции или типу" oninput="filterSignals()"><select id="signalFilter" onchange="filterSignals()"><option value="">Все статусы</option>' +
+    '<div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--bell section-icon" aria-hidden="true"></span><span>Реестр расхождений</span></h2><div class="toolbar"><input id="signalSearch" placeholder="Поиск по позиции или типу" oninput="filterSignals()"><select id="signalFilter" onchange="filterSignals()"><option value="">Все статусы</option>' +
     ['Требует проверки', 'В работе', 'Подтверждено специалистом', 'Не подтверждено', 'Недостаточно данных'].map(s =>
       '<option>' + s + '</option>').join('') +
     '</select></div><div style="overflow:auto"><table><thead><tr><th>ID</th><th>Тип</th><th>Позиция</th><th>Статус</th><th>Действие</th></tr></thead><tbody id="signalRows">' +
@@ -362,21 +377,21 @@ function signalPage() {
   if (!s) return go('case', 'results');
   layout(title('Результаты / ' + esc(s.id), s.type, esc(s.item),
       '<button class="btn" onclick="go(\'case\',\'results\')">← К результатам</button>') +
-    '<div class="cols"><div><div class="panel"><h2 class="sectionTitle">Основание сигнала</h2><div class="detail"><div class="value"><span class="sub">Ожидаемое значение</span><b>' +
+    '<div class="cols"><div><div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--bell section-icon" aria-hidden="true"></span><span>Основание сигнала</span></h2><div class="detail"><div class="value"><span class="sub">Ожидаемое значение</span><b>' +
     esc(s.expected) + '</b></div><div class="value"><span class="sub">Значение в комплекте</span><b>' + esc(s
     .actual) + '</b></div></div><div class="field"><label>Расчётное отклонение</label><strong>' + esc(s.difference) +
     '</strong></div><div class="field"><label>Правило сопоставления</label><div class="note">' + esc(s.rule) +
     '</div></div><div class="field"><label>Пояснение</label><p class="sub">' + esc(s.explanation) +
     '</p></div><div class="field"><label>Определённость</label><p class="note">' + esc(s.confidence) +
-    '</p></div></div><div class="panel"><h2 class="sectionTitle">Документы-источники</h2>' + s.sources.map(id => {
+    '</p></div></div><div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--folder section-icon" aria-hidden="true"></span><span>Документы-источники</span></h2>' + s.sources.map(id => {
       let d = x.docs.find(d => d.id === id);
       return d ? '<div class="doc"><span>' + esc(d.name) + '</span><button class="btn small" onclick="viewDoc(\'' +
         d.id + '\')">Открыть</button></div>' : ''
     }).join('') +
-    '<p class="note">Точная подсветка фрагментов появится после передачи координат/страниц серверным модулем.</p></div></div><div><div class="panel"><h2 class="sectionTitle">Рассмотрение специалистом</h2><div class="field"><label>Статус</label><select id="signalStatus">' +
+    '<p class="note">Точная подсветка фрагментов появится после передачи координат/страниц серверным модулем.</p></div></div><div><div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--users section-icon" aria-hidden="true"></span><span>Рассмотрение специалистом</span></h2><div class="field"><label>Статус</label><select id="signalStatus">' +
     ['Требует проверки', 'В работе', 'Подтверждено специалистом', 'Не подтверждено', 'Недостаточно данных'].map(t =>
       '<option ' + (s.status === t ? 'selected' : '') + '>' + t + '</option>').join('') +
-    '</select></div><div class="field"><label>Комментарий специалиста</label><textarea id="comment" rows="5" placeholder="Укажите основания решения или недостающие документы"></textarea></div><button class="btn primary" onclick="saveSignal()">Сохранить решение</button><p class="note">Подтверждение означает подтверждение документального расхождения, а не установление правонарушения.</p></div><div class="panel"><h2 class="sectionTitle">История рассмотрения</h2>' +
+    '</select></div><div class="field"><label>Комментарий специалиста</label><textarea id="comment" rows="5" placeholder="Укажите основания решения или недостающие документы"></textarea></div><button class="btn primary" onclick="saveSignal()">Сохранить решение</button><p class="note">Подтверждение означает подтверждение документального расхождения, а не установление правонарушения.</p></div><div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--alarm section-icon" aria-hidden="true"></span><span>История рассмотрения</span></h2>' +
     (s.history.length ? s.history.map(h => '<div class="history"><b>' + esc(h.text) + '</b><div class="sub">' + esc(h
       .date) + '</div></div>').join('') : '<div class="empty">Изменений пока нет</div>') + '</div></div></div>')
 }
@@ -405,7 +420,7 @@ function saveSignal() {
 }
 
 function hist(x) {
-  return '<div class="panel"><h2 class="sectionTitle">Журнал действий</h2>' + (x.history.length ? x.history.map(h =>
+  return '<div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--alarm section-icon" aria-hidden="true"></span><span>Журнал действий</span></h2>' + (x.history.length ? x.history.map(h =>
       '<div class="history"><b>' + esc(h.text) + '</b><div class="sub">' + esc(h.date) + '</div></div>').join('') :
     '<div class="empty">Действий пока нет</div>') + '</div>'
 }
@@ -454,7 +469,7 @@ function changeDocType(id) {
   overlay.className = 'modalOverlay type-overlay';
   overlay.innerHTML =
     `<section class="modalWindow type-window" role="dialog" aria-modal="true" aria-labelledby="prototype-modal-title" tabindex="-1">
-  <div class="modalHead"><div><div class="eyebrow">Классификация документа</div><h2 id="prototype-modal-title">Изменить тип документа</h2></div><button class="btn" onclick="closeDocModal()">Закрыть ×</button></div>
+  <div class="modalHead"><div><div class="eyebrow">Классификация документа</div><h2 id="prototype-modal-title" class="section-heading"><span class="identity-icon identity-icon--tag section-icon" aria-hidden="true"></span><span>Изменить тип документа</span></h2></div><button class="btn" onclick="closeDocModal()">Закрыть ×</button></div>
   <p class="modal-filename">${esc(d.name)}</p><div class="field"><label class="type-label" for="prototype-type-trigger">Категория документа</label><input type="hidden" id="docCategory" value="${esc(d.type)}">
   <div class="type-picker"><button class="type-trigger" id="prototype-type-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="prototype-type-options" onclick="togglePrototypeType()"><span id="prototype-type-selected">${esc(d.type)}</span><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
   <div class="type-list" id="prototype-type-options" role="listbox" aria-label="Категория документа" hidden>${types.map((t,i)=>`<button class="type-option" type="button" role="option" aria-selected="${t===d.type}" onclick="choosePrototypeType(${i})">${esc(t)}</button>`).join('')}</div></div></div>
