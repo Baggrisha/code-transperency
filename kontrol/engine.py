@@ -485,11 +485,21 @@ _SKU_CONFUSABLES = str.maketrans({
     **dict.fromkeys("OО0", "0"), **dict.fromkeys("IL1", "1"),
     **dict(zip("АВЕКМНРСТУХ", "ABEKMH PCTYX".replace(" ", ""))),
 })
+_SCRIPT_HOMOGLYPHS = {
+    **dict(zip("АВЕКМНОРСТУХ", "ABEKMHOPCTYX")),
+    **dict(zip("ABEKMHOPCTYX", "АВЕКМНОРСТУХ")),
+}
+_MAX_AMBIGUOUS_SUBSTITUTIONS = 3
 
 
 def _similar_sku(left: str, right: str) -> bool:
     """Look for visually confusable characters without changing identifiers."""
     return bool(left and right and left != right and left.translate(_SKU_CONFUSABLES) == right.translate(_SKU_CONFUSABLES))
+
+
+def _ambiguous_substitutions(left: str, right: str) -> int:
+    """Count OCR substitutions, excluding matching Cyrillic/Latin letter shapes."""
+    return sum(a != b and _SCRIPT_HOMOGLYPHS.get(a) != b for a, b in zip(left, right))
 
 
 def _infer_contracts(ctx: _Context) -> None:
@@ -505,7 +515,9 @@ def _infer_contracts(ctx: _Context) -> None:
     for doc in documents:
         if (doc.type != "contract" and doc.status == "active"
                 and ids.count(doc.id) == 1
-                and _similar_sku(normalize_identifier(doc.contract_id), normalize_identifier(contract.contract_id))):
+                and _similar_sku(normalize_identifier(doc.contract_id), normalize_identifier(contract.contract_id))
+                and _ambiguous_substitutions(normalize_identifier(doc.contract_id), normalize_identifier(contract.contract_id))
+                    <= _MAX_AMBIGUOUS_SUBSTITUTIONS):
             ctx.resolved_contracts[doc.id] = contract.id
 
 
@@ -547,13 +559,15 @@ def _match_item(ctx: _Context, doc: Document, item: Item, target: Document, *, r
         similar = [x for x in candidates if _similar_sku(sku, normalize_identifier(x.sku))] if sku and not sitems else []
         if similar:
             candidate_ids = [x.line_id for x in similar]
-            eligible = len(similar) == 1 and (not pid or (len(pitems) == 1 and pitems[0].line_id == similar[0].line_id))
+            eligible = (len(similar) == 1
+                        and _ambiguous_substitutions(sku, normalize_identifier(similar[0].sku)) <= _MAX_AMBIGUOUS_SUBSTITUTIONS
+                        and (not pid or (len(pitems) == 1 and pitems[0].line_id == similar[0].line_id)))
             if eligible:
                 chosen, method, score = similar[0], "similar_sku_auto", 1.0
                 explanation = f"Артикулы {item.sku} и {chosen.sku} различаются только похожими символами."
             else:
                 method, state = "similar_sku", "needs_review"
-                explanation = f"Артикул {item.sku} похож на другие артикулы, но связь нельзя подтвердить автоматически; проверьте оригиналы."
+                explanation = f"Артикул {item.sku} похож на другие артикулы, но связь неоднозначна или содержит более трёх замен; проверьте оригиналы."
         elif pid:
             if len(pitems) == 1 and (not sku or not pitems[0].sku or normalize_identifier(pitems[0].sku) == sku):
                 chosen, method, score = pitems[0], "position_id", 1.0
@@ -828,8 +842,12 @@ def _run(request: CheckRequest) -> CheckResult:
                           "Несколько актов ссылаются на одну поставку; суммируются только явно incremental строки приёмки.")
         for doc in sorted(transactions, key=lambda d: (d.date or date.min, d.id)):
             if not _same_contract(ctx, contract, doc):
-                ctx.signal("CONTRACT_MISMATCH", "Документ другого контракта",
-                           "Реквизит контракта не совпадает. Документ исключён из сумм; подтвердите принадлежность или исправьте извлечение.",
+                source_id = normalize_identifier(doc.contract_id)
+                contract_id = normalize_identifier(contract.contract_id)
+                too_many = (_similar_sku(source_id, contract_id)
+                            and _ambiguous_substitutions(source_id, contract_id) > _MAX_AMBIGUOUS_SUBSTITUTIONS)
+                ctx.signal("AMBIGUOUS_CONTRACT_ID" if too_many else "CONTRACT_MISMATCH", "Номер договора требует проверки" if too_many else "Документ другого контракта",
+                           "Более трёх неоднозначных символов в номере договора. Сверьте оригинал и подтвердите реквизит." if too_many else "Реквизит контракта не совпадает. Документ исключён из сумм; подтвердите принадлежность или исправьте извлечение.",
                            "contract_id всех документов должен совпадать с выбранным контрактом после нормализации.",
                            [_doc_source(contract, "contract_id"), _doc_source(doc, "contract_id")],
                            expected=contract.contract_id, actual=doc.contract_id, blocks=True)

@@ -62,6 +62,50 @@ class IndependentRegressions(unittest.TestCase):
                 self.assertEqual(Decimal('10'), result.positions[0].delivered_quantity)
                 self.assertEqual(observed, data['documents'][1]['items'][0]['sku'])
 
+    def test_confusable_sku_threshold_excludes_cross_script_letters(self):
+        for reference, observed, expected in (
+            ('000ABC', 'OOOАВС', 'matched'),
+            ('0000ABC', 'OOOOАВС', 'needs_review'),
+            ('1111ABC', 'ILILАВС', 'needs_review'),
+            ('ABEKMHOPCTYX', 'АВЕКМНОРСТУХ', 'matched'),
+        ):
+            with self.subTest(reference=reference, observed=observed):
+                data = request()
+                data['documents'][0]['items'][0]['sku'] = reference
+                data['documents'][1]['items'][0]['sku'] = observed
+                data['documents'][2]['items'][0]['sku'] = reference
+                result = evaluate(data)
+                match = next(m for m in result.matches if m.document_id == 'delivery-1')
+                self.assertEqual(expected, match.state)
+                if expected == 'needs_review':
+                    self.assertEqual(['1'], match.candidates)
+                    self.assertIsNone(match.target_line_id)
+                    self.assertNotEqual('ok', result.status)
+                else:
+                    self.assertEqual('similar_sku_auto', match.method)
+                    self.assertEqual('ok', result.status)
+
+    def test_confusable_contract_threshold_excludes_cross_script_letters(self):
+        for reference, observed, automatic in (
+            ('000ABC', 'OOOАВС', True),
+            ('0000ABC', 'OOOOАВС', False),
+            ('1111ABC', 'ILILАВС', False),
+            ('ABEKMHOPCTYX', 'АВЕКМНОРСТУХ', True),
+        ):
+            with self.subTest(reference=reference, observed=observed):
+                data = request()
+                for doc in data['documents']:
+                    doc['contract_id'] = reference
+                data['documents'][1]['contract_id'] = observed
+                result = evaluate(data)
+                if automatic:
+                    self.assertEqual('ok', result.status)
+                    self.assertIn('SIMILAR_CONTRACT_ID', {e.code for e in result.audit})
+                else:
+                    self.assertIn('AMBIGUOUS_CONTRACT_ID', codes(result))
+                    self.assertNotIn('SIMILAR_CONTRACT_ID', {e.code for e in result.audit})
+                    self.assertNotEqual('ok', result.status)
+
     def test_confusable_sku_does_not_hide_other_differences(self):
         for field, value in (('name', 'Другая позиция'), ('quantity', '9'), ('unit_price', '999'),
                              ('unit', 'кг'), ('currency', None)):
