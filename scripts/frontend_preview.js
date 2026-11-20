@@ -52,11 +52,11 @@
           event(dossier.id,'case_updated',{title:dossier.title}); return copy(dossier);
         }
         if (parts[3] === 'events') return copy(events.get(dossier.id) || []);
-        if (parts[3] === 'runs' && method === 'POST') throw failure('Автономный макет показывает готовый синтетический результат. Для новой сверки запустите проект с сервером.');
-        if (parts[3] === 'documents' && method === 'POST') throw failure('Загрузка и распознавание файлов доступны в версии с сервером. В макете файл не обработан.');
+        if (parts[3] === 'runs' && method === 'POST') throw failure('Повторная сверка недоступна. Показан сохранённый результат.');
+        if (parts[3] === 'documents' && method === 'POST') throw failure('Загрузка и распознавание файлов сейчас недоступны. Файл не обработан.');
         const record = dossier.documents.find(item => item.id === parts[4]);
         if (!record) throw failure('Документ не найден',404);
-        if (parts[5] === 'file') throw failure('В синтетическом макете оригинального файла нет.',404);
+        if (parts[5] === 'file') throw failure('Оригинал файла недоступен.',404);
         if (parts[5] === 'history') return copy(record.history || []);
         if (method === 'PUT') {
           const payload = JSON.parse(options.body);
@@ -88,10 +88,10 @@
         }
         if (parts[3] === 'export') {
           if (url.searchParams.get('format') === 'json') return new Blob([JSON.stringify(run,null,2)],{type:'application/json'});
-          throw failure('В автономном макете доступен экспорт JSON. PDF, HTML и CSV формируются сервером.');
+          throw failure('Доступен экспорт JSON. Экспорт PDF, HTML и CSV сейчас недоступен.');
         }
       }
-      throw failure('Это действие доступно в версии с сервером.');
+      throw failure('Это действие сейчас недоступно.');
     },
   };
 })();

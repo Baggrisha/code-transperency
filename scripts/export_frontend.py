@@ -40,7 +40,7 @@ def preview_seed() -> dict:
             document["number"] = "ГК-2026/0142"
             document["deadline"] = "2026-11-30"
         document["source"] = {"document_id":document["id"], "filename":document["filename"],
-                              "excerpt":f'Синтетический документ. {document["number"]}; контракт ГК-2026/0142.'}
+                              "excerpt":f'{document["number"]}; контракт ГК-2026/0142.'}
         for item in document["items"]:
             item["name"] = "Скамейка парковая"
             source = {"document_id":document["id"], "filename":document["filename"], "row":1,
@@ -53,7 +53,7 @@ def preview_seed() -> dict:
         raise RuntimeError("The visual demo must preserve the single T02 quantity signal")
     normalized_json = normalized.model_dump(mode="json")
     timestamp = "2026-11-18T10:00:00Z"
-    dossier = {"id":"demo-001", "title":"Поставка уличных скамеек", "description":"Учебный кейс T02. Синтетические данные.",
+    dossier = {"id":"demo-001", "title":"Поставка уличных скамеек", "description":"Сопоставление документов по поставке уличных скамеек.",
                "contract_number":"ГК-2026/0142", "created_at":timestamp, "updated_at":timestamp,
                "revision":4, "metadata_revision":0, "is_demo":True,
                "documents":[{"id":doc["id"], "revision":1, "document":doc,
@@ -62,7 +62,7 @@ def preview_seed() -> dict:
     run = {"id":"demo-run-001", "case_id":"demo-001", "created_at":timestamp, "stale":False,
            "request":normalized_json, "result":result, "reviews":[], "latest_reviews":{}, "prior_reviews":{}}
     events = [{"action":"case_created", "created_at":timestamp, "payload":{"title":dossier["title"]}},
-              {"action":"run_created", "created_at":timestamp, "payload":{"signals":1,"comment":"Демонстрационная сверка синтетического комплекта T02."}}]
+              {"action":"run_created", "created_at":timestamp, "payload":{"signals":1,"comment":"Проверка комплекта документов."}}]
     return {"dossier":dossier, "run":run, "events":events}
 
 
@@ -87,7 +87,6 @@ def export(output: Path) -> Path:
     adapter = (ROOT / "scripts/frontend_preview.js").read_text(encoding="utf-8")
     injection = '<script>\nglobalThis.KONTROL_PREVIEW_SEED = ' + data + ';\n' + adapter + '\n</script>\n'
     html = html.replace('  <script>\n', injection + '  <script>\n',1)
-    html = html.replace('<title>uzniki’s project — Контроль исполнения</title>', '<title>uzniki’s project — автономный макет</title>')
     licenses = "\n\n".join((ROOT / "web/assets/fonts" / name).read_text(encoding="utf-8")
                              for name in ("OFL-Unbounded.txt", "OFL-Involve.txt", "OFL-Montserrat.txt"))
     html = html.replace("</body>", '<template id="font-licenses"><pre>' + escape(licenses) + '</pre></template>\n</body>')

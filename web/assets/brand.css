@@ -348,6 +348,19 @@ th, td, .app td, .app th { padding: 14px 12px; }
   width: auto; padding: 22px 12px; font-size: 13px; line-height: 1.5; text-align: center; white-space: normal; background: transparent;
 }
 .empty-message { display: block; max-width: 44rem; margin: 0 auto; text-align: center; overflow-wrap: break-word; }
+/* An empty registry shares one centre line for the status header and message.
+   Populated rows keep their content-driven column widths. */
+.data-table.registry-table:has(td.table-empty[colspan="6"]) { table-layout: fixed; }
+.data-table.registry-table:has(td.table-empty[colspan="6"]) > thead > tr > th:nth-child(1) { width: 18%; }
+.data-table.registry-table:has(td.table-empty[colspan="6"]) > thead > tr > th:nth-child(2) { width: 26%; }
+.data-table.registry-table:has(td.table-empty[colspan="6"]) > thead > tr > th:nth-child(3) { width: 12%; }
+.data-table.registry-table:has(td.table-empty[colspan="6"]) > thead > tr > th:nth-child(4) { width: 16%; }
+.data-table.registry-table:has(td.table-empty[colspan="6"]) > thead > tr > th:nth-child(5),
+.data-table.registry-table:has(td.table-empty[colspan="6"]) > thead > tr > th:nth-child(6) { width: 14%; }
+@media screen {
+  .data-table.registry-table:has(td.table-empty[colspan="6"]) { min-width: 768px; }
+  .data-table.registry-table:has(td.table-empty[colspan="6"]) > thead > tr > th { padding-left: 8px; padding-right: 8px; }
+}
 .matching-table th { padding-top: 14px; padding-bottom: 16px; }
 .matching-table td { padding-top: 18px; padding-bottom: 18px; }
 .table-link, .registry-table .case-link, .registry-table .contract-link { min-height: 0; padding: 0; font-size: 15px; line-height: 1.45; text-align: center; justify-content: center; }

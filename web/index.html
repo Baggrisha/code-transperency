@@ -22,7 +22,7 @@
         <button class="nav-item" id="nav-workspace" data-action="workspace"><span class="identity-icon identity-icon--home" aria-hidden="true"></span><span>Рабочая область</span></button>
         <button class="nav-item" id="nav-history" data-action="global-history"><span class="identity-icon identity-icon--alarm" aria-hidden="true"></span><span>История проверок</span></button>
       </nav>
-      <div class="sidebar-bottom"><div class="sidebar-note"><strong>ПРОТОТИП</strong><p>Локальный режим<br>Результаты демонстрационных<br>кейсов не являются реальной<br>сверкой</p></div><div class="sidebar-tools"><button class="ghost" data-action="token">Доступ</button><a id="api-link" href="/docs" target="_blank" rel="noopener">API ↗</a><span id="busy" role="status" aria-live="polite">Обработка…</span></div></div>
+      <div class="sidebar-bottom"><div class="sidebar-tools"><button class="ghost" data-action="token">Доступ</button><a id="api-link" href="/docs" target="_blank" rel="noopener">API ↗</a><span id="busy" role="status" aria-live="polite">Обработка…</span></div></div>
     </aside>
     <main id="main" class="main page-registry" tabindex="-1"><p class="muted">Загрузка проверок…</p></main>
   </div>
@@ -134,6 +134,18 @@ function isDemo(dossier = state.current) {
   return Boolean(dossier?.is_demo || /синтетическ|демо|^T\d{2}\s*·/i.test((dossier?.title || '') + ' ' + (dossier?.description || '')));
 }
 
+function caseTitle(dossier = state.current) {
+  const title = dossier?.title || '';
+  const suffix = ' [синтетические данные]';
+  return isDemo(dossier) && title.endsWith(suffix) ? title.slice(0,-suffix.length) : title;
+}
+
+function caseDescription(dossier = state.current) {
+  const description = dossier?.description || '';
+  return isDemo(dossier) && description === 'Учебный кейс T02. Синтетические данные.'
+    ? 'Сопоставление документов по поставке уличных скамеек.' : description;
+}
+
 function setRoute(hash) {
   if (globalThis.history?.replaceState && globalThis.location) globalThis.history.replaceState(null, '', hash);
 }
@@ -156,7 +168,7 @@ function stat(label, value) {
 }
 
 function demoSelect() {
-  return `<select id="demo-choice" aria-label="Демонстрационный сценарий">${state.demos.map(item => `<option value="${esc(item.id)}" ${item.id === 'T02' ? 'selected' : ''}>${esc(item.id)} · ${esc(item.title)}</option>`).join('')}</select><button data-action="demo">Открыть пример</button>`;
+  return `<select id="demo-choice" aria-label="Готовая проверка">${state.demos.map(item => `<option value="${esc(item.id)}" ${item.id === 'T02' ? 'selected' : ''}>${esc(item.id)} · ${esc(item.title)}</option>`).join('')}</select><button data-action="demo">Открыть проверку</button>`;
 }
 
 async function refreshList() {
@@ -182,13 +194,13 @@ async function afterSaved(message, refresh) {
 function registryRows() {
   const query = state.query.trim().toLocaleLowerCase('ru');
   const entries = state.cases.filter(item => {
-    const matchesText = (item.title + ' ' + (item.contract_number || '')).toLocaleLowerCase('ru').includes(query);
+    const matchesText = (caseTitle(item) + ' ' + (item.contract_number || '')).toLocaleLowerCase('ru').includes(query);
     return matchesText && (state.filter === 'all' || statusInfo(item).key === state.filter);
   });
   return entries.map(item => {
     const status = statusInfo(item);
-    return `<tr data-action="open" data-id="${esc(item.id)}"><td class="cell-id"><button class="table-link" data-action="open" data-id="${esc(item.id)}">${esc(item.contract_number || 'Без номера')}</button></td><td class="cell-description"><span>${esc(item.title)}</span>${isDemo(item) ? '<small class="demo-tag">Демо-кейс</small>' : ''}</td><td class="cell-status"><span class="badge ${status.tone}">${status.text}</span></td><td class="cell-count">${item.document_count || 0}</td><td class="cell-count">${item.signal_count ?? '—'}</td><td class="cell-date"><time>${esc(dateLabel(item.updated_at || item.last_run_at || item.created_at))}</time></td></tr>`;
-  }).join('') || `<tr><td colspan="6" class="table-empty"><span class="empty-message">${state.cases.length ? 'По вашему запросу проверок не найдено. Измените поиск или статус.' : 'Проверок пока нет. Создайте новую или откройте демо-кейс.'}</span></td></tr>`;
+    return `<tr data-action="open" data-id="${esc(item.id)}"><td class="cell-id"><button class="table-link" data-action="open" data-id="${esc(item.id)}">${esc(item.contract_number || 'Без номера')}</button></td><td class="cell-description"><span>${esc(caseTitle(item))}</span></td><td class="cell-status"><span class="badge ${status.tone}">${status.text}</span></td><td class="cell-count">${item.document_count || 0}</td><td class="cell-count">${item.signal_count ?? '—'}</td><td class="cell-date"><time>${esc(dateLabel(item.updated_at || item.last_run_at || item.created_at))}</time></td></tr>`;
+  }).join('') || `<tr><td colspan="6" class="table-empty"><span class="empty-message">${state.cases.length ? 'По вашему запросу проверок не найдено. Измените поиск или статус.' : 'Проверок пока нет'}</span></td></tr>`;
 }
 
 function home(invalidate = true) {
@@ -204,7 +216,7 @@ function home(invalidate = true) {
     <section class="stats registry-stats" aria-label="Сводка проверок">${stat('Всего проверок',state.cases.length)}${stat('В работе',state.cases.length - processed)}${stat('Сигналов',state.cases.reduce((sum,item) => sum + (item.signal_count || 0),0))}${stat('Рассмотрено',processed)}</section>
     <section class="card registry-card" aria-label="Реестр проверок"><div class="registry-tools"><div class="search-wrap">${icon('search')}<input class="search" id="registry-query" type="search" autocomplete="off" aria-label="Поиск по контракту или названию" placeholder="Поиск по контракту или названию" value="${esc(state.query)}"></div><select id="registry-status" aria-label="Статус проверки">${[['all','Все статусы'],['draft','Черновик'],['needs_review','Требует рассмотрения'],['incomplete','Нужны уточнения'],['stale','Обновить сверку'],['reviewed','Рассмотрено'],['ok','Расхождений нет']].map(([value,label]) => `<option value="${value}" ${state.filter === value ? 'selected' : ''}>${label}</option>`).join('')}</select></div>
     <div class="scroll"><table class="data-table registry-table"><thead><tr><th scope="col" class="cell-id">Контракт</th><th scope="col" class="cell-description">Наименование</th><th scope="col" class="cell-status">Статус</th><th scope="col" class="cell-count">Документы</th><th scope="col" class="cell-count">Сигналы</th><th scope="col" class="cell-date">Изменено</th></tr></thead><tbody id="registry-rows">${registryRows()}</tbody></table></div></section>
-    ${state.demos.length ? `<details class="demo-launcher"><summary>${state.cases.length ? 'Открыть демонстрационный комплект' : 'Попробовать на демо-кейсе'}</summary><p class="muted small">Синтетические документы для знакомства с системой.</p><div class="row">${demoSelect()}</div></details>` : ''}`;
+    ${state.demos.length ? `<details class="demo-launcher"><summary>Готовые проверки</summary><p class="muted small">Выберите комплект документов для проверки.</p><div class="row">${demoSelect()}</div></details>` : ''}`;
 }
 
 async function openCase(id, options, tab, runId) {
@@ -246,19 +258,19 @@ function render() {
   setRoute('#case/' + enc(dossier.id) + '/' + state.tab + (state.selectedRunId ? '/run/' + enc(state.selectedRunId) : ''));
   const status = statusInfo(dossier, state.run);
   const views = {overview:renderOverview, documents:renderDocuments, recognition:renderRecognition, matching:renderMatching, results:renderResults, actions:renderActions};
-  $('#main').innerHTML = `${header('Рабочая область', esc(dossier.title), `Контракт <strong>${esc(contractNumber() || 'без номера')}</strong> – ${status.text.toLocaleLowerCase('ru')}`, '<button data-action="home">← К списку</button>')}
+  $('#main').innerHTML = `${header('Рабочая область', esc(caseTitle(dossier)), `Контракт <strong>${esc(contractNumber() || 'без номера')}</strong> – ${status.text.toLocaleLowerCase('ru')}`, '<button data-action="home">← К списку</button>')}
     <div class="tabs" role="tablist" aria-label="Разделы проверки">${tabs.map(([key,label]) => `<button class="tab${state.tab === key ? ' active' : ''}" id="tab-${key}" data-action="tab" data-tab="${key}" role="tab" aria-controls="workspace-panel" aria-selected="${state.tab === key}" tabindex="${state.tab === key ? '0' : '-1'}">${label}</button>`).join('')}</div>
     <div id="workspace-panel" role="tabpanel" aria-labelledby="tab-${state.tab}">${(views[state.tab] || renderOverview)()}</div>`;
 }
 
 function contractForm(id = 'contract-form', button = 'Сохранить реквизиты') {
   const dossier = state.current;
-  return `<form id="${id}" class="contract-form" data-form="case-metadata"><div class="field"><label for="${id}-number">Номер</label><input id="${id}-number" name="contract_number" value="${esc(contractNumber())}" maxlength="300" placeholder="Номер контракта"></div><div class="field"><label for="${id}-title">Наименование</label><input id="${id}-title" name="title" value="${esc(dossier.title)}" maxlength="300" required></div><div class="field"><label for="${id}-description">Описание</label><textarea id="${id}-description" name="description" rows="3" maxlength="5000" placeholder="Описание проверки">${esc(dossier.description || '')}</textarea></div><div class="form-actions"><button class="primary" type="submit">${button}</button>${id === 'contract-form' ? '<button type="button" data-action="tab" data-tab="documents">К документам →</button>' : ''}</div>${state.preview ? '' : '<p class="small muted form-help">Поля карточки не изменяют исходные документы. Исправить извлечённые значения можно в разделе «Распознавание».</p>'}</form>`;
+  return `<form id="${id}" class="contract-form" data-form="case-metadata"><div class="field"><label for="${id}-number">Номер</label><input id="${id}-number" name="contract_number" value="${esc(contractNumber())}" maxlength="300" placeholder="Номер контракта"></div><div class="field"><label for="${id}-title">Наименование</label><input id="${id}-title" name="title" value="${esc(caseTitle(dossier))}" maxlength="300" required></div><div class="field"><label for="${id}-description">Описание</label><textarea id="${id}-description" name="description" rows="3" maxlength="5000" placeholder="Описание проверки">${esc(caseDescription(dossier))}</textarea></div><div class="form-actions"><button class="primary" type="submit">${button}</button>${id === 'contract-form' ? '<button type="button" data-action="tab" data-tab="documents">К документам →</button>' : ''}</div>${state.preview ? '' : '<p class="small muted form-help">Поля карточки не изменяют исходные документы. Исправить извлечённые значения можно в разделе «Распознавание».</p>'}</form>`;
 }
 
 function renderOverview() {
   const counts = runCounts();
-  return `<section class="stats overview-stats" aria-label="Состояние проверки">${stat('Документов',state.current.documents.length)}${stat('Сигналов',counts.signals)}${stat('Ожидают решения',counts.pending)}${stat('Рассмотрено',counts.reviewed)}</section><section class="card contract-card"><h2 class="section-heading"><span class="identity-icon identity-icon--wallet section-icon" aria-hidden="true"></span><span>Данные контракта</span></h2>${contractForm()}</section><div class="notice">Система предоставляет информационные сигналы. Окончательная оценка документов остаётся за специалистом.</div>${staleNotice()}`;
+  return `<section class="stats overview-stats" aria-label="Состояние проверки">${stat('Документов',state.current.documents.length)}${stat('Сигналов',counts.signals)}${stat('Ожидают решения',counts.pending)}${stat('Рассмотрено',counts.reviewed)}</section><section class="card contract-card"><h2 class="section-heading"><span class="identity-icon identity-icon--wallet section-icon" aria-hidden="true"></span><span>Данные контракта</span></h2>${contractForm()}</section>${staleNotice()}`;
 }
 
 function documentName(record) { return record.document.filename || record.original_name || record.id; }
@@ -274,9 +286,9 @@ function documentMeta(record) {
 
 function renderDocuments() {
   const records = state.current.documents;
-  return `<div class="workspace-grid documents-grid"><section class="card upload-panel"><h2 class="section-heading"><span class="identity-icon identity-icon--folder section-icon" aria-hidden="true"></span><span>Загрузка документов</span></h2><div class="dropzone" id="dropzone"><span class="identity-icon identity-icon--folder upload-icon" aria-hidden="true"></span><h3>Перетащите файлы сюда</h3><p class="upload-hint">или выберите файлы на устройстве (<span>${state.preview ? 'PDF, PNG, JPEG, TXT' : 'PDF, DOCX, PNG, JPEG, TIFF, TXT, CSV, TSV, JSON'}</span>)</p><div class="file-picker-row"><button class="file-button" data-action="choose-files">Выбрать файлы</button><span id="file-count">Файлы не выбраны</span></div><input class="visually-hidden" type="file" id="files" multiple aria-label="Выбрать документы" accept=".pdf,.docx,.txt,.csv,.tsv,.json,.png,.jpg,.jpeg,.tif,.tiff"></div>
+  return `<div class="workspace-grid documents-grid"><section class="card upload-panel"><h2 class="section-heading"><span class="identity-icon identity-icon--folder section-icon" aria-hidden="true"></span><span>Загрузка документов</span></h2><div class="dropzone" id="dropzone"><span class="identity-icon identity-icon--folder upload-icon" aria-hidden="true"></span><h3>Перетащите файлы сюда</h3><p class="upload-hint">или выберите файлы на устройстве (<span>${state.preview ? 'PDF, PNG, JPEG, TXT' : 'PDF, DOCX, PNG, JPEG, TIFF, TXT, CSV, TSV, JSON'}</span>). До 20 МБ на файл.</p><div class="file-picker-row"><button class="file-button" data-action="choose-files">Выбрать файлы</button><span id="file-count">Файлы не выбраны</span></div><input class="visually-hidden" type="file" id="files" multiple aria-label="Выбрать документы" accept=".pdf,.docx,.txt,.csv,.tsv,.json,.png,.jpg,.jpeg,.tif,.tiff"></div>
     <div id="upload-controls" hidden><div class="row"><label class="grow">Тип документа<select id="upload-type"><option value="">Определить автоматически</option>${Object.entries(types).map(([key,label]) => `<option value="${key}">${label}</option>`).join('')}</select></label><label class="grow">Номер контракта<input id="upload-contract" value="${esc(contractNumber())}" placeholder="Если не читается в файле"></label></div><p id="upload-selection" class="small muted"></p><button class="primary" data-action="upload">Загрузить документы</button></div>
-    <p class="small muted storage-note">${state.preview ? 'Автономный макет. Загрузка и распознавание файлов доступны в версии с сервером. Изменения макета сохраняются только в открытой вкладке.' : 'Исходные файлы, реквизиты и решения сохраняются на локальном сервере. До 20 МБ на файл. Повторная загрузка одного файла не создаёт дубликат.'}</p></section>
+    </section>
     <section class="card document-panel"><h2 class="section-heading"><span class="identity-icon identity-icon--folder section-icon" aria-hidden="true"></span><span>Комплект документов: <span class="accent">${records.length}</span></span></h2><div class="document-list">${records.map(record => `<div class="document-row${record.document.status === 'cancelled' ? ' cancelled' : ''}"><div class="document-info"><b>${esc(documentName(record))}</b><span class="muted">${esc(documentMeta(record))}</span></div><div class="document-actions"><button data-action="type" data-id="${esc(record.id)}" aria-label="Изменить тип ${esc(documentName(record))}">Тип</button><button data-action="view" data-id="${esc(record.id)}" aria-label="Открыть ${esc(documentName(record))}">Открыть</button><button class="icon-button" data-action="exclude" data-id="${esc(record.id)}" aria-label="${record.document.status === 'cancelled' ? 'Восстановить' : 'Исключить из сверки'} ${esc(documentName(record))}">${record.document.status === 'cancelled' ? '↶' : '×'}</button></div></div>`).join('') || '<div class="emptylist">Загрузите контракт, спецификацию, накладные и документы о приёмке.</div>'}</div></section></div>
     <div class="notice">Если в загруженном комплекте отсутствует документ, это не означает, что он отсутствует у сторон контракта.</div><div class="form-actions"><button class="primary" data-action="tab" data-tab="recognition">К распознаванию →</button></div>`;
 }
@@ -284,7 +296,7 @@ function renderDocuments() {
 function renderRecognition() {
   const documents = state.current.documents;
   const notice = state.preview
-    ? 'Модуль OCR и извлечения данных ещё не подключён. Ниже доступны редактируемые реквизиты проверки, но значения из загруженных файлов автоматически не извлекаются.'
+    ? 'Реквизиты вводятся вручную. Проверьте их по исходным документам перед сопоставлением.'
     : 'Реквизиты извлекаются при загрузке документов. Проверьте значения по оригиналам, особенно после распознавания сканов. Изменённое поле становится подтверждённым только после вашей отметки.';
   return `<section class="card recognition-card"><h2 class="section-heading"><span class="identity-icon identity-icon--chip section-icon" aria-hidden="true"></span><span>Распознавание реквизитов</span></h2><div class="notice">${notice}</div><div class="recognition-grid"><section><h2 class="section-heading"><span class="identity-icon identity-icon--folder section-icon" aria-hidden="true"></span><span>Исходные документы</span></h2><div class="source-documents">${documents.map(record => `<div class="document-row"><div class="document-info"><b>${esc(documentName(record))}</b>${!state.preview ? `<span class="small muted">${esc(documentTypeLabel(record.document.type))} · ${record.document.items.length} строк${record.document.extraction_method === 'ocr' ? ' · OCR' : ''}</span>` : ''}</div><div class="document-actions"><button data-action="view" data-id="${esc(record.id)}">Просмотреть</button>${!state.preview ? `<button data-action="edit" data-id="${esc(record.id)}">Реквизиты</button>` : ''}</div></div>`).join('') || '<p class="muted">Сначала добавьте документы.</p>'}</div></section><section>${contractForm('recognition-form','Сохранить исправления')}${!state.preview && documents.length ? '<p class="small muted">Кнопка «Реквизиты» открывает значения и товарные строки выбранного документа с отметками проверки по оригиналу.</p>' : ''}</section></div></section><div class="form-actions"><button data-action="tab" data-tab="matching">К сопоставлению →</button></div>`;
 }
@@ -301,14 +313,14 @@ function quantity(value, unit) {
 function renderMatching() {
   const result = state.run?.result;
   const note = state.preview
-    ? 'Автоматическое связывание товарных позиций ожидает подключения серверного модуля. Система не выполняет сравнение единиц измерения без подтверждённого коэффициента пересчёта.'
+    ? 'Показаны сохранённые данные сопоставления. Система не выполняет сравнение единиц измерения без подтверждённого коэффициента пересчёта.'
     : 'Позиции связаны по данным последней сверки. Неоднозначные связи требуют подтверждения. Система не сравнивает разные единицы измерения без подтверждённого коэффициента пересчёта.';
   return `${staleNotice()}<section class="card matching-card"><h2 class="section-heading"><span class="identity-icon identity-icon--layers section-icon" aria-hidden="true"></span><span>Сопоставление позиций</span></h2><div class="notice">${result ? note : 'Запустите сверку, чтобы связать позиции из контракта, накладных и документов о приёмке.'}</div><div class="scroll"><table class="data-table matching-table"><thead><tr><th scope="col" class="cell-description">Позиция</th><th scope="col" class="cell-count">Контракт</th><th scope="col" class="cell-count">Накладная</th><th scope="col" class="cell-count">Приёмка</th><th scope="col" class="cell-status">Состояние</th></tr></thead><tbody>${(result?.positions || []).map(position => {
     const signals = result.signals.filter(signal => signal.position_id === position.line_id);
     const blocked = !position.complete;
     const text = blocked ? 'Нужны уточнения' : signals.length ? 'Требует проверки' : 'Сопоставлено';
     return `<tr><td class="cell-description">${esc(position.name || position.line_id)}</td><td class="cell-count">${quantity(position.expected_quantity,position.unit)}</td><td class="cell-count">${quantity(position.delivered_quantity,position.unit)}</td><td class="cell-count">${quantity(position.accepted_quantity,position.unit)}</td><td class="cell-status"><span class="badge ${blocked || signals.length ? 'warning' : 'ok'}">${text}</span></td></tr>`;
-  }).join('') || '<tr><td colspan="5" class="table-empty"><span class="empty-message">Позиции появятся после сверки комплекта.</span></td></tr>'}</tbody></table></div><p class="matching-note muted">${state.preview ? 'Демонстрационное сопоставление из синтетического кейса T02.' : result ? `Срез на ${esc(dateLabel(result.as_of))}. Количества приведены по действующим документам выбранной редакции.` : 'Сначала загрузите и проверьте исходные документы.'}</p></section>
+  }).join('') || '<tr><td colspan="5" class="table-empty"><span class="empty-message">Позиции появятся после сверки комплекта.</span></td></tr>'}</tbody></table></div>${state.preview ? '' : `<p class="matching-note muted">${result ? `Срез на ${esc(dateLabel(result.as_of))}. Количества приведены по действующим документам выбранной редакции.` : 'Сначала загрузите и проверьте исходные документы.'}</p>`}</section>
     ${runControls()}${result ? renderLinks(result) : ''}<div class="form-actions"><button class="primary" data-action="tab" data-tab="results">К результатам →</button></div>`;
 }
 
@@ -322,7 +334,7 @@ function renderResult(run) {
   return `${staleNotice()}<div class="row between results-heading"><h2 class="section-heading"><span class="identity-icon identity-icon--award section-icon" aria-hidden="true"></span><span>${headings[result.status] || 'Результаты проверки'}</span></h2><div class="row">${['html','pdf','csv','json'].map(format => `<button data-action="export" data-format="${format}">${format === 'html' ? 'Отчёт' : format.toUpperCase()}</button>`).join('')}</div></div><section class="stats overview-stats">${stat('Сигналов',counts.signals)}${stat('Ожидают решения',counts.pending)}${stat('Рассмотрено',counts.reviewed)}${stat('Позиций',result.positions.length)}</section>
     <section class="card"><h2 class="section-heading"><span class="identity-icon identity-icon--layers section-icon" aria-hidden="true"></span><span>Количество по позициям</span></h2><div class="scroll"><table class="data-table quantity-table"><thead><tr><th class="cell-description">Товар</th><th class="cell-unit">Ед.</th><th class="cell-count">По условиям</th><th class="cell-count">Поставлено</th><th class="cell-count">Принято</th><th class="cell-count">Остаток</th></tr></thead><tbody>${result.positions.map(position => `<tr><td class="cell-description">${esc(position.name || position.line_id)}${!position.complete ? '<small>Сравнение ограничено</small>' : ''}</td><td class="cell-unit">${esc(position.unit || '—')}</td><td class="cell-count">${esc(number(position.expected_quantity))}</td><td class="cell-count">${esc(number(position.delivered_quantity))}</td><td class="cell-count">${esc(number(position.accepted_quantity))}</td><td class="cell-count">${esc(number(position.remaining_quantity))}</td></tr>`).join('') || '<tr><td colspan="6" class="table-empty"><span class="empty-message">Нет достаточных данных для сводки.</span></td></tr>'}</tbody></table></div></section>
     <section class="card"><h2 class="section-heading"><span class="identity-icon identity-icon--bell section-icon" aria-hidden="true"></span><span>Сигналы и источники</span></h2>${result.signals.map(signal => `<article class="signal"><div class="row"><span class="badge ${reviews[signal.id] && reviews[signal.id].status !== 'needs_review' ? 'ok' : signal.blocks_comparison ? 'warning' : 'neutral'}">${esc(reviews[signal.id] ? reviewNames[reviews[signal.id].status] : signal.blocks_comparison ? 'Сравнение ограничено' : 'Требует проверки')}</span>${reviews[signal.id] && signal.blocks_comparison ? '<span class="badge warning">Сравнение ограничено</span>' : ''}<span class="small muted">${esc(signal.code)}</span></div><h3>${esc(signal.title)}</h3><p>${esc(signal.explanation)}</p><div class="values"><div><span class="small muted">Ожидается</span><b>${esc(showValue(signal.expected))}</b></div><div><span class="small muted">В комплекте</span><b>${esc(showValue(signal.actual))}</b></div></div><p class="small muted">Правило: ${esc(signal.rule)}</p><details><summary>Исходные данные · ${signal.sources.length} фрагментов</summary>${signal.sources.map(source => `<div class="source"><div class="row between"><b>${esc(source.filename || source.document_id)}${source.page ? ' · стр. ' + esc(source.page) : ''}${source.row ? ' · строка ' + esc(source.row) : ''}</b><div class="row"><button data-action="view-snapshot" data-id="${esc(source.document_id)}">Просмотреть</button><button data-action="edit" data-id="${esc(source.document_id)}">Открыть реквизиты</button></div></div>${esc(source.excerpt)}</div>`).join('')}</details><div class="review">${reviews[signal.id] ? `<p class="small"><b>${esc(reviewNames[reviews[signal.id].status])}</b> · ${esc(reviews[signal.id].reviewer)}<br>${esc(reviews[signal.id].comment)}</p>` : ''}<form data-signal="${esc(signal.id)}"><label>Решение<select name="status">${Object.entries(reviewNames).map(([key,label]) => `<option value="${key}" ${reviews[signal.id]?.status === key ? 'selected' : ''}>${label}</option>`).join('')}</select></label><label>Проверяющий<input name="reviewer" required maxlength="200" placeholder="Имя или роль"></label><label class="comment">Комментарий<input name="comment" required maxlength="10000" placeholder="Что проверено по документам"></label><button type="submit" class="primary">Сохранить</button></form></div></article>`).join('') || '<span class="badge ok">Сигналов нет в пределах выполненных проверок</span>'}</section>
-    <details class="card"><summary>Учёт версий и воспроизводимость</summary><ul class="audit">${result.audit.map(entry => `<li>${esc(entry.explanation)} <span class="small muted">${esc(entry.document_ids.join(', '))}</span></li>`).join('') || '<li>Корректировки не применялись.</li>'}</ul><p class="small">Правила ${esc(result.engine_version)} · срез ${esc(result.as_of)}</p><p class="hash">Вход: ${esc(result.input_hash)}<br>Результат: ${esc(result.result_hash)}</p></details><p class="footer">Сигнал показывает документальное расхождение или недостаток данных. Окончательная оценка остаётся за специалистом.</p>`;
+    <details class="card"><summary>Учёт версий и воспроизводимость</summary><ul class="audit">${result.audit.map(entry => `<li>${esc(entry.explanation)} <span class="small muted">${esc(entry.document_ids.join(', '))}</span></li>`).join('') || '<li>Корректировки не применялись.</li>'}</ul><p class="small">Правила ${esc(result.engine_version)} · срез ${esc(result.as_of)}</p><p class="hash">Вход: ${esc(result.input_hash)}<br>Результат: ${esc(result.result_hash)}</p></details>`;
 }
 
 function renderActions() {
@@ -351,7 +363,7 @@ async function showHistory(offset = 0) {
   if (ticket !== state.loadingCase || state.page !== 'history' || state.historyOffset !== offset) return;
   state.history = history;
   const names = {ok:'Расхождений нет', needs_review:'Требует рассмотрения', incomplete:'Нужны уточнения'};
-  $('#main').innerHTML = header('История проверок','Журнал проверок','Сохранённые результаты и состояние рассмотрения') + `<section class="card"><div class="scroll"><table class="data-table history-table"><thead><tr><th class="cell-description">Проверка</th><th class="cell-date">Дата запуска</th><th class="cell-status">Состояние</th><th class="cell-count">Сигналы</th><th class="cell-action"></th></tr></thead><tbody>${history.items.map(item => `<tr><td class="cell-description">${esc(item.case_title)}</td><td class="cell-date">${esc(dateLabel(item.created_at,true))}</td><td class="cell-status"><span class="badge ${item.stale || item.status !== 'ok' ? 'warning' : 'ok'}">${item.stale ? 'Сохранённая редакция' : names[item.status] || item.status}</span></td><td class="cell-count">${item.signal_count ?? '—'}</td><td class="cell-action"><button data-action="open-run" data-id="${esc(item.id)}" data-case="${esc(item.case_id)}">Открыть</button></td></tr>`).join('') || '<tr><td colspan="5" class="table-empty"><span class="empty-message">Выполненных сверок пока нет.</span></td></tr>'}</tbody></table></div><div class="row between pagination"><p class="small muted">${history.total ? `${offset + 1}–${Math.min(offset + history.limit,history.total)} из ${history.total}` : '0 проверок'}</p><div class="row"><button data-action="history-page" data-offset="${Math.max(0,offset - 25)}" ${offset === 0 ? 'disabled' : ''}>← Назад</button><button data-action="history-page" data-offset="${offset + 25}" ${offset + 25 >= history.total ? 'disabled' : ''}>Далее →</button></div></div></section>`;
+  $('#main').innerHTML = header('История проверок','Журнал проверок','Сохранённые результаты и состояние рассмотрения') + `<section class="card"><div class="scroll"><table class="data-table history-table"><thead><tr><th class="cell-description">Проверка</th><th class="cell-date">Дата запуска</th><th class="cell-status">Состояние</th><th class="cell-count">Сигналы</th><th class="cell-action"></th></tr></thead><tbody>${history.items.map(item => `<tr><td class="cell-description">${esc(caseTitle({...item,title:item.case_title}))}</td><td class="cell-date">${esc(dateLabel(item.created_at,true))}</td><td class="cell-status"><span class="badge ${item.stale || item.status !== 'ok' ? 'warning' : 'ok'}">${item.stale ? 'Сохранённая редакция' : names[item.status] || item.status}</span></td><td class="cell-count">${item.signal_count ?? '—'}</td><td class="cell-action"><button data-action="open-run" data-id="${esc(item.id)}" data-case="${esc(item.case_id)}">Открыть</button></td></tr>`).join('') || '<tr><td colspan="5" class="table-empty"><span class="empty-message">Выполненных сверок пока нет.</span></td></tr>'}</tbody></table></div><div class="row between pagination"><p class="small muted">${history.total ? `${offset + 1}–${Math.min(offset + history.limit,history.total)} из ${history.total}` : '0 проверок'}</p><div class="row"><button data-action="history-page" data-offset="${Math.max(0,offset - 25)}" ${offset === 0 ? 'disabled' : ''}>← Назад</button><button data-action="history-page" data-offset="${offset + 25}" ${offset + 25 >= history.total ? 'disabled' : ''}>Далее →</button></div></div></section>`;
 }
 
 
@@ -784,7 +796,7 @@ async function saveDocumentType(form) {
   const updated = structuredClone(record.document);
   updated.type = selected;
   updated.fields_confidence = {...updated.fields_confidence,type:0};
-  await api(`/api/cases/${enc(context.caseId)}/documents/${enc(id)}`,{method:'PUT',body:JSON.stringify({document:updated,expected_revision:record.revision,reviewer:values.reviewer?.trim() || (state.preview ? 'Демонстрация' : ''),comment:values.comment?.trim() || (state.preview ? 'Изменён тип в макете' : ''),confirmed_fields:[],confirmed_items:{}})});
+  await api(`/api/cases/${enc(context.caseId)}/documents/${enc(id)}`,{method:'PUT',body:JSON.stringify({document:updated,expected_revision:record.revision,reviewer:values.reviewer?.trim() || (state.preview ? 'Пользователь' : ''),comment:values.comment?.trim() || (state.preview ? 'Изменён тип документа' : ''),confirmed_fields:[],confirmed_items:{}})});
   if (state.modalTicket === modalTicket) closeModal();
   await afterSaved('Тип сохранён. Подтвердите его по оригиналу в реквизитах и повторите сверку.',async () => {
     if (isCurrentWorkspace(context)) await openCase(context.caseId,context.options,state.tab,context.selectedRunId);
@@ -850,11 +862,11 @@ document.addEventListener('click', async event => {
       const ticket = state.loadingCase;
       const response = await api('/api/demo/' + enc($('#demo-choice').value),{method:'POST'});
       try {
-        if (ticket !== state.loadingCase) { await refreshList(); toast('Демонстрационный комплект создан в реестре'); }
+        if (ticket !== state.loadingCase) { await refreshList(); toast('Проверка создана в реестре'); }
         else if (await openCase(response.case.id,response.options,'overview',null)) {
           if (!state.preview) await run();
         }
-      } catch (error) { toast('Демонстрационный комплект создан, но открыть или проверить его не удалось: ' + error.message,true); }
+      } catch (error) { toast('Проверка создана, но открыть или выполнить её не удалось: ' + error.message,true); }
     }
     if (action === 'choose-files') $('#files').click();
     if (action === 'upload') await uploadFiles();

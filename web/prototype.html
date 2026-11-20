@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#26306E">
-  <title>uzniki’s project — прототип</title>
+  <title>uzniki’s project — Проверки контрактов</title>
   <link rel="preload" href="assets/fonts/Unbounded-Variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/Montserrat-Variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/styles.css">
@@ -14,14 +14,14 @@
 </head>
 <body>
   <div id="root"></div>
-  <noscript>Для работы прототипа включите JavaScript в браузере.</noscript>
+  <noscript>Для работы страницы включите JavaScript в браузере.</noscript>
   <script>
 const KEY = 'control-execution-demo-v1';
 const initial = [{
   id: 'DEMO-001',
   number: 'ГК-2026/0142',
   name: 'Поставка уличных скамеек',
-  description: 'Учебный кейс T02. Синтетические данные.',
+  description: 'Поставка уличных скамеек по контракту ГК-2026/0142.',
   created: '18.11.2026',
   updated: '18.11.2026',
   status: 'Требует рассмотрения',
@@ -81,6 +81,17 @@ try {
 } catch {
   state = initialState()
 };
+const previousFactoryDescriptions = new Set([
+  'Учебный кейс T02. Синтетические данные.',
+  'Синтетические данные.'
+]);
+let presentationMigrated = false;
+for (const item of Array.isArray(state.cases) ? state.cases : []) {
+  if (item?.demo === true && previousFactoryDescriptions.has(item.description)) {
+    item.description = initial[0].description;
+    presentationMigrated = true;
+  }
+}
 if (!state.selected && state.cases?.length) state.selected = state.cases[0].id;
 let ephemeralFiles = {};
 const save = () => {
@@ -125,8 +136,7 @@ function layout(content) {
         <button class="nav ${active?'active':''}" onclick="${c()?"go('case','overview')":"go('home')"}" ${active?'aria-current="page"':''}><span class="identity-icon identity-icon--home" aria-hidden="true"></span><span>Рабочая область</span></button>
         <button class="nav ${state.page==='history'?'active':''}" onclick="go('history')" ${state.page==='history'?'aria-current="page"':''}><span class="identity-icon identity-icon--alarm" aria-hidden="true"></span><span>История проверок</span></button>
       </nav>
-      <div class="sidefoot"><strong>ПРОТОТИП</strong><p>Локальный режим<br>Результаты демонстрационных<br>кейсов не являются реальной<br>сверкой</p></div>
-    </aside><main class="main" id="prototype-main">${content}<footer class="footer">Контроль исполнения · Демонстрационный интерфейс · Не принимает юридически значимых решений</footer></main></div>`;
+    </aside><main class="main" id="prototype-main">${content}</main></div>`;
 }
 const title = (e, t, s, action = '') =>
   `<header class="top"><div class="header-copy"><div class="eyebrow">${e}</div><h1 class="heading">${esc(t)}</h1><p class="sub">${s}</p></div>${action?`<div class="header-action">${action}</div>`:''}</header>`;
@@ -135,7 +145,7 @@ function home(history = false) {
   const list = state.cases.filter(x => !history || x.status === 'Завершена');
   layout(title(history ? 'ИСТОРИЯ ПРОВЕРОК' : 'ВСЕ ПРОВЕРКИ', history ? 'История проверок' : 'Проверки контрактов',
       history ? 'Завершённые дела и решения специалистов' : 'Реестр проверочных дел и состояние рассмотрения',
-      `<button class="btn primary" onclick="createCase()">+ Новая проверка</button><button class="btn" onclick="openOriginalDemo()">Открыть исходное демо</button>`) +
+      `<button class="btn primary" onclick="createCase()">+ Новая проверка</button><button class="btn" onclick="openOriginalDemo()">Открыть проверку</button>`) +
     `
   <div class="grid registry-metrics">
     <div class="metric"><span>Всего проверок</span><strong>${state.cases.length}</strong></div>
@@ -148,8 +158,7 @@ function home(history = false) {
 
 function rows(list) {
   return list.length ? list.map(x => '<tr class="clickable" onclick="openCase(\'' + x.id + '\')"><td class="cell-id"><b>' + esc(x
-        .number || x.id) + '</b></td><td class="cell-description">' + esc(x.name || 'Без названия') + (x.demo ?
-        '<div class="tag">Демо-кейс</div>' : '') + '</td><td class="cell-status">' + pill(x.status) + '</td><td class="cell-count">' + x.docs.length +
+        .number || x.id) + '</b></td><td class="cell-description">' + esc(x.name || 'Без названия') + '</td><td class="cell-status">' + pill(x.status) + '</td><td class="cell-count">' + x.docs.length +
       '</td><td class="cell-count">' + x.signals.length + '</td><td class="cell-date">' + esc(x.updated) + '</td></tr>').join('') :
     '<tr><td colspan="6" class="table-empty"><span class="empty-message">Проверок пока нет</span></td></tr>'
 }
@@ -208,7 +217,7 @@ function openOriginalDemo() {
   }
   state.signal = null;
   openCase(demo.id);
-  prototypeNotice('Открыто исходное демо. Существующие дела и изменения сохранены.');
+  prototypeNotice('Проверка открыта.');
 }
 
 function casePage() {
@@ -223,7 +232,7 @@ function casePage() {
     ['history', 'История действий']
   ];
   const sub = `Контракт <b>${esc(x.number||'номер не указан')}</b> — ${esc(x.status.toLowerCase())}`;
-  const header = title('РАБОЧАЯ ОБЛАСТЬ / ' + esc(x.id), x.name || 'Новая проверка', sub,
+  const header = title('РАБОЧАЯ ОБЛАСТЬ', x.name || 'Новая проверка', sub,
       `<button class="btn" onclick="go('home')">← К списку</button>`) +
     `<nav class="steps" aria-label="Разделы проверки">${tabs.map(([k,v])=>`<button class="step ${state.tab===k?'active':''}" ${state.tab===k?'aria-current="page"':''} onclick="go('case','${k}')">${v}</button>`).join('')}</nav>`;
   const body = state.tab === 'overview' ? overview(x) : state.tab === 'docs' ? docs(x) : state.tab === 'extract' ?
@@ -241,8 +250,7 @@ function overview(x) {
   <div class="field"><label for="caseNumber">Номер</label><input id="caseNumber" value="${esc(x.number)}"></div>
   <div class="field"><label for="caseName">Наименование</label><input id="caseName" value="${esc(x.name)}"></div>
   <div class="field"><label for="caseDescription">Описание</label><textarea id="caseDescription" rows="3">${esc(x.description)}</textarea></div>
-  <div class="actions"><button class="btn primary" onclick="updateCase()">Сохранить реквизиты</button><button class="btn" onclick="go('case','docs')">К документам →</button></div></section>
-  <div class="warn">Система предоставляет информационные сигналы. Окончательная оценка документов остаётся за специалистом</div>`;
+  <div class="actions"><button class="btn primary" onclick="updateCase()">Сохранить реквизиты</button><button class="btn" onclick="go('case','docs')">К документам →</button></div></section>`;
 }
 
 function updateCase() {
@@ -263,8 +271,7 @@ function docs(x) {
   <div id="drop" class="drop" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="dropFiles(event)">
   <span class="identity-icon identity-icon--folder upload-icon" aria-hidden="true"></span><h3>Перетащите файлы сюда</h3><p class="upload-hint">или выберите файлы на устройстве (<b>PDF, PNG, JPEG, TXT</b>)</p>
   <div class="file-picker-row"><button type="button" class="btn" onclick="document.getElementById('files').click()">Выбрать файлы</button><span>Файлы не выбраны</span></div>
-  <input class="visually-hidden" type="file" id="files" multiple accept=".pdf,.png,.jpg,.jpeg,.txt" aria-label="Выбрать файлы" onchange="addFiles(this.files)"></div>
-  <p class="note storage-note">Файлы сохраняются только в памяти открытой вкладки. Метаданные и решения — в локальном хранилище браузера. Для постоянного хранения файлов требуется сервер</p></section>
+  <input class="visually-hidden" type="file" id="files" multiple accept=".pdf,.png,.jpg,.jpeg,.txt" aria-label="Выбрать файлы" onchange="addFiles(this.files)"></div></section>
   <section class="panel document-card"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--folder section-icon" aria-hidden="true"></span><span>Комплект документов: <span class="accent">${x.docs.length}</span></span></h2>${x.docs.length?x.docs.map(d=>`<div class="doc"><div class="document-info"><div class="docname"><b>${esc(d.name)}</b></div><div class="sub">${esc(d.type)} – ${Math.round(d.size/1024)} КБ – версия ${d.version}</div></div><div class="actions"><button class="btn small" onclick="changeDocType('${d.id}')">Тип</button><button class="btn small" onclick="viewDoc('${d.id}')">Открыть</button><button class="btn small" aria-label="Удалить ${esc(d.name)} из комплекта" onclick="removeDoc('${d.id}')">×</button></div></div>`).join(''):'<div class="empty">Документы ещё не добавлены</div>'}</section></div>
   <div class="warn documents-warning">Если в загруженном комплекте отсутствует документ, это не означает, что он отсутствует у сторон контракта</div><div class="actions"><button class="btn primary" onclick="go('case','extract')">К распознаванию →</button></div>`;
 }
@@ -316,7 +323,7 @@ function removeDoc(id) {
 }
 
 function extract(x) {
-  return `<section class="panel recognition-panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--chip section-icon" aria-hidden="true"></span><span>Распознавание реквизитов</span></h2><div class="warn">Модуль OCR и извлечения данных ещё не подключён. Ниже доступны редактируемые реквизиты проверки, но значения из загруженных файлов автоматически не извлекаются.</div>
+  return `<section class="panel recognition-panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--chip section-icon" aria-hidden="true"></span><span>Распознавание реквизитов</span></h2><div class="warn">Реквизиты вводятся и уточняются вручную. Данные из файлов автоматически не извлекаются.</div>
   <div class="cols recognition-cols"><section class="recognition-sources"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--folder section-icon" aria-hidden="true"></span><span>Исходные документы</span></h2>${x.docs.map(d=>`<div class="doc"><span class="docname">${esc(d.name)}</span><button class="btn small" onclick="viewDoc('${d.id}')">Просмотреть</button></div>`).join('')||'<p class="muted">Документы ещё не добавлены</p>'}</section><section class="recognition-fields">
   <div class="field"><label for="caseNumber">Номер</label><input id="caseNumber" value="${esc(x.number)}"></div>
   <div class="field"><label for="caseName">Наименование</label><input id="caseName" value="${esc(x.name)}"></div>
@@ -325,12 +332,12 @@ function extract(x) {
 }
 
 function match(x) {
-  return '<div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--layers section-icon" aria-hidden="true"></span><span>Сопоставление позиций</span></h2><div class="warn">Автоматическое связывание товарных позиций ожидает подключения серверного модуля. Система не выполняет сравнение единиц измерения без подтверждённого коэффициента пересчёта.</div>' +
+  return '<div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--layers section-icon" aria-hidden="true"></span><span>Сопоставление позиций</span></h2><div class="warn">Автоматическое сопоставление не выполняется. Проверьте позиции и единицы измерения по документам.</div>' +
     (x.demo ?
       '<div class="scroll"><table class="data-table matching-table"><thead><tr><th class="cell-description">Позиция</th><th class="cell-count">Контракт</th><th class="cell-count">Накладная</th><th class="cell-count">Приёмка</th><th class="cell-status">Состояние</th></tr></thead><tbody><tr><td class="cell-description">Скамейка парковая</td><td class="cell-count">10 шт.</td><td class="cell-count">8 шт.</td><td class="cell-count">10 шт.</td><td class="cell-status">' +
       pill('Требует проверки') +
-      '</td></tr></tbody></table></div><p class="note">Демонстрационное сопоставление из синтетического кейса T02.</p>' :
-      '<div class="empty">Позиции появятся после подключения извлечения и сопоставления данных.</div>') +
+      '</td></tr></tbody></table></div>' :
+      '<div class="empty">Сопоставленные позиции пока отсутствуют.</div>') +
     '</div><div class="actions"><button class="btn primary" onclick="go(\'case\',\'results\')">К результатам →</button></div>'
 }
 
@@ -340,9 +347,8 @@ function results(x) {
     '</strong></div><div class="metric"><span>Сигналы</span><strong>' + x.signals.length +
     '</strong></div><div class="metric"><span>Рассмотренные сигналы</span><strong>' + x.signals.filter(s => [
       'Подтверждено специалистом', 'Не подтверждено'
-    ].includes(s.status)).length + '</strong></div></div>' + (x.demo ?
-      '<div class="warn">Результаты ниже подготовлены для учебного кейса T02 и не получены автоматической обработкой загруженных документов.</div>' :
-      '<div class="warn">Реальная автоматическая сверка ещё не подключена. Отсутствие сигналов здесь не означает, что расхождений нет.</div>'
+    ].includes(s.status)).length + '</strong></div></div>' + (x.demo ? '' :
+      '<div class="warn">Автоматическая сверка не выполняется. Отсутствие сигналов не означает, что расхождений нет.</div>'
       ) +
     '<div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--bell section-icon" aria-hidden="true"></span><span>Реестр расхождений</span></h2><div class="toolbar"><input id="signalSearch" placeholder="Поиск по позиции или типу" oninput="filterSignals()"><select id="signalFilter" onchange="filterSignals()"><option value="">Все статусы</option>' +
     ['Требует проверки', 'В работе', 'Подтверждено специалистом', 'Не подтверждено', 'Недостаточно данных'].map(s =>
@@ -388,7 +394,7 @@ function signalPage() {
       return d ? '<div class="doc"><span>' + esc(d.name) + '</span><button class="btn small" onclick="viewDoc(\'' +
         d.id + '\')">Открыть</button></div>' : ''
     }).join('') +
-    '<p class="note">Точная подсветка фрагментов появится после передачи координат/страниц серверным модулем.</p></div></div><div><div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--users section-icon" aria-hidden="true"></span><span>Рассмотрение специалистом</span></h2><div class="field"><label>Статус</label><select id="signalStatus">' +
+    '<p class="note">Фрагменты не выделяются в документе автоматически.</p></div></div><div><div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--users section-icon" aria-hidden="true"></span><span>Рассмотрение специалистом</span></h2><div class="field"><label>Статус</label><select id="signalStatus">' +
     ['Требует проверки', 'В работе', 'Подтверждено специалистом', 'Не подтверждено', 'Недостаточно данных'].map(t =>
       '<option ' + (s.status === t ? 'selected' : '') + '>' + t + '</option>').join('') +
     '</select></div><div class="field"><label>Комментарий специалиста</label><textarea id="comment" rows="5" placeholder="Укажите основания решения или недостающие документы"></textarea></div><button class="btn primary" onclick="saveSignal()">Сохранить решение</button><p class="note">Подтверждение означает подтверждение документального расхождения, а не установление правонарушения.</p></div><div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--alarm section-icon" aria-hidden="true"></span><span>История рассмотрения</span></h2>' +
@@ -437,7 +443,7 @@ function finishCase() {
 
 function exportQuestions() {
   let x = c(),
-    lines = ['Проверка: ' + (x.number || x.id), 'Демонстрационные данные: ' + (x.demo ? 'да' : 'нет'), ''];
+    lines = ['Проверка: ' + (x.number || x.id), ''];
   x.signals.forEach(s => lines.push(s.id + ' — ' + s.type + ' — ' + s.item + ' — ' + s.status + '\n' + s.explanation +
     '\n'));
   let a = document.createElement('a'),
@@ -519,14 +525,12 @@ function saveDocCategory(id) {
 const demoContents = {
   d1: {
     title: 'Государственный контракт № ГК-2026/0142',
-    lines: ['Предмет: поставка уличных скамеек', 'Позиция 1: Скамейка парковая', 'Количество по контракту: 10 шт.',
-      'Данные синтетические. Документ показан для демонстрации.'
-    ]
+    lines: ['Предмет: поставка уличных скамеек', 'Позиция 1: Скамейка парковая', 'Количество по контракту: 10 шт.']
   },
   d2: {
     title: 'Спецификация к контракту',
     lines: ['Позиция 1: Скамейка парковая', 'Единица измерения: шт.', 'Количество: 10',
-      'Редакция: 1 (демонстрационная)'
+      'Редакция: 1'
     ]
   },
   d3: {
@@ -559,12 +563,12 @@ function viewDoc(id) {
   overlay.id = 'docModal';
   overlay.className = 'modalOverlay';
   overlay.innerHTML =
-    '<div class="modalWindow viewer-window" role="dialog" aria-modal="true" aria-label="Просмотр документа" tabindex="-1"><div class="modalHead"><div><div class="eyebrow">Просмотр документа</div><h2>' +
+    '<div class="modalWindow viewer-window" role="dialog" aria-modal="true" aria-label="Предпросмотр документа" tabindex="-1"><div class="modalHead"><div><div class="eyebrow">Предпросмотр документа</div><h2>' +
     esc(d.name) + '</h2></div><button class="btn" onclick="closeDocModal()">Закрыть ×</button></div><div class="sub">' +
     esc(d.type) + ' · версия ' + esc(d.version) + '</div>' + (demo ?
-      '<div class="warn">Синтетический предпросмотр по тестовому кейсу T02. Это не оригинальный PDF и не результат OCR.</div><div class="paperPreview"><h3>' +
+      '<div class="paperPreview"><h3>' +
       esc(demo.title) + '</h3>' + demo.lines.map(line => '<p>' + esc(line) + '</p>').join('') + '</div>' :
-      '<div class="warn">Оригинальный файл недоступен: в прототипе сохранены только метаданные. Загрузите документ заново для просмотра или подключите серверное хранилище.</div>'
+      '<div class="warn">Оригинальный файл недоступен. Загрузите документ заново для просмотра.</div>'
       ) + '<div class="actions"><button class="btn" onclick="changeDocType(&quot;' + id +
     '&quot;)">Изменить тип</button><button class="btn primary" onclick="closeDocModal()">Готово</button></div></div>';
   overlay.addEventListener('click', e => {
@@ -632,6 +636,7 @@ function render() {
   else home(state.page === 'history')
 }
 render();
+if (presentationMigrated) save();
   </script>
 </body>
 </html>

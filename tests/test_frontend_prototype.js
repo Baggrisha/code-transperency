@@ -10,6 +10,11 @@ const html = fs.readFileSync(prototypePath,'utf8');
 const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(match=>match[1]).join('\n');
 const KEY = 'control-execution-demo-v1';
 const suppliedSource = JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/prototype_source.json'),'utf8'));
+const presentedSource = structuredClone(suppliedSource);
+presentedSource.initial[0].description = 'Поставка уличных скамеек по контракту ГК-2026/0142.';
+presentedSource.demoContents.d1.lines = presentedSource.demoContents.d1.lines.filter(line=>line!=='Данные синтетические. Документ показан для демонстрации.');
+presentedSource.demoContents.d2.lines = presentedSource.demoContents.d2.lines.map(line=>line==='Редакция: 1 (демонстрационная)'?'Редакция: 1':line);
+const visibleText = markup => markup.replace(/<[^>]+>/g,' ');
 
 function setup(saved = new Map(), storageAccess = {}) {
   const storage = new Map(saved), elements = new Map(), listeners = {}, blobs = new Map();
@@ -65,28 +70,31 @@ function setup(saved = new Map(), storageAccess = {}) {
     }};
 }
 
-test('standalone startup renders the supplied demonstration without a server',()=>{
+test('standalone startup renders the supplied case without presentation labels',()=>{
   const app=setup();
   assert.equal(app.evaluate('state.cases.length'),1);
   assert.equal(app.evaluate('state.cases[0].docs.length'),4);
   assert.equal(app.evaluate('state.cases[0].signals.length'),1);
   assert.match(app.element('root').innerHTML,/Проверки контрактов/);
   assert.match(app.element('root').innerHTML,/ГК-2026\/0142/);
-  assert.match(app.element('root').innerHTML,/Демо-кейс/);
+  assert.match(app.element('root').innerHTML,/Открыть проверку/);
+  assert.doesNotMatch(visibleText(app.element('root').innerHTML),/прототип|локальный режим|демо-кейс|демонстрационн|синтетическ|учебный кейс/i);
+  assert.doesNotMatch(html.match(/<title>([\s\S]*?)<\/title>/)?.[1]||'',/прототип|демо/i);
+  assert.doesNotMatch(html.match(/<noscript>([\s\S]*?)<\/noscript>/)?.[1]||'',/прототип|демо/i);
 });
 
-test('the initial case and all four synthetic document previews retain the supplied source values',()=>{
+test('the initial case and four previews retain source data with the approved neutral descriptions',()=>{
   const app=setup();
-  assert.deepEqual(JSON.parse(app.evaluate('JSON.stringify(initial)')),suppliedSource.initial);
-  assert.deepEqual(JSON.parse(app.evaluate('JSON.stringify(state.cases)')),suppliedSource.initial);
-  assert.deepEqual(JSON.parse(app.evaluate('JSON.stringify(demoContents)')),suppliedSource.demoContents);
+  assert.deepEqual(JSON.parse(app.evaluate('JSON.stringify(initial)')),presentedSource.initial);
+  assert.deepEqual(JSON.parse(app.evaluate('JSON.stringify(state.cases)')),presentedSource.initial);
+  assert.deepEqual(JSON.parse(app.evaluate('JSON.stringify(demoContents)')),presentedSource.demoContents);
   assert.equal(app.evaluate('c().history.length'),0);
   assert.equal(app.evaluate('c().signals[0].history.length'),0);
   assert.equal(app.evaluate('c().signals[0].comments.length'),0);
 });
 
-test('overview and recognition render the original form values and case identifier without the subtitle demo suffix',()=>{
-  const app=setup(),original=suppliedSource.initial[0];
+test('overview and recognition retain form values without presentation identifiers or general disclaimers',()=>{
+  const app=setup(),original=presentedSource.initial[0];
   for(const tab of ['overview','extract']){
     app.evaluate(`openCase("DEMO-001");go("case","${tab}")`);
     const markup=app.element('root').innerHTML;
@@ -97,12 +105,13 @@ test('overview and recognition render the original form values and case identifi
     }
     const textarea=[...markup.matchAll(/<textarea\b([^>]*)>([\s\S]*?)<\/textarea>/g)].find(match=>match[1].includes('id="caseDescription"'));
     assert.equal(textarea?.[2],original.description,`${tab}: complete description`);
-    assert.match(markup,/РАБОЧАЯ ОБЛАСТЬ \/ DEMO-001/);
+    assert.equal(markup.match(/<div class="eyebrow">([\s\S]*?)<\/div>/)?.[1],'РАБОЧАЯ ОБЛАСТЬ');
     const subtitle=markup.match(/<p class="sub">([\s\S]*?)<\/p>/)?.[1];
     assert.ok(subtitle);
     assert.doesNotMatch(subtitle,/ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ| · /);
     assert.equal(app.evaluate('c().demo'),true);
-    assert.match(markup,/Контроль исполнения · Демонстрационный интерфейс · Не принимает юридически значимых решений/);
+    assert.doesNotMatch(visibleText(markup),/DEMO-001|прототип|демонстрационн|синтетическ|учебный кейс/i);
+    assert.doesNotMatch(markup,/Система предоставляет информационные сигналы|Не принимает юридически значимых решений/);
   }
 });
 
@@ -118,12 +127,12 @@ test('opening the original demo preserves edited legacy data, uploaded files and
   const stored=setup(app.storage);
   assert.equal(stored.evaluate('state.cases.find(x=>x.id==="DEMO-001").number'),'');
   assert.equal(stored.evaluate('state.cases.length'),2);
-  assert.equal(app.evaluate('initial[0].description'),suppliedSource.initial[0].description);
+  assert.equal(app.evaluate('initial[0].description'),presentedSource.initial[0].description);
   app.evaluate('openOriginalDemo()');
   assert.equal(app.evaluate('state.cases.length'),3);
   assert.notEqual(app.evaluate('c().id'),'DEMO-001');
   const fresh=JSON.parse(app.evaluate('JSON.stringify(c())'));
-  assert.deepEqual({...fresh,id:'DEMO-001'},suppliedSource.initial[0]);
+  assert.deepEqual({...fresh,id:'DEMO-001'},presentedSource.initial[0]);
   for(const item of before)
     assert.deepEqual(JSON.parse(app.evaluate(`JSON.stringify(state.cases.find(x=>x.id===${JSON.stringify(item.id)}))`)),item);
   assert.equal(app.evaluate(`ephemeralFiles[${JSON.stringify(fileId)}].name`),'пользовательский.txt');
@@ -158,17 +167,32 @@ test('all workspace tabs and the separate signal page remain reachable',()=>{
     app.evaluate(`go('case','${tab}')`);
     assert.equal(app.evaluate('state.tab'),tab);
     assert.match(app.element('root').innerHTML,label);
+    assert.doesNotMatch(visibleText(app.element('root').innerHTML),/прототип|локальный режим|демо-кейс|демонстрационн|синтетическ|учебный кейс/i);
   }
   app.evaluate('openSignal("SIG-001")');
   assert.equal(app.evaluate('state.page'),'signal');
   for(const label of ['Основание сигнала','Документы-источники','Рассмотрение специалистом','История рассмотрения'])
     assert.ok(app.element('root').innerHTML.includes(label),label);
+  assert.doesNotMatch(visibleText(app.element('root').innerHTML),/прототип|локальный режим|демо-кейс|демонстрационн|синтетическ|учебный кейс/i);
   app.evaluate('go("case","results")');
   assert.match(app.element('root').innerHTML,/Реестр расхождений/);
 });
 
-test('case metadata and selected screen survive reopening the original localStorage key',()=>{
-  const app=setup();
+test('factory descriptions migrate narrowly while metadata and selected screen survive reopening',()=>{
+  const original=suppliedSource.initial[0];
+  const legacy={cases:[
+    structuredClone(original),
+    {...structuredClone(original),id:'DEMO-SHORT',description:'Синтетические данные.'},
+    {...structuredClone(original),id:'DEMO-CUSTOM',description:'Моя проверенная правка'},
+    {...structuredClone(original),id:'DEMO-EMPTY',description:''},
+    {...structuredClone(original),id:'USER-OLD-LABEL',demo:false},
+  ],selected:'DEMO-CUSTOM',tab:'extract',page:'case',signal:null};
+  const expected=structuredClone(legacy);
+  expected.cases[0].description=presentedSource.initial[0].description;
+  expected.cases[1].description=presentedSource.initial[0].description;
+  const app=setup(new Map([[KEY,JSON.stringify(legacy)]]));
+  assert.deepEqual(JSON.parse(app.storage.get(KEY)),expected);
+  assert.deepEqual(JSON.parse(app.evaluate('JSON.stringify(state)')),expected);
   app.create();
   app.evaluate('go("case","overview")');
   app.element('caseNumber').value='ГК-42';
@@ -190,7 +214,7 @@ test('newly uploaded files do not acquire the demonstration comparison or signal
   assert.equal(app.evaluate('c().demo'),false);
   assert.equal(app.evaluate('c().signals.length'),0);
   app.evaluate('go("case","match")');
-  assert.match(app.element('root').innerHTML,/подключени[яе].*сопоставления|не подключён|ещё не подключен/);
+  assert.match(app.element('root').innerHTML,/Автоматическое сопоставление не выполняется/);
   assert.doesNotMatch(app.element('root').innerHTML,/<td>10 шт\.<\/td>/);
   app.evaluate('go("case","results")');
   assert.match(app.element('root').innerHTML,/Отсутствие сигналов.*не означает/);
@@ -275,11 +299,11 @@ test('uploaded originals can be viewed in-session but reopening does not fabrica
   assert.equal(restored.opened.length,0);
 });
 
-test('demonstration document previews identify synthetic content explicitly',()=>{
+test('document previews keep their evidence values without claiming OCR or original file availability',()=>{
   const app=setup();app.evaluate('openCase("DEMO-001");viewDoc("d3")');
   const markup=app.element('docModal').innerHTML;
-  assert.match(markup,/Синтетический предпросмотр/);
-  assert.match(markup,/не оригинальный PDF/);
+  assert.match(markup,/Предпросмотр документа/);
+  assert.doesNotMatch(visibleText(markup),/прототип|демонстрационн|синтетическ|учебный кейс|оригинальный PDF|результат OCR/i);
   assert.match(markup,/8 шт\./);
   assert.equal(app.opened.length,0);
 });
@@ -334,14 +358,16 @@ test('completion respects the unresolved-signal confirmation and the archive con
   assert.equal(setup(app.storage).evaluate('state.cases.find(item=>item.id==="DEMO-001").status'),'Завершена');
 });
 
-test('question export preserves the selected case, signal explanation and demonstration label',async()=>{
+test('question export preserves the selected case and signal explanation without presentation labels',async()=>{
   const app=setup();app.evaluate('openCase("DEMO-001");exportQuestions()');
   assert.equal(app.downloads.length,1);
   assert.equal(app.downloads[0].download,'questions-DEMO-001.txt');
   const blob=app.blobs.get(app.downloads[0].href),content=await blob.text();
   assert.match(blob.type,/text\/plain/);
-  for(const text of ['ГК-2026/0142','Демонстрационные данные: да','SIG-001','Несоответствие количества','Требует проверки','Это сигнал для проверки'])
+  for(const text of ['ГК-2026/0142','SIG-001','Несоответствие количества','Требует проверки','Это сигнал для проверки'])
     assert.ok(content.includes(text),text);
+  assert.doesNotMatch(content,/Демонстрационные данные/);
+  assert.equal(app.evaluate('c().demo'),true);
 });
 
 test('invalid stored JSON recovers the demonstration without network calls',()=>{
