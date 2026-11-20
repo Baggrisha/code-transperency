@@ -16,6 +16,7 @@ import pdfplumber
 from fastapi.testclient import TestClient
 
 from kontrol.api import create_app
+from kontrol.exports import report_pdf
 from tests.oracle import load_cases
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -166,6 +167,86 @@ class BackendIntegration(unittest.TestCase):
             self.assertIn(expected, text)
         exports = self.client.get(f'/api/cases/{case_id}/events', params={'action': 'report_exported'}).json()
         self.assertEqual([{'run_id': run['id'], 'format': 'pdf'}], [e['payload'] for e in exports])
+
+    def test_pdf_keeps_typical_document_and_signal_ids_and_review_statuses_intact(self):
+        case_id, options = self.load_fixture('T02')
+        run = self.run_case(case_id, options)
+        signal_id = 'sig_' + '0' * 20
+        document_id = 'doc-' + '0' * 20
+        run['result']['signals'][0]['id'] = signal_id
+        run['reviews'] = [
+            {'signal_id': signal_id, 'status': status, 'reviewer': 'Мария',
+             'comment': 'Проверено', 'created_at': '2026-11-20T12:00:00+00:00'}
+            for status in ('confirmed', 'needs_review', 'resolved', 'dismissed')
+        ]
+        case = {'title': 'Длинные идентификаторы', 'documents': [
+            {'document': {'id': document_id, 'type': 'delivery', 'number': 'GK-2026-001',
+                          'date': '2026-11-20', 'filename': 'накладная.pdf'}},
+            {'document': {'id': 'Ж' * 200, 'type': 'delivery', 'number': 'Н-2',
+                          'date': '2026-11-20', 'filename': 'file.pdf'}},
+        ]}
+        with pdfplumber.open(io.BytesIO(report_pdf(run, case))) as pdf:
+            text = '\n'.join(page.extract_text() or '' for page in pdf.pages)
+            words = [word['text'] for page in pdf.pages for word in page.extract_words()]
+        documents = text.split('Документы комплекта', 1)[1].split('Позиции', 1)[0]
+        history = text.split('История рассмотрения', 1)[1].split('История учёта документов', 1)[0]
+        self.assertIn(document_id, documents)
+        self.assertIn('GK-2026-001', documents)
+        self.assertIn('Автор', history)
+        self.assertEqual(200, documents.count('Ж'))
+        self.assertIn(signal_id, history)
+        for word in ('Подтверждено', 'Требует', 'рассмотрения', 'Устранено', 'Отклонено'):
+            self.assertIn(word, words)
+            self.assertIn(word, history)
+
+    def test_pdf_review_history_heading_stays_with_table_across_page_boundaries(self):
+        case_id, options = self.load_fixture('T02')
+        run = self.run_case(case_id, options)
+        signal = run['result']['signals'][0]
+        run['result']['signals'] = [signal]
+        run['reviews'] = [{'signal_id': signal['id'], 'status': 'confirmed', 'reviewer': 'Мария',
+                           'comment': 'Готово', 'created_at': '2026-11-20T12:00:00+00:00'}]
+        signal['sources'] = [{'document_id': 'doc', 'excerpt': ''}]
+        heading_pages = set()
+        for count in range(10, 61, 2):
+            with self.subTest(source_lines=count):
+                signal['sources'][0]['excerpt'] = '\n'.join(['Исходная строка'] * count)
+                with pdfplumber.open(io.BytesIO(report_pdf(run))) as pdf:
+                    pages = [page.extract_text() or '' for page in pdf.pages]
+                page_index = next(i for i, text in enumerate(pages) if 'История рассмотрения' in text)
+                heading_pages.add(page_index)
+                after_heading = pages[page_index].split('История рассмотрения', 1)[1]
+                self.assertIn('Комментарий', after_heading)
+                self.assertIn('Готово', after_heading)
+        self.assertGreaterEqual(len(heading_pages), 2)
+
+    def test_pdf_review_table_splits_long_cyrillic_comment_and_repeats_header(self):
+        case_id, options = self.load_fixture('T02')
+        run = self.run_case(case_id, options)
+        signal_id = run['result']['signals'][0]['id']
+        run['reviews'] = [
+            {'signal_id': signal_id, 'status': 'confirmed', 'reviewer': 'Мария',
+             'comment': 'началометки ' + 'проверка ' * 600 + 'конецметки',
+             'created_at': '2026-11-20T12:00:00+00:00'},
+            {'signal_id': signal_id, 'status': 'resolved', 'reviewer': 'Мария',
+             'comment': 'Готово', 'created_at': '2026-11-20T12:01:00+00:00'},
+        ]
+        with pdfplumber.open(io.BytesIO(report_pdf(run))) as pdf:
+            pages = [page.extract_text() or '' for page in pdf.pages]
+        self.assertGreaterEqual(len(pages), 3)
+        history_start = next(i for i, text in enumerate(pages) if 'История рассмотрения' in text)
+        history_end = next(i for i, text in enumerate(pages) if 'История учёта документов' in text)
+        history_pages = pages[history_start:history_end + 1]
+        history_pages[0] = history_pages[0].split('История рассмотрения', 1)[1]
+        history_pages[-1] = history_pages[-1].split('История учёта документов', 1)[0]
+        history_text = '\n'.join(history_pages)
+        self.assertIn('началометки', history_text)
+        self.assertIn('конецметки', history_text)
+        self.assertEqual(600, history_text.split().count('проверка'))
+        continuation_pages = [page for page in history_pages if 'проверка' in page]
+        self.assertGreaterEqual(len(continuation_pages), 2)
+        for page in continuation_pages:
+            self.assertIn('Сигнал', page)
 
     def test_all_export_formats_succeed_for_clean_run(self):
         case_id, options = self.load_fixture('T03')

@@ -139,7 +139,7 @@ def report_pdf(run: dict, case: dict | None = None) -> bytes:
             d = record["document"]
             rows.append([Paragraph(esc(v), cell) for v in (d.get("id"), d.get("type"), d.get("number"),
                                                          d.get("date"), d.get("filename") or record.get("original_name"))])
-        story.append(_table(rows, [32 * mm, 22 * mm, 34 * mm, 22 * mm, 64 * mm], regular))
+        story.append(_table(rows, [50 * mm, 25 * mm, 30 * mm, 22 * mm, 47 * mm], regular))
 
     story.append(Paragraph("Позиции", h2))
     rows = [[Paragraph(f"<b>{x}</b>", cell) for x in ("Позиция", "Ед.", "По условиям", "Поставлено", "Принято", "Данных хватает")]]
@@ -174,12 +174,14 @@ def report_pdf(run: dict, case: dict | None = None) -> bytes:
 
     history = run.get("reviews", [])
     if history:
-        story.append(Paragraph("История рассмотрения", h2))
-        rows = [[Paragraph(f"<b>{x}</b>", cell) for x in ("Время", "Сигнал", "Статус", "Проверяющий", "Комментарий")]]
+        history_heading = Paragraph("История рассмотрения", h2)
+        history_heading.keepWithNext = True
+        story.append(history_heading)
+        rows = [[Paragraph(f"<b>{x}</b>", cell) for x in ("Время", "Сигнал", "Статус", "Автор", "Комментарий")]]
         for r in history:
             rows.append([Paragraph(esc(v), cell) for v in (_when(r["created_at"]), r["signal_id"],
                                                          REVIEW_NAMES.get(r["status"], r["status"]), r["reviewer"], r["comment"])])
-        story.append(_table(rows, [28 * mm, 40 * mm, 26 * mm, 32 * mm, 48 * mm], regular))
+        story.append(_table(rows, [27 * mm, 50 * mm, 32 * mm, 28 * mm, 37 * mm], regular))
 
     story.append(Paragraph("История учёта документов", h2))
     for a in result["audit"]:
@@ -207,7 +209,7 @@ def report_pdf(run: dict, case: dict | None = None) -> bytes:
 def _table(rows: list, widths: list, font: str):
     from reportlab.lib import colors
     from reportlab.platypus import Table, TableStyle
-    table = Table(rows, colWidths=widths, repeatRows=1)
+    table = Table(rows, colWidths=widths, repeatRows=1, splitInRow=1)
     table.setStyle(TableStyle([("FONTNAME", (0, 0), (-1, -1), font), ("VALIGN", (0, 0), (-1, -1), "TOP"),
                                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eaf1f6")),
                                ("LINEBELOW", (0, 0), (-1, -1), 0.4, colors.HexColor("#d7e3ec"))]))

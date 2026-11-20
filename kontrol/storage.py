@@ -310,7 +310,7 @@ class Store:
             document.source = original.source.model_copy(deep=True) if original.source else None
             supplied_confidence = document.fields_confidence
             document.fields_confidence = _retained_confidence(original.fields_confidence, supplied_confidence)
-            changes = []
+            changes, confirmations = [], []
             for field in sorted(set(discarded_confidence_fields)):
                 value = document.fields_confidence.pop(field)
                 changes.append(f"удалён ошибочный ключ уверенности документа {field!r}: {value}")
@@ -327,9 +327,11 @@ class Store:
                 elif changed:
                     document.fields_confidence[field] = 0.0
                 lowered = document.fields_confidence.get(field, 1.0) < original.fields_confidence.get(field, 1.0)
-                if changed or confirmed:
+                if changed:
                     state = "подтверждено" if confirmed else "не подтверждено"
                     changes.append(f"{field}: {before} → {after} ({state})")
+                elif confirmed:
+                    confirmations.append(f"{field}: {after}")
                 elif lowered:
                     changes.append(f"{field}: уверенность {original.fields_confidence.get(field, 1.0)} → "
                                    f"{document.fields_confidence[field]}")
@@ -375,9 +377,15 @@ class Store:
                     if changed or created or confirmed or lowered:
                         old_ref = (previous.field_sources.get(field) or previous.source) if previous else None
                         excerpt = old_ref.excerpt + "\n" if old_ref and old_ref.excerpt else ""
-                        state = "подтверждено" if confirmed else "не подтверждено"
-                        excerpt += (f"Ручное изменение ({reviewer}): {field}: {before} → {after} "
-                                    f"({state}). {comment}")
+                        if changed or created or previous is None:
+                            state = "подтверждено" if confirmed else "не подтверждено"
+                            excerpt += (f"Ручное изменение ({reviewer}): {field}: {before} → {after} "
+                                        f"({state}). {comment}")
+                        elif confirmed:
+                            excerpt += f"Подтверждение ({reviewer}): {field}: {after}. {comment}"
+                        else:
+                            excerpt += (f"Уверенность снижена ({reviewer}): {field}: {old_confidence} → "
+                                        f"{item.confidence[field]}. {comment}")
                         item.field_sources[field] = SourceRef(document_id=document_id, filename=document.filename,
                             page=old_ref.page if old_ref else None, row=old_ref.row if old_ref else None,
                             field=field, excerpt=excerpt)
@@ -391,9 +399,12 @@ class Store:
                         item.field_sources[field] = SourceRef(document_id=document_id, filename=document.filename,
                             page=old_ref.page if old_ref else None, row=old_ref.row if old_ref else None,
                             field=field, excerpt=excerpt)
-            if changes:
+            if changes or confirmations:
                 ref = document.source or SourceRef(document_id=document_id, filename=document.filename)
-                ref.excerpt += f"\nРучное изменение ({reviewer}): {'; '.join(changes)}. {comment}"
+                if changes:
+                    ref.excerpt += f"\nРучное изменение ({reviewer}): {'; '.join(changes)}. {comment}"
+                if confirmations:
+                    ref.excerpt += f"\nПодтверждение ({reviewer}): {'; '.join(confirmations)}. {comment}"
                 document.source = ref
             revision = expected_revision + 1
             data = document.model_dump_json()

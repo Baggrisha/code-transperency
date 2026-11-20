@@ -423,6 +423,182 @@ class ExtractionTests(unittest.TestCase):
         self.assertTrue(any("OCR_LANGUAGE_MISSING" in w for w in result.warnings))
         self.assertEqual(result.document.items, [])
 
+    def test_ocr_missing_tsv_config_is_reported_as_failure(self):
+        from PIL import Image
+
+        path = self.root / "scan.png"
+        Image.new("RGB", (320, 120), "white").save(path)
+
+        def run(command, **kwargs):
+            if command[1] == "--list-langs":
+                return subprocess.CompletedProcess(command, 0, "List of available languages (1):\neng\n", "")
+            return subprocess.CompletedProcess(
+                command, 0, "Delivery No N1\nContract: K1\n", "read_params_file: Can't open tsv\n",
+            )
+
+        with patch("kontrol.extract.shutil.which", return_value="/usr/bin/tesseract"), \
+                patch("kontrol.extract.subprocess.run", side_effect=run):
+            result = extract_document(path, document_type="delivery", metadata={"ocr_language": "eng"})
+
+        self.assertEqual(result.text, "")
+        self.assertFalse(result.document.is_complete)
+        self.assertTrue(result.needs_review)
+        self.assertEqual(result.document.items, [])
+        self.assertTrue(any("OCR_FAILED" in warning and "configs/tsv" in warning for warning in result.warnings))
+
+    def test_valid_empty_ocr_tsv_is_not_a_configuration_failure(self):
+        from PIL import Image
+
+        path = self.root / "blank.png"
+        Image.new("RGB", (320, 120), "white").save(path)
+        header = "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n"
+
+        def run(command, **kwargs):
+            if command[1] == "--list-langs":
+                return subprocess.CompletedProcess(command, 0, "List of available languages (1):\neng\n", "")
+            return subprocess.CompletedProcess(command, 0, header, "")
+
+        with patch("kontrol.extract.shutil.which", return_value="/usr/bin/tesseract"), \
+                patch("kontrol.extract.subprocess.run", side_effect=run):
+            result = extract_document(path, document_type="delivery", metadata={"ocr_language": "eng"})
+
+        self.assertEqual(result.text, "")
+        self.assertTrue(result.needs_review)
+        self.assertFalse(result.document.is_complete)
+        self.assertTrue(any("OCR_REVIEW_REQUIRED" in warning for warning in result.warnings))
+        self.assertFalse(any("OCR_FAILED" in warning for warning in result.warnings))
+
+    def test_ocr_tax_basis_from_header_points_to_header_and_needs_review(self):
+        from PIL import Image
+
+        path = self.root / "scan.png"
+        Image.new("RGB", (320, 120), "white").save(path)
+        text = (
+            "Накладная № N-1 от 20.10.2026\nКонтракт: K1\n"
+            "Артикул;Наименование;Количество;Ед. изм.;Цена с НДС\nA1;Стул;1;шт;100"
+        )
+        with patch("kontrol.extract._ocr", return_value=(text, 0.96, ["OCR_REVIEW_REQUIRED"])):
+            result = extract_document(path, document_type="delivery")
+
+        item = result.document.items[0]
+        self.assertTrue(item.tax_included)
+        self.assertLess(item.confidence["tax_included"], 0.50)
+        self.assertEqual(item.field_sources["tax_included"].page, 1)
+        self.assertEqual(item.field_sources["tax_included"].row, 3)
+        self.assertIn("Цена с НДС", item.field_sources["tax_included"].excerpt)
+
+    def test_ocr_identifiers_can_be_corrected_and_explicitly_confirmed(self):
+        from PIL import Image, ImageDraw
+        from kontrol.storage import Store
+
+        path = self.root / "scan.png"
+        image = Image.new("RGB", (320, 120), "white")
+        ImageDraw.Draw(image).text((10, 10), "A1", fill="black")
+        image.save(path)
+        text = (
+            "Накладная № N-1 от 20.10.2026\nКонтракт: K1\n"
+            "Артикул;Наименование;Количество;Ед. изм.;Цена\nAl;Стул;1;шт;100"
+        )
+        with patch("kontrol.extract._ocr", return_value=(text, 0.96, ["OCR_REVIEW_REQUIRED"])):
+            document = extract_document(path, document_type="delivery").document
+
+        store = Store(self.root / "review-data")
+        case_id = store.create_case("OCR review")["id"]
+        store.add_document(case_id, document)
+        corrected = document.model_copy(deep=True)
+        item = corrected.items[0]
+        item.sku = "A1"
+        updated = store.update_document(
+            case_id, document.id, corrected, 1, "reviewer", "Сверено с исходным изображением",
+            confirmed_items={item.line_id: ["sku", "position_id"]},
+        )["document"]["items"][0]
+        self.assertEqual(updated["sku"], "A1")
+        self.assertEqual(updated["confidence"]["sku"], 1.0)
+        self.assertEqual(updated["confidence"]["position_id"], 1.0)
+        self.assertLess(updated["confidence"]["quantity"], 0.50)
+        self.assertEqual(updated["field_sources"]["sku"]["page"], 1)
+
+    def test_ocr_identifiers_and_critical_fields_require_source_review_at_minimum_threshold(self):
+        from PIL import Image, ImageDraw
+        from kontrol.engine import run_check
+        from kontrol.models import CheckRequest
+
+        contract = extract_document(self.write(
+            "contract.csv",
+            "Contract No K1 dated 2026-10-01\nContract: K1\nCurrency: RUB\nTax included: yes\n"
+            "sku;name;quantity;unit;price\nAl;Bench;10;piece;1200\n",
+        )).document
+        metadata_lines = [
+            ["Delivery", "No", "N1", "dated", "2026-10-20"],
+            ["Contract:", "K1"],
+            ["Currency:", "RUB"],
+            ["Tax", "included:", "yes"],
+            ["VAT", "rate:", "20"],
+            ["Discount", "percent:", "5"],
+            ["Deadline:", "2026-11-05"],
+        ]
+        for has_sku in (True, False):
+            with self.subTest(has_sku=has_sku):
+                path = self.root / f"scan-{has_sku}.png"
+                image = Image.new("RGB", (900, 300), "white")
+                draw = ImageDraw.Draw(image)
+                for index, line in enumerate(metadata_lines):
+                    draw.text((5, 5 + index * 20), " ".join(line), fill="black")
+                draw.text((5, 165), "sku   name   quantity   unit   price", fill="black")
+                draw.text((5, 185), "A1    Bench  8          piece  1200", fill="black")
+                image.save(path)
+
+                headers = ["name", "quantity", "unit", "price"]
+                values = ["Bench", "8", "piece", "1200"]
+                if has_sku:
+                    headers.insert(0, "sku")
+                    values.insert(0, "Al")  # Simulate OCR confusing digit 1 with lowercase l.
+                tsv = ["level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext"]
+                for line_number, words in enumerate([*metadata_lines, headers, values], 1):
+                    left = 0
+                    for word_number, word in enumerate(words, 1):
+                        width = len(word) * 7
+                        tsv.append(f"5\t1\t1\t1\t{line_number}\t{word_number}\t{left}\t0\t{width}\t20\t96\t{word}")
+                        left += 140 if line_number > len(metadata_lines) else width + 7
+
+                def run(command, **kwargs):
+                    if command[1] == "--list-langs":
+                        return subprocess.CompletedProcess(command, 0, "List of available languages (1):\neng\n", "")
+                    return subprocess.CompletedProcess(command, 0, "\n".join(tsv), "")
+
+                with patch("kontrol.extract.shutil.which", return_value="/usr/bin/tesseract"), \
+                        patch("kontrol.extract.subprocess.run", side_effect=run):
+                    result = extract_document(path, metadata={"ocr_language": "eng"})
+
+                item = result.document.items[0]
+                self.assertEqual(item.sku, "Al" if has_sku else None)
+                self.assertTrue(result.needs_review)
+                self.assertFalse(result.document.is_complete)
+                for key in ("type", "number", "contract_id", "date", "deadline"):
+                    self.assertLess(result.document.fields_confidence[key], 0.50)
+                for key in ("position_id", "sku", "name", "quantity", "unit_price",
+                            "currency", "tax_included", "vat_rate", "discount_percent"):
+                    self.assertLess(item.confidence[key], 0.50)
+                self.assertEqual(item.field_sources["sku"].filename, path.name)
+                self.assertEqual(item.field_sources["sku"].page, 1)
+                self.assertIn("Al" if has_sku else "Bench", item.field_sources["sku"].excerpt)
+                self.assertTrue(any("OCR_REVIEW_REQUIRED" in warning and "артикул" in warning
+                                    and "оригинал" in warning and "страниц" in warning
+                                    for warning in result.warnings))
+
+                # Confirm document metadata and position absence, but not the OCR SKU.
+                reviewed = result.document.model_copy(deep=True, update={"fields_confidence": {}, "is_complete": True})
+                reviewed.items[0].confidence["position_id"] = 1.0
+                reviewed.items[0].confidence["name"] = 1.0
+                checked = run_check(CheckRequest(
+                    documents=[contract, reviewed], as_of="2026-10-22",
+                    required_types=["contract", "delivery"], confidence_threshold=0.50,
+                ))
+                match = next(match for match in checked.matches if match.document_id == reviewed.id)
+                self.assertEqual(match.method, "sku" if has_sku else "exact_name")
+                self.assertEqual(match.state, "needs_review")
+                self.assertIsNone(match.target_line_id)
+
     @unittest.skipUnless(shutil.which("tesseract"), "Tesseract is optional")
     def test_real_english_ocr_reads_digits_but_requires_review(self):
         from PIL import Image, ImageDraw, ImageFont

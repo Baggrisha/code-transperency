@@ -29,6 +29,8 @@ MAX_FILE_BYTES = 25 * 1024 * 1024
 MAX_PAGES = 100
 MAX_OCR_PAGES = 20
 MAX_ROWS = 10000
+# Below the minimum supported comparison threshold (0.50); OCR needs review even when it is lowered.
+_OCR_CONFIDENCE_CAP = 0.49
 SUPPORTED_EXTENSIONS = {".json", ".txt", ".csv", ".tsv", ".docx", ".pdf", ".png", ".jpg", ".jpeg", ".tif", ".tiff"}
 DOCUMENT_TYPES = {"contract", "specification", "delivery", "acceptance", "amendment"}
 
@@ -193,9 +195,14 @@ def _ocr(path: Path, language: str) -> tuple[str, float, list[str]]:
         return "", 0.0, ["OCR_TIMEOUT: превышено время распознавания страницы; требуется ручной ввод."]
     except (OSError, subprocess.CalledProcessError):
         return "", 0.0, ["OCR_FAILED: распознать скан не удалось; требуется ручной ввод."]
+    reader = csv.DictReader(io.StringIO(result.stdout), delimiter="\t")
+    tsv_columns = {"level", "page_num", "block_num", "par_num", "line_num", "word_num",
+                   "left", "top", "width", "height", "conf", "text"}
+    if not tsv_columns.issubset(reader.fieldnames or []):
+        return "", 0.0, ["OCR_FAILED: Tesseract вернул некорректный TSV. Проверьте его конфигурацию, в том числе configs/tsv в каталоге tessdata (TESSDATA_PREFIX); требуется ручной ввод."]
     groups: dict[tuple[str, ...], list[dict[str, str]]] = {}
     confidences = []
-    for word in csv.DictReader(io.StringIO(result.stdout), delimiter="\t"):
+    for word in reader:
         if not (word.get("text") or "").strip():
             continue
         try:
@@ -515,6 +522,7 @@ def _items(parsed: Parsed, doc_id: str, filename: str, defaults: dict[str, Any])
         mapping: dict[int, str] = {}
         ambiguous_columns: set[str] = set()
         price_included_from_header: bool | None = None
+        price_header_source: SourceRef | None = None
         for row_index, cells in enumerate(table.rows, 1):
             if _is_header(cells):
                 mapping = _header_map(cells)
@@ -529,6 +537,12 @@ def _items(parsed: Parsed, doc_id: str, filename: str, defaults: dict[str, Any])
                             price_included_from_header = False
                         elif "с ндс" in label:
                             price_included_from_header = True
+                        if table.ocr_confidence is not None and ("без ндс" in label or "с ндс" in label):
+                            header_row = table.row_numbers[row_index - 1] if table.row_numbers else row_index
+                            price_header_source = SourceRef(
+                                document_id=doc_id, filename=filename, page=table.page, row=header_row,
+                                field="tax_included", excerpt=" | ".join(cells)[:1800],
+                            )
                 continue
             if not mapping or not any(c.strip() for c in cells):
                 continue
@@ -542,10 +556,25 @@ def _items(parsed: Parsed, doc_id: str, filename: str, defaults: dict[str, Any])
                 values["tax_included"] = price_included_from_header
             confidence: dict[str, float] = {}
             fields_sources: dict[str, SourceRef] = {}
+            if parsed.ocr:
+                # Document-wide defaults may come from OCR, including on another PDF page.
+                for key, value in defaults.items():
+                    if value is not None:
+                        confidence[key] = min(parsed.ocr_confidence, _OCR_CONFIDENCE_CAP)
+                        fields_sources[key] = SourceRef(document_id=doc_id, filename=filename, field=key)
+            if table.ocr_confidence is not None:
+                # An unrecognized identifier column is not proof that the identifier is absent.
+                for key in ("position_id", "sku"):
+                    confidence[key] = 0.0
+                    fields_sources[key] = source.model_copy(update={"field": key})
+                if price_included_from_header is not None:
+                    confidence["tax_included"] = min(table.ocr_confidence, _OCR_CONFIDENCE_CAP)
+                    if price_header_source is not None:
+                        fields_sources["tax_included"] = price_header_source
             for col, key in mapping.items():
                 value = cells[col].strip() if col < len(cells) else ""
                 fields_sources[key] = source.model_copy(update={"field": key})
-                base_conf = min(table.confidence_cap, min(0.85, table.ocr_confidence) if table.ocr_confidence is not None else 0.99)
+                base_conf = min(table.confidence_cap, min(_OCR_CONFIDENCE_CAP, table.ocr_confidence) if table.ocr_confidence is not None else 0.99)
                 confidence[key] = base_conf
                 if not value or value in {"—", "–", "-", "?", "не указано"}:
                     values[key] = None
@@ -718,7 +747,11 @@ def extract_document(path: Path, *, document_type: str | None = None,
             missing.append("pages")
             warnings.append(f"PAGE_COUNT_MISMATCH: ожидается {expected} страниц, получено {parsed.pages}.")
     if parsed.ocr:
-        warnings.append("OCR_REVIEW_REQUIRED: перед сверкой подтвердите извлечённые значения и реквизиты по оригиналу.")
+        warnings.append(
+            "OCR_REVIEW_REQUIRED: откройте оригинал и на каждой странице посимвольно сверьте номера документа и "
+            "контракта, даты, номера позиций и артикулы (в том числе нераспознанные), наименования, единицы, "
+            "количества, цены, суммы, валюту и НДС. Распознанные строки и фрагменты — не изображение оригинала."
+        )
     if explicit:
         warnings.append("METADATA_OVERRIDE: часть реквизитов задана пользователем; эти значения не являются результатом распознавания.")
     source = SourceRef(document_id=doc_id, filename=path.name, page=1 if parsed.pages else None,
@@ -726,8 +759,13 @@ def extract_document(path: Path, *, document_type: str | None = None,
     complete = not missing and not parsed.ocr and not parsed.incomplete and not any("EMPTY_PAGE" in w or "не включена" in w or "не прошли" in w for w in warnings)
     if explicit.get("is_complete") is False:
         complete = False
-    confidence = {key: min(parsed.ocr_confidence, 0.85) if parsed.ocr else 0.99
+    confidence = {key: min(parsed.ocr_confidence, _OCR_CONFIDENCE_CAP) if parsed.ocr else 0.99
                   for key in ("number", "contract_id", "date") if values.get(key)}
+    if parsed.ocr:
+        confidence.update({key: min(parsed.ocr_confidence, _OCR_CONFIDENCE_CAP)
+                           for key in extracted if key not in explicit})
+        if "type" not in explicit:
+            confidence["type"] = min(parsed.ocr_confidence, _OCR_CONFIDENCE_CAP)
     values.update(id=doc_id, type=dtype, items=items, filename=path.name, content_hash=digest,
                   source=source, actual_pages=parsed.pages, extraction_method=parsed.method,
                   extraction_warnings=list(dict.fromkeys(warnings)), missing_fields=list(dict.fromkeys(missing)),

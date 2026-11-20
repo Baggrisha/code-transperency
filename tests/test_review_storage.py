@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import copy
+import io
 import json
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import pdfplumber
 from fastapi.testclient import TestClient
 
 from kontrol.api import create_app
@@ -115,7 +117,47 @@ class StoreReviewTests(unittest.TestCase):
                 self.assertIn('Reviewer', ref['excerpt'])
                 self.assertIn('Checked against source', ref['excerpt'])
         self.assertIn('Original quantity is 8', doc['items'][0]['field_sources']['quantity']['excerpt'])
+        self.assertIn('Ручное изменение (Reviewer): quantity: 8 → 10 (подтверждено)',
+                      doc['items'][0]['field_sources']['quantity']['excerpt'])
+        self.assertIn('Подтверждение (Reviewer): unit_price:', doc['items'][0]['field_sources']['unit_price']['excerpt'])
+        self.assertNotIn('Ручное изменение', doc['items'][0]['field_sources']['unit_price']['excerpt'])
+        self.assertIn('Подтверждение (Reviewer): date:', doc['source']['excerpt'])
+        self.assertNotIn('Ручное изменение', doc['source']['excerpt'])
         self.assertEqual('Original row evidence', doc['items'][0]['source']['excerpt'])
+
+    def test_unchanged_confirmation_preserves_sources_and_version_history(self):
+        result = self.update(self.original, confirmed_fields=['date'],
+                             confirmed_items={'line-1': ['quantity']})
+        doc = result['document']
+        field_source = doc['items'][0]['field_sources']['quantity']
+        self.assertEqual(1.0, doc['items'][0]['confidence']['quantity'])
+        self.assertEqual((1, 4, 'quantity'), (field_source['page'], field_source['row'], field_source['field']))
+        self.assertIn('Original quantity is 8', field_source['excerpt'])
+        self.assertIn('Подтверждение (Reviewer): quantity: 8', field_source['excerpt'])
+        self.assertIn('Checked against source', field_source['excerpt'])
+        self.assertNotIn('Ручное изменение', field_source['excerpt'])
+        self.assertIn('Original document evidence', doc['source']['excerpt'])
+        self.assertIn('Подтверждение (Reviewer): date: 2026-01-01', doc['source']['excerpt'])
+        self.assertNotIn('Ручное изменение', doc['source']['excerpt'])
+        history = self.store.document_history(self.case_id, 'doc-1')
+        self.assertEqual([1, 2], [version['revision'] for version in history])
+        self.assertEqual(self.original.model_dump(mode='json'), history[0]['document'])
+        self.assertEqual(doc, history[1]['document'])
+        self.assertEqual(('Reviewer', 'Checked against source'), (history[1]['reviewer'], history[1]['comment']))
+
+    def test_changed_and_confirmed_document_fields_are_distinct_in_same_audit(self):
+        edited = self.original.model_copy(deep=True)
+        edited.number = 'ACT-2'
+        doc = self.update(edited, confirmed_fields=['number', 'date'])['document']
+        excerpt = doc['source']['excerpt']
+        change = next(line for line in excerpt.splitlines() if line.startswith('Ручное изменение'))
+        confirmation = next(line for line in excerpt.splitlines() if line.startswith('Подтверждение'))
+        self.assertIn('number: ACT-1 → ACT-2 (подтверждено)', change)
+        self.assertNotIn('date:', change)
+        self.assertIn('date: 2026-01-01', confirmation)
+        self.assertNotIn('number:', confirmation)
+        self.assertIn('Checked against source', change)
+        self.assertIn('Checked against source', confirmation)
 
     def test_confidence_cannot_be_raised_or_deleted_without_confirmation(self):
         edited = self.original.model_copy(deep=True)
@@ -128,6 +170,9 @@ class StoreReviewTests(unittest.TestCase):
         self.assertEqual(0.2, doc['items'][0]['confidence']['quantity'])
         self.assertEqual(0.4, doc['items'][0]['confidence']['line_id'])
         self.assertIn('quantity', doc['items'][0]['field_sources'])
+        excerpt = doc['items'][0]['field_sources']['quantity']['excerpt']
+        self.assertIn('Уверенность снижена (Reviewer): quantity: 1.0 → 0.2', excerpt)
+        self.assertNotIn('Ручное изменение', excerpt)
 
     def test_removing_unknown_confidence_keys_is_explicit_audited_and_versioned(self):
         original = self.original.model_copy(deep=True)
@@ -380,6 +425,50 @@ class ReviewAPITests(unittest.TestCase):
         history = self.client.get(path + '/history').json()
         self.assertEqual(record['document'], history[0]['document'])
 
+    def test_confirming_unchanged_quantity_is_visible_in_report_without_false_edit(self):
+        request = copy.deepcopy(next(c for c in load_cases() if c['id'] == 'T02')['request'])
+        for document in request['documents']:
+            created = self.client.post(f'/api/cases/{self.case_id}/structured', json=document)
+            self.assertEqual(201, created.status_code, created.text)
+        document = request['documents'][1]
+        item = document['items'][0]
+        path = f'/api/cases/{self.case_id}/documents/{document["id"]}'
+        updated = self.client.put(path, json={
+            'document': document, 'expected_revision': 1, 'reviewer': 'Эксперт',
+            'comment': 'Сверено с оригиналом', 'confirmed_items': {item['line_id']: ['quantity']},
+        })
+        self.assertEqual(200, updated.status_code, updated.text)
+        stored_item = updated.json()['document']['items'][0]
+        excerpt = stored_item['field_sources']['quantity']['excerpt']
+        self.assertEqual('8', stored_item['quantity'])
+        self.assertEqual(1, stored_item['confidence']['quantity'])
+        self.assertIn(item['field_sources']['quantity']['excerpt'], excerpt)
+        self.assertIn('Подтверждение (Эксперт): quantity: 8', excerpt)
+        self.assertIn('Сверено с оригиналом', excerpt)
+        self.assertNotIn('Ручное изменение', excerpt)
+        history = self.client.get(path + '/history').json()
+        self.assertEqual([1, 2], [version['revision'] for version in history])
+        self.assertEqual('8', history[0]['document']['items'][0]['quantity'])
+        self.assertEqual(('Эксперт', 'Сверено с оригиналом'), (history[1]['reviewer'], history[1]['comment']))
+
+        options = {key: value for key, value in request.items() if key != 'documents'}
+        checked = self.client.post(f'/api/cases/{self.case_id}/runs', json=options)
+        self.assertEqual(201, checked.status_code, checked.text)
+        run = checked.json()
+        signal = next(signal for signal in run['result']['signals'] if signal['code'] == 'QUANTITY_MISMATCH')
+        self.assertTrue(any(source['excerpt'] == excerpt for source in signal['sources']))
+        report_path = f'/api/runs/{run["id"]}/export'
+        html_report = self.client.get(report_path, params={'format': 'html'})
+        self.assertEqual(200, html_report.status_code, html_report.text)
+        pdf_report = self.client.get(report_path, params={'format': 'pdf'})
+        self.assertEqual(200, pdf_report.status_code, pdf_report.text)
+        with pdfplumber.open(io.BytesIO(pdf_report.content)) as pdf:
+            pdf_text = '\n'.join(page.extract_text() or '' for page in pdf.pages)
+        for report in (html_report.text, pdf_text):
+            self.assertIn('Подтверждение (Эксперт): quantity: 8', report)
+            self.assertIn('Сверено с оригиналом', report)
+            self.assertNotIn('Ручное изменение', report)
+
     def test_unconfirmed_edit_blocks_check_until_explicit_confirmation(self):
         case = next(c for c in load_cases() if c['id'] == 'T02')
         request = copy.deepcopy(case['request'])
@@ -407,6 +496,9 @@ class ReviewAPITests(unittest.TestCase):
         })
         self.assertEqual(200, confirmed.status_code, confirmed.text)
         self.assertEqual(1, confirmed.json()['document']['items'][0]['confidence']['quantity'])
+        excerpt = confirmed.json()['document']['items'][0]['field_sources']['quantity']['excerpt']
+        self.assertIn('Ручное изменение (Reviewer): quantity: 8 → 10 (не подтверждено)', excerpt)
+        self.assertIn('Подтверждение (Reviewer): quantity: 10', excerpt)
         fresh = self.client.post(f'/api/cases/{self.case_id}/runs', json=options)
         self.assertEqual(201, fresh.status_code, fresh.text)
         self.assertEqual('ok', fresh.json()['result']['status'])
