@@ -41,8 +41,7 @@
 .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
 .toolbar > input { flex: 1 1 300px; min-width: 0; font-family: var(--font-heading); font-size: 16px; }
 .toolbar > select { flex: 0 1 250px; width: 250px; font-family: var(--font-heading); font-size: 16px; }
-.app table { min-width: 650px; }
-.app[data-page="home"] table, .app[data-page="history"] table { min-width: 990px; }
+.app table { min-width: 0; }
 .app th { font: 700 11px/1.4 var(--font-heading); color: #9b9fa7; text-transform: uppercase; letter-spacing: 1px; }
 .app td { font: 400 20px/1.35 var(--font-body); overflow-wrap: anywhere; }
 .app td b { font-weight: 700; }
@@ -52,10 +51,6 @@
 .app tr:last-child td { border-bottom: 0; }
 .app tr.clickable { cursor: pointer; }
 .app tr.clickable:hover { background: #23262b; }
-.app[data-page="home"] td, .app[data-page="history"] td { padding-top: 24px; padding-bottom: 24px; }
-.app[data-page="home"] th:first-child, .app[data-page="history"] th:first-child { width: 18%; }
-.app[data-page="home"] th:nth-child(2), .app[data-page="history"] th:nth-child(2) { width: 25%; }
-.app[data-page="home"] th:nth-child(3), .app[data-page="history"] th:nth-child(3) { width: 26%; }
 .pill { display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border: 1px solid #50565f; border-radius: 99px; color: #b6b8be; font: 400 20px/1.25 var(--font-body); }
 .pill.green { border-color: #456c50; color: var(--green); }
 .pill.orange { border-color: #8a6b3b; color: var(--amber); }
@@ -113,11 +108,6 @@
 .app[data-page="case"][data-tab="extract"] .doc { min-height: 84px; padding-top: 12px; padding-bottom: 12px; }
 .app[data-page="case"][data-tab="extract"] .doc > span { font-size: 20px; font-weight: 600; }
 .app[data-page="case"][data-tab="extract"] .doc > .btn { min-width: 138px; }
-.app[data-page="case"][data-tab="match"] .panel table { min-width: 800px; }
-.app[data-page="case"][data-tab="match"] .panel th:first-child { width: 28%; }
-.app[data-page="case"][data-tab="match"] .panel th:last-child { width: 24%; }
-.app[data-page="case"][data-tab="match"] .panel th { padding-top: 19px; padding-bottom: 22px; }
-.app[data-page="case"][data-tab="match"] .panel td { padding-top: 24px; padding-bottom: 24px; }
 .app[data-page="case"][data-tab="match"] .panel > .note { margin-top: 24px; font-size: 17px; }
 .detail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .value { min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: 13px; background: var(--field); }

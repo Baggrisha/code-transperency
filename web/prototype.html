@@ -142,16 +142,16 @@ function home(history = false) {
     <div class="metric"><span>В работе</span><strong>${state.cases.filter(x=>x.status!=='Завершена').length}</strong></div>
     <div class="metric"><span>Сигналов</span><strong>${state.cases.reduce((a,x)=>a+x.signals.length,0)}</strong></div>
     <div class="metric"><span>Рассмотрено</span><strong>${state.cases.reduce((a,x)=>a+x.signals.filter(y=>['Подтверждено специалистом','Не подтверждено'].includes(y.status)).length,0)}</strong></div>
-  </div><section class="panel registry-panel"><div class="toolbar"><input id="search" aria-label="Поиск по контракту или названию" placeholder="Поиск по контракту или названию" oninput="filterCases()"><select id="statusFilter" aria-label="Статус проверки" onchange="filterCases()"><option value="">Все статусы</option><option>Черновик</option><option>Требует рассмотрения</option><option>Завершена</option></select></div><div class="scroll"><table class="registry-table"><thead><tr><th>Контракт</th><th>Наименование</th><th>Статус</th><th>Документы</th><th>Сигналы</th><th>Изменено</th></tr></thead><tbody id="caseRows">${rows(list)}</tbody></table></div></section>`
+  </div><section class="panel registry-panel"><div class="toolbar"><input id="search" aria-label="Поиск по контракту или названию" placeholder="Поиск по контракту или названию" oninput="filterCases()"><select id="statusFilter" aria-label="Статус проверки" onchange="filterCases()"><option value="">Все статусы</option><option>Черновик</option><option>Требует рассмотрения</option><option>Завершена</option></select></div><div class="scroll"><table class="data-table registry-table"><thead><tr><th class="cell-id">Контракт</th><th class="cell-description">Наименование</th><th class="cell-status">Статус</th><th class="cell-count">Документы</th><th class="cell-count">Сигналы</th><th class="cell-date">Изменено</th></tr></thead><tbody id="caseRows">${rows(list)}</tbody></table></div></section>`
     );
 }
 
 function rows(list) {
-  return list.length ? list.map(x => '<tr class="clickable" onclick="openCase(\'' + x.id + '\')"><td><b>' + esc(x
-        .number || x.id) + '</b></td><td>' + esc(x.name || 'Без названия') + (x.demo ?
-        '<div class="tag">Демо-кейс</div>' : '') + '</td><td>' + pill(x.status) + '</td><td>' + x.docs.length +
-      '</td><td>' + x.signals.length + '</td><td>' + esc(x.updated) + '</td></tr>').join('') :
-    '<tr><td colspan="6" class="empty">Проверок пока нет</td></tr>'
+  return list.length ? list.map(x => '<tr class="clickable" onclick="openCase(\'' + x.id + '\')"><td class="cell-id"><b>' + esc(x
+        .number || x.id) + '</b></td><td class="cell-description">' + esc(x.name || 'Без названия') + (x.demo ?
+        '<div class="tag">Демо-кейс</div>' : '') + '</td><td class="cell-status">' + pill(x.status) + '</td><td class="cell-count">' + x.docs.length +
+      '</td><td class="cell-count">' + x.signals.length + '</td><td class="cell-date">' + esc(x.updated) + '</td></tr>').join('') :
+    '<tr><td colspan="6" class="table-empty"><span class="empty-message">Проверок пока нет</span></td></tr>'
 }
 
 function filterCases() {
@@ -222,7 +222,7 @@ function casePage() {
     ['results', 'Результаты'],
     ['history', 'История действий']
   ];
-  const sub = `Контракт <b>${esc(x.number||'номер не указан')}</b> — ${esc(x.status.toLowerCase())}${x.demo?' · ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ':''}`;
+  const sub = `Контракт <b>${esc(x.number||'номер не указан')}</b> — ${esc(x.status.toLowerCase())}`;
   const header = title('РАБОЧАЯ ОБЛАСТЬ / ' + esc(x.id), x.name || 'Новая проверка', sub,
       `<button class="btn" onclick="go('home')">← К списку</button>`) +
     `<nav class="steps" aria-label="Разделы проверки">${tabs.map(([k,v])=>`<button class="step ${state.tab===k?'active':''}" ${state.tab===k?'aria-current="page"':''} onclick="go('case','${k}')">${v}</button>`).join('')}</nav>`;
@@ -327,7 +327,7 @@ function extract(x) {
 function match(x) {
   return '<div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--layers section-icon" aria-hidden="true"></span><span>Сопоставление позиций</span></h2><div class="warn">Автоматическое связывание товарных позиций ожидает подключения серверного модуля. Система не выполняет сравнение единиц измерения без подтверждённого коэффициента пересчёта.</div>' +
     (x.demo ?
-      '<div class="scroll"><table class="matching-table"><thead><tr><th>Позиция</th><th>Контракт</th><th>Накладная</th><th>Приёмка</th><th>Состояние</th></tr></thead><tbody><tr><td>Скамейка парковая</td><td>10 шт.</td><td>8 шт.</td><td>10 шт.</td><td>' +
+      '<div class="scroll"><table class="data-table matching-table"><thead><tr><th class="cell-description">Позиция</th><th class="cell-count">Контракт</th><th class="cell-count">Накладная</th><th class="cell-count">Приёмка</th><th class="cell-status">Состояние</th></tr></thead><tbody><tr><td class="cell-description">Скамейка парковая</td><td class="cell-count">10 шт.</td><td class="cell-count">8 шт.</td><td class="cell-count">10 шт.</td><td class="cell-status">' +
       pill('Требует проверки') +
       '</td></tr></tbody></table></div><p class="note">Демонстрационное сопоставление из синтетического кейса T02.</p>' :
       '<div class="empty">Позиции появятся после подключения извлечения и сопоставления данных.</div>') +
@@ -347,16 +347,16 @@ function results(x) {
     '<div class="panel"><h2 class="section-heading sectionTitle"><span class="identity-icon identity-icon--bell section-icon" aria-hidden="true"></span><span>Реестр расхождений</span></h2><div class="toolbar"><input id="signalSearch" placeholder="Поиск по позиции или типу" oninput="filterSignals()"><select id="signalFilter" onchange="filterSignals()"><option value="">Все статусы</option>' +
     ['Требует проверки', 'В работе', 'Подтверждено специалистом', 'Не подтверждено', 'Недостаточно данных'].map(s =>
       '<option>' + s + '</option>').join('') +
-    '</select></div><div style="overflow:auto"><table><thead><tr><th>ID</th><th>Тип</th><th>Позиция</th><th>Статус</th><th>Действие</th></tr></thead><tbody id="signalRows">' +
+    '</select></div><div class="scroll"><table class="data-table signals-table"><thead><tr><th class="cell-id">ID</th><th class="cell-description">Тип</th><th class="cell-description">Позиция</th><th class="cell-status">Статус</th><th class="cell-action">Действие</th></tr></thead><tbody id="signalRows">' +
     signalRows(x.signals) +
     '</tbody></table></div></div><div class="actions"><button class="btn" onclick="exportQuestions()">Экспорт перечня вопросов</button><button class="btn" onclick="finishCase()">Завершить рассмотрение</button></div>'
 }
 
 function signalRows(a) {
-  return a.length ? a.map(s => '<tr><td>' + esc(s.id) + '</td><td>' + esc(s.type) + '</td><td>' + esc(s.item) +
-      '</td><td>' + pill(s.status) + '</td><td><button class="btn small" onclick="openSignal(\'' + s.id +
-      '\')">Рассмотреть →</button></td></tr>').join('') :
-    '<tr><td colspan="5" class="empty">Нет сигналов для отображения</td></tr>'
+  return a.length ? a.map(s => '<tr><td class="cell-id">' + esc(s.id) + '</td><td class="cell-description">' + esc(s.type) + '</td><td class="cell-description">' + esc(s.item) +
+      '</td><td class="cell-status">' + pill(s.status) + '</td><td class="cell-action"><button class="btn small" onclick="openSignal(\'' + s.id +
+      '\')">Рассмотреть <span class="action-arrow" aria-hidden="true">→</span></button></td></tr>').join('') :
+    '<tr><td colspan="5" class="table-empty"><span class="empty-message">Нет сигналов для отображения</span></td></tr>'
 }
 
 function filterSignals() {

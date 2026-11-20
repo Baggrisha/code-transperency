@@ -85,7 +85,7 @@ test('the initial case and all four synthetic document previews retain the suppl
   assert.equal(app.evaluate('c().signals[0].comments.length'),0);
 });
 
-test('overview and recognition render the original form values, case identifier and demonstration marker',()=>{
+test('overview and recognition render the original form values and case identifier without the subtitle demo suffix',()=>{
   const app=setup(),original=suppliedSource.initial[0];
   for(const tab of ['overview','extract']){
     app.evaluate(`openCase("DEMO-001");go("case","${tab}")`);
@@ -98,7 +98,10 @@ test('overview and recognition render the original form values, case identifier 
     const textarea=[...markup.matchAll(/<textarea\b([^>]*)>([\s\S]*?)<\/textarea>/g)].find(match=>match[1].includes('id="caseDescription"'));
     assert.equal(textarea?.[2],original.description,`${tab}: complete description`);
     assert.match(markup,/РАБОЧАЯ ОБЛАСТЬ \/ DEMO-001/);
-    assert.match(markup,/ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ/);
+    const subtitle=markup.match(/<p class="sub">([\s\S]*?)<\/p>/)?.[1];
+    assert.ok(subtitle);
+    assert.doesNotMatch(subtitle,/ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ| · /);
+    assert.equal(app.evaluate('c().demo'),true);
     assert.match(markup,/Контроль исполнения · Демонстрационный интерфейс · Не принимает юридически значимых решений/);
   }
 });

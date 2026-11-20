@@ -158,7 +158,7 @@ input[type="file"]::file-selector-button { margin-right: 20px; padding: 9px 12px
 .formgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 14px; }
 
 .scroll { max-width: 100%; min-width: 0; overflow: auto; overscroll-behavior-inline: contain; scrollbar-width: thin; scrollbar-color: #50565f var(--panel); }
-table { border-collapse: collapse; width: 100%; min-width: 650px; font: 400 20px/1.35 var(--font-body); }
+table { border-collapse: collapse; width: 100%; min-width: 0; font: 400 20px/1.35 var(--font-body); }
 th { color: #9b9fa7; font: 700 11px/1.4 var(--font-heading); text-transform: uppercase; letter-spacing: 1px; text-align: left; }
 th, td { padding: 18px 14px; vertical-align: middle; border-bottom: 1px solid var(--line); }
 th:first-child, td:first-child { padding-left: 0; }
@@ -167,12 +167,8 @@ tbody tr:last-child td { border-bottom: 0; }
 td { overflow-wrap: anywhere; }
 td small { display: block; margin-top: 5px; color: var(--muted); font-size: 15px; }
 td button { min-height: 38px; padding: 8px 11px; font-size: 15px; }
-.registry-table { min-width: 990px; }
 .registry-table th { padding-top: 19px; padding-bottom: 16px; }
 .registry-table td { padding-top: 24px; padding-bottom: 24px; }
-.registry-table th:first-child { width: 18%; }
-.registry-table th:nth-child(2) { width: 25%; }
-.registry-table th:nth-child(3) { width: 26%; }
 .registry-table tbody tr[data-action], .registry-table tbody tr[tabindex] { cursor: pointer; }
 .registry-table tbody tr[data-action]:hover, .registry-table tbody tr[tabindex]:hover { background: #23262b; }
 .registry-table .case-link, .registry-table .contract-link { padding: 0; min-height: 0; background: transparent; border: 0; color: var(--ink); font-size: 20px; font-weight: 700; justify-content: flex-start; text-align: left; }
@@ -219,11 +215,8 @@ td button { min-height: 38px; padding: 8px 11px; font-size: 15px; }
 .recognition-grid .contract-form { align-content: start; }
 .recognition-grid > .contract-form { padding-top: 80px; }
 .matching-card h2 { margin-bottom: 24px; }
-.matching-table { min-width: 800px; }
 .matching-table th { padding-top: 19px; padding-bottom: 22px; }
 .matching-table td { padding-top: 24px; padding-bottom: 24px; }
-.matching-table th:first-child { width: 28%; }
-.matching-table th:last-child { width: 24%; }
 .matching-note { margin: 24px 0 0; color: var(--muted); font-size: 17px; line-height: 1.4; }
 
 .empty { padding: 32px 24px; border: 1px solid var(--line); border-radius: 15px; background: var(--panel); }
@@ -412,7 +405,6 @@ dialog table select { min-width: 90px; }
   .overview-stats .stat > span { font-size: 14px; }
   .recognition-grid { grid-template-columns: minmax(250px, 40%) minmax(0, 1fr); gap: 26px; }
   .recognition-grid .document-row { align-items: flex-start; flex-direction: column; gap: 12px; }
-  .registry-table { min-width: 960px; }
 }
 @media (max-width: 1100px) {
   :root { --sidebar-width: 240px; }
