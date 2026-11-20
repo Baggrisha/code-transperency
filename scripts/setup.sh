@@ -20,6 +20,13 @@ echo "Использую $($PYTHON --version) ($(command -v "$PYTHON"))"
 .venv/bin/python -m pip install --upgrade pip >/dev/null
 .venv/bin/python -m pip install -r requirements-lock.txt
 
+if ! command -v npm >/dev/null 2>&1; then
+  echo "Нужен Node.js с npm для сборки интерфейса." >&2
+  exit 1
+fi
+npm ci
+npm run build
+
 if ! command -v tesseract >/dev/null 2>&1; then
   echo "Предупреждение: tesseract не найден — сканы (PNG/JPG/TIFF, PDF без текста) обрабатываться не будут."
   echo "  macOS: brew install tesseract tesseract-lang poppler"

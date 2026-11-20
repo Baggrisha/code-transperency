@@ -6,7 +6,6 @@ The exported data is synthetic; no files from the server's data directory are re
 from __future__ import annotations
 
 import argparse
-import base64
 from copy import deepcopy
 from html import escape
 import json
@@ -15,6 +14,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from build_singlefile import build_singlefile
 
 from kontrol.engine import run_check
 from kontrol.models import CheckRequest
@@ -67,34 +67,14 @@ def preview_seed() -> dict:
 
 
 def export(output: Path) -> Path:
-    html = (ROOT / "web/index.html").read_text(encoding="utf-8")
-    fonts = ("Unbounded-Variable.woff2", "Involve-Variable.woff2", "Montserrat-Variable.woff2")
-    for stylesheet in ("styles.css", "icons.css", "brand.css"):
-        css = (ROOT / "web/assets" / stylesheet).read_text(encoding="utf-8")
-        if stylesheet == "icons.css":
-            source = base64.b64encode((ROOT / "web/assets/icons/reference-sheet.png").read_bytes()).decode("ascii")
-            css = css.replace("icons/reference-sheet.png", "data:image/png;base64," + source)
-        for name in fonts:
-            content = base64.b64encode((ROOT / "web/assets/fonts" / name).read_bytes()).decode("ascii")
-            css = css.replace(f'fonts/{name}', "data:font/woff2;base64," + content)
-        marker = f'<link rel="stylesheet" href="assets/{stylesheet}">'
-        if html.count(marker) != 1:
-            raise RuntimeError(f"Expected one stylesheet marker for {stylesheet}")
-        html = html.replace(marker, '<style>\n' + css + '\n</style>')
-    for name in fonts:
-        html = html.replace(f'  <link rel="preload" href="assets/fonts/{name}" as="font" type="font/woff2" crossorigin>\n', "")
-    data = json.dumps(preview_seed(),ensure_ascii=False).replace("<", "\\u003c")
+    html = build_singlefile("index")
+    data = json.dumps(preview_seed(), ensure_ascii=False).replace("<", "\\u003c")
     adapter = (ROOT / "scripts/frontend_preview.js").read_text(encoding="utf-8")
     injection = '<script>\nglobalThis.KONTROL_PREVIEW_SEED = ' + data + ';\n' + adapter + '\n</script>\n'
-    html = html.replace('  <script>\n', injection + '  <script>\n',1)
+    html = html.replace("</head>", injection + "</head>", 1)
     licenses = "\n\n".join((ROOT / "web/assets/fonts" / name).read_text(encoding="utf-8")
                              for name in ("OFL-Unbounded.txt", "OFL-Involve.txt", "OFL-Montserrat.txt"))
     html = html.replace("</body>", '<template id="font-licenses"><pre>' + escape(licenses) + '</pre></template>\n</body>')
-    html = html.replace('<button class="ghost" data-action="token">Доступ</button>', '', 1)
-    startup = "if (initialHash) await routeFromHash(); else home();"
-    if html.count(startup) != 1:
-        raise RuntimeError("Expected exactly one frontend startup route for the offline export")
-    html = html.replace(startup, "if (initialHash) await routeFromHash(); else await openCase('demo-001',null,'matching');", 1)
     output.parent.mkdir(parents=True,exist_ok=True)
     output.write_text(html,encoding="utf-8")
     return output

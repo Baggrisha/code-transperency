@@ -147,17 +147,19 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
 
     @app.get("/", response_class=HTMLResponse, include_in_schema=False)
     def index():
-        path = ROOT / "web" / "index.html"
-        if path.is_file():
-            return HTMLResponse(path.read_text(encoding="utf-8"))
-        return HTMLResponse('<html lang="ru"><meta charset="utf-8"><h1>Контроль исполнения</h1><a href="/docs">Открыть API</a></html>')
+        path = ROOT / "web" / "dist" / "index.html"
+        if not path.is_file():
+            return HTMLResponse("Интерфейс не собран. Выполните npm ci && npm run build.", status_code=503)
+        return HTMLResponse(path.read_text(encoding="utf-8"))
 
     @app.get("/prototype", response_class=HTMLResponse, include_in_schema=False)
     def prototype():
-        """The supplied standalone prototype, restyled without changing its storage model."""
-        return HTMLResponse((ROOT / "web" / "prototype.html").read_text(encoding="utf-8"))
+        path = ROOT / "web" / "dist" / "prototype.html"
+        if not path.is_file():
+            return HTMLResponse("Интерфейс не собран. Выполните npm ci && npm run build.", status_code=503)
+        return HTMLResponse(path.read_text(encoding="utf-8"))
 
-    app.mount("/assets", StaticFiles(directory=ROOT / "web" / "assets", check_dir=False), name="assets")
+    app.mount("/assets", StaticFiles(directory=ROOT / "web" / "dist" / "assets", check_dir=False), name="assets")
 
     @app.post("/api/check", tags=["Сверка"])
     def check(request: CheckRequest):

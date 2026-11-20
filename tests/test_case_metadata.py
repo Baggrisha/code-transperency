@@ -178,10 +178,10 @@ class CaseMetadataTests(unittest.TestCase):
 
     def test_static_assets_are_served_with_content_type_and_cannot_escape_directory(self):
         web_root = self.root / "project"
-        assets = web_root / "web" / "assets"
+        assets = web_root / "web" / "dist" / "assets"
         assets.mkdir(parents=True)
         (assets / "app.css").write_text("body{color:#78FF9E}", encoding="utf-8")
-        (web_root / "web" / "private.txt").write_text("not an asset", encoding="utf-8")
+        (web_root / "web" / "dist" / "private.txt").write_text("not an asset", encoding="utf-8")
         with patch("kontrol.api.ROOT", web_root), patch.dict("os.environ", {"KONTROL_API_TOKEN": ""}):
             app = create_app(self.root / "asset-data")
         with TestClient(app) as client:
