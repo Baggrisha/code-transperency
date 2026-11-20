@@ -97,7 +97,9 @@ class Store:
             conn.executescript("""
                 CREATE TABLE IF NOT EXISTS cases (
                     id TEXT PRIMARY KEY, title TEXT NOT NULL,
-                    created_at TEXT NOT NULL, revision INTEGER NOT NULL DEFAULT 0
+                    created_at TEXT NOT NULL, revision INTEGER NOT NULL DEFAULT 0,
+                    description TEXT NOT NULL DEFAULT '', contract_number TEXT NOT NULL DEFAULT '',
+                    metadata_revision INTEGER NOT NULL DEFAULT 0, updated_at TEXT
                 );
                 CREATE TABLE IF NOT EXISTS documents (
                     case_id TEXT NOT NULL REFERENCES cases(id), id TEXT NOT NULL,
@@ -131,6 +133,21 @@ class Store:
                     payload TEXT NOT NULL, created_at TEXT NOT NULL
                 );
             """)
+            # The card metadata is deliberately separate from the document revision:
+            # editing a title must not invalidate a saved reconciliation snapshot.
+            conn.execute("BEGIN IMMEDIATE")
+            columns = {row["name"] for row in conn.execute("PRAGMA table_info(cases)")}
+            for name, definition in (
+                ("description", "TEXT NOT NULL DEFAULT ''"),
+                ("contract_number", "TEXT NOT NULL DEFAULT ''"),
+                ("metadata_revision", "INTEGER NOT NULL DEFAULT 0"),
+                ("updated_at", "TEXT"),
+            ):
+                if name not in columns:
+                    conn.execute(f"ALTER TABLE cases ADD COLUMN {name} {definition}")
+            conn.execute("""UPDATE cases SET updated_at=COALESCE(
+                (SELECT MAX(created_at) FROM events WHERE case_id=cases.id), created_at)
+                WHERE updated_at IS NULL""")
 
     @contextmanager
     def connect(self) -> Iterator[sqlite3.Connection]:
@@ -148,33 +165,86 @@ class Store:
             conn.close()
 
     def _event(self, conn: sqlite3.Connection, case_id: str, action: str, payload: dict) -> None:
+        timestamp = now()
         conn.execute("INSERT INTO events(case_id,action,payload,created_at) VALUES (?,?,?,?)",
-                     (case_id, action, json.dumps(payload, ensure_ascii=False), now()))
+                     (case_id, action, json.dumps(payload, ensure_ascii=False), timestamp))
+        conn.execute("UPDATE cases SET updated_at=? WHERE id=?", (timestamp, case_id))
 
-    def create_case(self, title: str) -> dict:
-        case = {"id": uuid4().hex, "title": title, "created_at": now(), "revision": 0}
+    def create_case(self, title: str, description: str = "", contract_number: str = "") -> dict:
+        case = {"id": uuid4().hex, "title": title, "description": description,
+                "contract_number": contract_number, "created_at": now(), "revision": 0,
+                "metadata_revision": 0}
         with self.connect() as conn:
-            conn.execute("INSERT INTO cases(id,title,created_at) VALUES (?,?,?)",
-                         (case["id"], title, case["created_at"]))
-            self._event(conn, case["id"], "case_created", {"title": title})
-        return case
+            conn.execute("INSERT INTO cases(id,title,description,contract_number,created_at) VALUES (?,?,?,?,?)",
+                         (case["id"], title, description, contract_number, case["created_at"]))
+            self._event(conn, case["id"], "case_created", {"title": title, "description": description,
+                                                         "contract_number": contract_number})
+            return dict(conn.execute("SELECT * FROM cases WHERE id=?", (case["id"],)).fetchone())
+
+    def update_case(self, case_id: str, title: str, description: str, contract_number: str,
+                    expected_metadata_revision: int) -> dict:
+        with self.connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            old = conn.execute("SELECT * FROM cases WHERE id=?", (case_id,)).fetchone()
+            if old is None:
+                raise NotFoundError(case_id)
+            if old["metadata_revision"] != expected_metadata_revision:
+                raise ConflictError("Данные проверки уже изменены. Обновите карточку и повторите сохранение.")
+            values = {"title": title, "description": description, "contract_number": contract_number}
+            changes = {key: {"before": old[key], "after": value}
+                       for key, value in values.items() if value != old[key]}
+            if changes:
+                conn.execute("""UPDATE cases SET title=?,description=?,contract_number=?,
+                    metadata_revision=metadata_revision+1 WHERE id=?""",
+                             (title, description, contract_number, case_id))
+                self._event(conn, case_id, "case_updated",
+                            {"changes": changes, "metadata_revision": expected_metadata_revision + 1})
+            return dict(conn.execute("SELECT * FROM cases WHERE id=?", (case_id,)).fetchone())
 
     def list_cases(self) -> list[dict]:
         with self.connect() as conn:
-            rows = conn.execute("""SELECT c.*, (SELECT COUNT(*) FROM documents d WHERE d.case_id=c.id) AS document_count,
-                (SELECT id FROM runs r WHERE r.case_id=c.id ORDER BY created_at DESC LIMIT 1) AS last_run_id,
-                (SELECT json_extract(r.result,'$.status') FROM runs r WHERE r.case_id=c.id
-                    ORDER BY created_at DESC LIMIT 1) AS last_run_status,
-                (SELECT r.created_at FROM runs r WHERE r.case_id=c.id ORDER BY created_at DESC LIMIT 1) AS last_run_at,
-                (SELECT COUNT(*) FROM runs r WHERE r.case_id=c.id) AS run_count,
-                (SELECT r.case_revision != c.revision FROM runs r WHERE r.case_id=c.id
-                    ORDER BY created_at DESC LIMIT 1) AS last_run_stale
-                FROM cases c ORDER BY created_at DESC, id""").fetchall()
+            # One query for the whole registry; repeated reviews count a signal once.
+            # A decision from an older run is only a hint, never a current decision.
+            rows = conn.execute("""WITH ranked_runs AS (
+                SELECT r.*, ROW_NUMBER() OVER (PARTITION BY case_id ORDER BY created_at DESC,id DESC) AS rn,
+                    COUNT(*) OVER (PARTITION BY case_id) AS run_count FROM runs r
+            ), latest_runs AS (SELECT * FROM ranked_runs WHERE rn=1),
+            document_counts AS (SELECT case_id,COUNT(*) AS total FROM documents GROUP BY case_id),
+            contract_candidates AS (
+                SELECT case_id,COALESCE(NULLIF(TRIM(json_extract(data,'$.number')),''),
+                    NULLIF(TRIM(json_extract(data,'$.contract_id')),'')) AS number
+                FROM documents WHERE json_extract(data,'$.type')='contract'
+                    AND COALESCE(json_extract(data,'$.status'),'active')='active'
+            ), contract_numbers AS (
+                SELECT case_id,CASE WHEN COUNT(DISTINCT number)=1 THEN MIN(number) ELSE '' END AS number
+                FROM contract_candidates GROUP BY case_id
+            ), latest_reviews AS (
+                SELECT v.*,ROW_NUMBER() OVER (PARTITION BY v.run_id,v.signal_id ORDER BY v.sequence DESC) AS rn
+                FROM reviews v JOIN latest_runs r ON r.id=v.run_id
+            ), decisions AS (
+                SELECT r.id,COUNT(*) AS reviewed FROM latest_runs r,
+                    json_each(r.result,'$.signals') s JOIN latest_reviews v
+                    ON v.run_id=r.id AND v.signal_id=json_extract(s.value,'$.id')
+                    AND v.rn=1 AND v.status!='needs_review' GROUP BY r.id
+            ) SELECT c.*,COALESCE(dc.total,0) AS document_count,
+                cn.number AS inferred_contract_number,r.id AS last_run_id,
+                json_extract(r.result,'$.status') AS last_run_status,r.created_at AS last_run_at,
+                COALESCE(r.run_count,0) AS run_count,(r.case_revision!=c.revision) AS last_run_stale,
+                COALESCE(json_array_length(json_extract(r.result,'$.signals')),0) AS signal_count,
+                COALESCE(d.reviewed,0) AS reviewed_signal_count
+                FROM cases c LEFT JOIN latest_runs r ON r.case_id=c.id
+                    LEFT JOIN document_counts dc ON dc.case_id=c.id
+                    LEFT JOIN contract_numbers cn ON cn.case_id=c.id
+                    LEFT JOIN decisions d ON d.id=r.id
+                ORDER BY c.created_at DESC,c.id""").fetchall()
         result = []
         for row in rows:
             item = dict(row)
             if item["last_run_stale"] is not None:
                 item["last_run_stale"] = bool(item["last_run_stale"])
+            inferred_number = item.pop("inferred_contract_number")
+            item["contract_number"] = item["contract_number"] or inferred_number or ""
+            item["pending_signal_count"] = item["signal_count"] - item["reviewed_signal_count"]
             result.append(item)
         return result
 

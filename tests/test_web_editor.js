@@ -99,7 +99,9 @@ async function setup(doc, putError, reloadError) {
   function element(selector) {
     if (selector === '#document-form') return form;
     if (!elements.has(selector)) {
-      const node = {textContent:'',style:{},value:'',open:false,showModal(){this.open=true;},close(){this.open=false;}};
+      const node = {textContent:'',style:{},value:'',open:false,attributes:{},
+        setAttribute(name,value){this.attributes[name]=String(value);},focus(){},
+        showModal(){this.open=true;},close(){this.open=false;}};
       Object.defineProperty(node, 'innerHTML', {get(){return this._html || '';},set(value){this._html=value;if (selector === '#editor') form=editorForm(value);}});
       elements.set(selector,node);
     }

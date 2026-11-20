@@ -60,7 +60,8 @@ async function setup({documents, savedDocuments=documents, result, includeReques
   let selects = [];
   function element(selector) {
     if (!elements.has(selector)) {
-      const node = {textContent:'',style:{},value:'',checked:false,showModal(){},close(){}};
+      const node = {textContent:'',style:{},value:'',checked:false,attributes:{},
+        setAttribute(name,value){this.attributes[name]=String(value);},focus(){},showModal(){},close(){}};
       Object.defineProperty(node, 'innerHTML', {get(){return this._html || '';},set(value){
         this._html=value;
         if (selector === '#main') selects=linkSelects(value);
@@ -89,6 +90,7 @@ async function setup({documents, savedDocuments=documents, result, includeReques
   });
   await vm.runInContext(script,context);
   await vm.runInContext('openCase("case-1")',context);
+  vm.runInContext('state.tab="matching";render()',context);
   return {element,selects:()=>selects,posted,async applyLinks() {
     const button={dataset:{action:'links'},disabled:false};
     await listeners.click({target:{closest(){return button;}}});

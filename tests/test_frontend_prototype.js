@@ -1,0 +1,287 @@
+/* Standalone prototype behavior: local state, navigation, files and decisions. */
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+
+const prototypePath = process.env.KONTROL_PROTOTYPE_FILE || path.join(__dirname,'../web/prototype.html');
+const html = fs.readFileSync(prototypePath,'utf8');
+const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(match=>match[1]).join('\n');
+const KEY = 'control-execution-demo-v1';
+
+function setup(saved = new Map(), storageAccess = {}) {
+  const storage = new Map(saved), elements = new Map(), listeners = {}, blobs = new Map();
+  const alerts = [], opened = [], downloads = [], timers = [], prompts = [];
+  let confirmation = true, objectSequence = 0;
+  const makeNode = (tag='div') => {
+    const classes = new Set(), descendants = new Map();
+    const node = {tagName:tag.toUpperCase(),id:'',innerHTML:'',textContent:'',value:'',style:{},hidden:false,
+      attributes:{},dataset:{},children:[],classList:{add(...values){values.forEach(value=>classes.add(value));},remove(...values){values.forEach(value=>classes.delete(value));},contains(value){return classes.has(value);}},
+      setAttribute(key,value){this.attributes[key]=String(value);},getAttribute(key){return this.attributes[key];},
+      addEventListener(){},removeEventListener(){},focus(){node.focused=true;context.document.activeElement=node;},contains(other){return other===node||[...descendants.values()].includes(other);},
+      querySelector(selector){
+        if(selector.startsWith('#'))return element(selector.slice(1));
+        if(selector!=='.modalWindow')return null;
+        if(!descendants.has(selector))descendants.set(selector,makeNode('section'));
+        return descendants.get(selector);
+      },querySelectorAll(){return [];},
+      appendChild(child){this.children.push(child);if(child.id)elements.set(child.id,child);return child;},
+      remove(){if(this.id)elements.delete(this.id);},
+      click(){if(tag==='a')downloads.push({href:this.href,download:this.download});},
+    };
+    return node;
+  };
+  function element(id) {
+    if(id==='docModal')return elements.get(id) || null;
+    if(!elements.has(id)){const node=makeNode();node.id=id;elements.set(id,node);}
+    return elements.get(id);
+  }
+  const body=makeNode('body');
+  const context=vm.createContext({
+    console,Date,Math,Blob,encodeURIComponent,decodeURIComponent,structuredClone,
+    localStorage:{
+      getItem(key){if(storageAccess.readError)throw new Error('Storage unavailable');return storage.get(key)??null;},
+      setItem(key,value){if(storageAccess.writeError)throw new Error('Storage unavailable');storage.set(key,String(value));},
+    },
+    document:{getElementById:element,createElement:makeNode,body,activeElement:null,
+      querySelector:selector=>selector.startsWith('#')?element(selector.slice(1)):null,querySelectorAll:()=>[],
+      addEventListener:(name,fn)=>listeners[name]=fn},
+    window:{open:url=>opened.push(url),addEventListener:(name,fn)=>listeners[name]=fn},
+    URL:{createObjectURL(blob){const id='blob:prototype-'+(++objectSequence);blobs.set(id,blob);return id;},revokeObjectURL(){}},
+    setTimeout(fn){timers.push(fn);return timers.length;},clearTimeout(){},
+    prompt:()=>prompts.shift()??'',confirm:()=>confirmation,alert:message=>alerts.push(message),
+  });
+  const evaluate=code=>vm.runInContext(code,context);
+  evaluate(scripts);
+  return {context,evaluate,element,storage,alerts,opened,downloads,blobs,listeners,
+    setConfirm(value){confirmation=value;},setPrompts(...answers){prompts.push(...answers);},
+    create(number='К-002',name='Поставка мебели'){prompts.push(number,name);evaluate('createCase()');},
+    add(name='накладная.txt',content='Документ поставки'){
+      context.addedFile=Object.assign(new Blob([content],{type:'text/plain'}),{name});
+      evaluate('addFiles([addedFile])');
+      return evaluate('c().docs.at(-1)?.id');
+    }};
+}
+
+test('standalone startup renders the supplied demonstration without a server',()=>{
+  const app=setup();
+  assert.equal(app.evaluate('state.cases.length'),1);
+  assert.equal(app.evaluate('state.cases[0].docs.length'),4);
+  assert.equal(app.evaluate('state.cases[0].signals.length'),1);
+  assert.match(app.element('root').innerHTML,/Проверки контрактов/);
+  assert.match(app.element('root').innerHTML,/ГК-2026\/0142/);
+  assert.match(app.element('root').innerHTML,/Демо-кейс/);
+});
+
+test('all workspace tabs and the separate signal page remain reachable',()=>{
+  const app=setup();
+  app.evaluate('openCase("DEMO-001")');
+  for(const [tab,label] of [['overview',/Данные контракта/],['docs',/Загрузка документов/],
+    ['extract',/Распознавание реквизитов/],['match',/Сопоставление позиций/],
+    ['results',/Реестр расхождений/],['history',/Журнал действий|История действий/]]){
+    app.evaluate(`go('case','${tab}')`);
+    assert.equal(app.evaluate('state.tab'),tab);
+    assert.match(app.element('root').innerHTML,label);
+  }
+  app.evaluate('openSignal("SIG-001")');
+  assert.equal(app.evaluate('state.page'),'signal');
+  for(const label of ['Основание сигнала','Документы-источники','Рассмотрение специалистом','История рассмотрения'])
+    assert.ok(app.element('root').innerHTML.includes(label),label);
+  app.evaluate('go("case","results")');
+  assert.match(app.element('root').innerHTML,/Реестр расхождений/);
+});
+
+test('case metadata and selected screen survive reopening the original localStorage key',()=>{
+  const app=setup();
+  app.create();
+  app.evaluate('go("case","overview")');
+  app.element('caseNumber').value='ГК-42';
+  app.element('caseName').value='Новые скамейки';
+  app.element('caseDescription').value='Ручное уточнение';
+  app.evaluate('updateCase();go("case","extract")');
+  const snapshot=JSON.parse(app.storage.get(KEY)),id=app.evaluate('state.selected');
+  assert.equal(snapshot.cases.find(item=>item.id===id).description,'Ручное уточнение');
+  const restored=setup(app.storage);
+  assert.equal(restored.evaluate('state.selected'),id);
+  assert.equal(restored.evaluate('state.tab'),'extract');
+  assert.equal(restored.evaluate('c().number'),'ГК-42');
+  assert.equal(restored.evaluate('c().name'),'Новые скамейки');
+  assert.match(restored.element('root').innerHTML,/Распознавание реквизитов/);
+});
+
+test('newly uploaded files do not acquire the demonstration comparison or signals',()=>{
+  const app=setup();app.create();app.add();
+  assert.equal(app.evaluate('c().demo'),false);
+  assert.equal(app.evaluate('c().signals.length'),0);
+  app.evaluate('go("case","match")');
+  assert.match(app.element('root').innerHTML,/подключени[яе].*сопоставления|не подключён|ещё не подключен/);
+  assert.doesNotMatch(app.element('root').innerHTML,/<td>10 шт\.<\/td>/);
+  app.evaluate('go("case","results")');
+  assert.match(app.element('root').innerHTML,/Отсутствие сигналов.*не означает/);
+});
+
+test('file selection retains metadata and ephemeral bytes while duplicate or unsupported files are rejected',()=>{
+  const app=setup();app.create();
+  const id=app.add('накладная.txt','12345');
+  assert.equal(app.evaluate('c().docs.length'),1);
+  assert.equal(app.evaluate('c().docs[0].type'),'Накладная');
+  assert.equal(app.evaluate(`ephemeralFiles[${JSON.stringify(id)}].name`),'накладная.txt');
+  app.add('накладная.txt','12345');
+  app.add('wrong.exe','12345');
+  assert.equal(app.evaluate('c().docs.length'),1);
+  assert.ok(app.alerts.some(message=>/дубликат/i.test(message)));
+  assert.ok(app.alerts.some(message=>/Неподдерживаемый формат/.test(message)));
+});
+
+test('all seven prototype categories remain available and changing a type is persisted and logged',()=>{
+  const app=setup();app.create();const id=app.add();
+  assert.equal(app.evaluate('types.length'),7);
+  assert.ok(app.evaluate('types.includes("Исправленная версия") && types.includes("Другое")'));
+  app.evaluate(`changeDocType(${JSON.stringify(id)})`);
+  assert.match(app.element('docModal').innerHTML,/Изменить тип документа/);
+  app.element('docCategory').value='Исправленная версия';
+  app.evaluate(`saveDocCategory(${JSON.stringify(id)})`);
+  assert.equal(app.evaluate('c().docs[0].type'),'Исправленная версия');
+  assert.ok(app.evaluate('c().history.some(item=>item.text.includes("Тип документа"))'));
+  assert.equal(setup(app.storage).evaluate('c().docs[0].type'),'Исправленная версия');
+});
+
+test('the custom category picker updates its hidden value before saving and supports cancellation',()=>{
+  const app=setup();app.evaluate('openCase("DEMO-001");changeDocType("d1")');
+  app.element('prototype-type-options').hidden=true;
+  app.evaluate('togglePrototypeType()');
+  assert.equal(app.element('prototype-type-options').hidden,false);
+  assert.equal(app.element('prototype-type-trigger').getAttribute('aria-expanded'),'true');
+  app.evaluate('choosePrototypeType(types.indexOf("Другое"))');
+  assert.equal(app.element('docCategory').value,'Другое');
+  assert.equal(app.element('prototype-type-selected').textContent,'Другое');
+  assert.equal(app.element('prototype-type-options').hidden,true);
+  app.evaluate('closeDocModal()');
+  assert.equal(app.evaluate('c().docs.find(d=>d.id==="d1").type'),'Контракт');
+  assert.equal(app.element('docModal'),null);
+  app.evaluate('changeDocType("d1");choosePrototypeType(types.indexOf("Исправленная версия"));saveDocCategory("d1")');
+  assert.equal(app.evaluate('c().docs.find(d=>d.id==="d1").type'),'Исправленная версия');
+});
+
+test('dropping files preserves the same upload flow and clears the drag state',()=>{
+  const app=setup();app.create();
+  const drop=app.element('drop');drop.classList.add('drag');
+  const file=Object.assign(new Blob(['Поставка']),{name:'акт.txt'});
+  let prevented=false;
+  app.context.dropEvent={preventDefault(){prevented=true;},currentTarget:drop,dataTransfer:{files:[file]}};
+  app.evaluate('dropFiles(dropEvent)');
+  assert.equal(prevented,true);
+  assert.equal(drop.classList.contains('drag'),false);
+  assert.equal(app.evaluate('c().docs[0].type'),'Документ о приёмке');
+  assert.equal(app.evaluate('ephemeralFiles[c().docs[0].id].name'),'акт.txt');
+});
+
+test('removing a file respects cancellation and removes its ephemeral bytes after confirmation',()=>{
+  const app=setup();app.create();const id=app.add();
+  app.setConfirm(false);app.evaluate(`removeDoc(${JSON.stringify(id)})`);
+  assert.equal(app.evaluate('c().docs.length'),1);
+  app.setConfirm(true);app.evaluate(`removeDoc(${JSON.stringify(id)})`);
+  assert.equal(app.evaluate('c().docs.length'),0);
+  assert.equal(app.evaluate(`ephemeralFiles[${JSON.stringify(id)}]`),undefined);
+  assert.ok(app.evaluate('c().history.some(item=>item.text.includes("Удалён документ"))'));
+});
+
+test('uploaded originals can be viewed in-session but reopening does not fabricate file bytes',()=>{
+  const app=setup();app.create();const id=app.add('original.txt','Original evidence');
+  app.evaluate(`viewDoc(${JSON.stringify(id)})`);
+  assert.equal(app.opened.length,1);
+  assert.equal(app.blobs.get(app.opened[0]).name,'original.txt');
+  const restored=setup(app.storage);
+  assert.equal(restored.evaluate('c().docs.length'),1);
+  assert.equal(restored.evaluate(`ephemeralFiles[${JSON.stringify(id)}]`),undefined);
+  restored.evaluate(`viewDoc(${JSON.stringify(id)})`);
+  assert.match(restored.element('docModal').innerHTML,/Оригинальный файл недоступен/);
+  assert.equal(restored.opened.length,0);
+});
+
+test('demonstration document previews identify synthetic content explicitly',()=>{
+  const app=setup();app.evaluate('openCase("DEMO-001");viewDoc("d3")');
+  const markup=app.element('docModal').innerHTML;
+  assert.match(markup,/Синтетический предпросмотр/);
+  assert.match(markup,/не оригинальный PDF/);
+  assert.match(markup,/8 шт\./);
+  assert.equal(app.opened.length,0);
+});
+
+test('signal status and comments persist with both histories without changing source values',()=>{
+  const app=setup();app.evaluate('openSignal("SIG-001")');
+  const before=app.evaluate('JSON.stringify([c().signals[0].expected,c().signals[0].actual,c().signals[0].rule])');
+  app.element('signalStatus').value='Подтверждено специалистом';
+  app.element('comment').value='  Сверено с актом <img src=x onerror=alert(1)>  ';
+  app.evaluate('saveSignal()');
+  assert.equal(app.evaluate('c().signals[0].status'),'Подтверждено специалистом');
+  assert.equal(app.evaluate('c().signals[0].comments.length'),1);
+  assert.equal(app.evaluate('c().signals[0].history.length'),2);
+  assert.equal(app.evaluate('c().history.length'),2);
+  assert.equal(app.evaluate('JSON.stringify([c().signals[0].expected,c().signals[0].actual,c().signals[0].rule])'),before);
+  assert.match(app.element('root').innerHTML,/&lt;img/);
+  assert.doesNotMatch(app.element('root').innerHTML,/<img src=x/);
+  const restored=setup(app.storage);
+  assert.equal(restored.evaluate('c().signals[0].status'),'Подтверждено специалистом');
+  assert.equal(restored.evaluate('c().signals[0].comments.length'),1);
+});
+
+test('registry and signal search filters continue to use their original controls',()=>{
+  const app=setup();
+  app.element('search').value='0142';app.element('statusFilter').value='Требует рассмотрения';app.evaluate('filterCases()');
+  assert.match(app.element('caseRows').innerHTML,/ГК-2026\/0142/);
+  app.element('search').value='несуществующий';app.evaluate('filterCases()');
+  assert.doesNotMatch(app.element('caseRows').innerHTML,/onclick="openCase/);
+  app.evaluate('openCase("DEMO-001");go("case","results")');
+  app.element('signalSearch').value='скамейка';app.element('signalFilter').value='Требует проверки';app.evaluate('filterSignals()');
+  assert.match(app.element('signalRows').innerHTML,/SIG-001/);
+  app.element('signalFilter').value='Не подтверждено';app.evaluate('filterSignals()');
+  assert.doesNotMatch(app.element('signalRows').innerHTML,/SIG-001/);
+});
+
+test('completion respects the unresolved-signal confirmation and the archive contains completed cases',()=>{
+  const app=setup();app.evaluate('openCase("DEMO-001")');
+  app.setConfirm(false);app.evaluate('finishCase()');
+  assert.equal(app.evaluate('c().status'),'Требует рассмотрения');
+  app.setConfirm(true);app.evaluate('finishCase()');
+  assert.equal(app.evaluate('c().status'),'Завершена');
+  app.create('UNFINISHED','Незавершённое дело');
+  app.evaluate('go("history")');
+  const markup=app.element('root').innerHTML;
+  assert.match(markup,/ГК-2026\/0142/);
+  assert.doesNotMatch(markup,/Незавершённое дело/);
+  app.element('search').value='UNFINISHED';app.element('statusFilter').value='';app.evaluate('filterCases()');
+  assert.doesNotMatch(app.element('caseRows').innerHTML,/UNFINISHED|Незавершённое дело/);
+  app.element('search').value='';app.evaluate('filterCases()');
+  assert.match(app.element('caseRows').innerHTML,/ГК-2026\/0142/);
+  assert.doesNotMatch(app.element('caseRows').innerHTML,/Незавершённое дело/);
+  assert.equal(setup(app.storage).evaluate('state.cases.find(item=>item.id==="DEMO-001").status'),'Завершена');
+});
+
+test('question export preserves the selected case, signal explanation and demonstration label',async()=>{
+  const app=setup();app.evaluate('openCase("DEMO-001");exportQuestions()');
+  assert.equal(app.downloads.length,1);
+  assert.equal(app.downloads[0].download,'questions-DEMO-001.txt');
+  const blob=app.blobs.get(app.downloads[0].href),content=await blob.text();
+  assert.match(blob.type,/text\/plain/);
+  for(const text of ['ГК-2026/0142','Демонстрационные данные: да','SIG-001','Несоответствие количества','Требует проверки','Это сигнал для проверки'])
+    assert.ok(content.includes(text),text);
+});
+
+test('invalid stored JSON recovers the demonstration without network calls',()=>{
+  const app=setup(new Map([[KEY,'not valid JSON']]));
+  assert.equal(app.evaluate('state.cases[0].id'),'DEMO-001');
+  assert.match(app.element('root').innerHTML,/Проверки контрактов/);
+});
+
+test('blocked browser storage keeps the open session usable and explains the persistence limit',()=>{
+  const app=setup(new Map(),{readError:true,writeError:true});
+  assert.equal(app.evaluate('state.cases[0].id'),'DEMO-001');
+  app.create('LOCAL-ONLY','Дело в открытой вкладке');
+  assert.equal(app.evaluate('c().number'),'LOCAL-ONLY');
+  assert.equal(app.storage.has(KEY),false);
+  assert.match(app.element('root').innerHTML,/Дело в открытой вкладке/);
+  assert.match(app.element('prototype-toast').textContent,/Хранилище браузера недоступно/);
+  assert.match(app.element('prototype-toast').textContent,/только в открытой вкладке/);
+});

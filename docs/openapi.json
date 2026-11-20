@@ -184,6 +184,60 @@
             }
           }
         }
+      },
+      "put": {
+        "tags": [
+          "Дела"
+        ],
+        "summary": "Edit Case",
+        "description": "Edit the display card; extracted documents and saved runs stay unchanged.",
+        "operationId": "edit_case_api_cases__case_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/extract": {
@@ -1143,6 +1197,18 @@
             "maxLength": 300,
             "minLength": 1,
             "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 10000,
+            "title": "Description",
+            "default": ""
+          },
+          "contract_number": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Contract Number",
+            "default": ""
           }
         },
         "additionalProperties": false,
@@ -1151,6 +1217,40 @@
           "title"
         ],
         "title": "CaseCreate"
+      },
+      "CaseUpdate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 10000,
+            "title": "Description"
+          },
+          "contract_number": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Contract Number"
+          },
+          "expected_metadata_revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Metadata Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "contract_number",
+          "expected_metadata_revision"
+        ],
+        "title": "CaseUpdate"
       },
       "CheckRequest": {
         "properties": {

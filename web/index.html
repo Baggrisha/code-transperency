@@ -1,26 +1,360 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Контроль исполнения</title>
-<style>
-:root{--ink:#16344c;--muted:#627b90;--line:#dce6ee;--blue:#155dfb;--bg:#f4f7fb;--green:#127b59;--amber:#a65b0a}*{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}button,input,select,textarea{font:inherit}button,a,input,select,textarea{outline-offset:3px}button{cursor:pointer;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);padding:10px 14px}button:hover{border-color:#99b7d2;background:#f7faff}button:disabled{opacity:.5;cursor:wait}.primary{background:var(--blue);border-color:var(--blue);color:#fff}.primary:hover{background:#0c4ee1;color:#fff}a{color:var(--blue)}header{height:74px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px;gap:20px}.brand{display:flex;gap:12px;align-items:center;font-size:17px;font-weight:700}.mark{display:grid;place-items:center;background:#155dfb;width:34px;height:34px;color:white;border-radius:10px;font-size:20px}.label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}.shell{display:grid;grid-template-columns:275px minmax(0,1fr);min-height:calc(100vh - 74px)}aside{background:#fff;padding:24px 16px;border-right:1px solid var(--line)}aside .title{display:flex;align-items:center;justify-content:space-between;margin:0 8px 18px}aside .case{display:block;text-align:left;width:100%;margin-bottom:8px;border-color:transparent;padding:14px 12px}.case.active{background:#eef4ff;border-color:#c7daff}.case small{display:block;margin-top:5px;color:var(--muted)}main{padding:32px;max-width:1450px;width:100%;margin:auto}h1{font-size:28px;letter-spacing:-.03em;line-height:1.2;margin:0 0 10px}h2{font-size:18px;margin:0 0 18px}h3{font-size:16px;margin:10px 0}p{margin:0 0 14px}.muted{color:var(--muted)}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.card{background:white;border:1px solid var(--line);border-radius:13px;padding:24px;margin:20px 0}.empty{padding:55px 30px;background:#fff;border:1px solid var(--line);border-radius:16px;max-width:800px}.empty h1{font-size:36px;max-width:540px}.empty p{max-width:640px}.empty .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:30px 0}.step{border-top:2px solid #d2e1ef;padding-top:14px}.step b{display:block;margin:8px 0}.step span{color:var(--muted)}.demo{background:#edf4ff;border:1px solid #d6e5ff;border-radius:12px;padding:20px;margin-top:24px}input,select,textarea{border:1px solid #ccd9e3;border-radius:7px;padding:10px 12px;background:#fff;color:var(--ink);min-width:0}textarea{width:100%;min-height:75px;resize:vertical}label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted)}label.check{flex-direction:row;align-items:center;font-size:13px}input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue)}.grow{flex:1}.upload{border:1px dashed #aac1d7;border-radius:10px;background:#f8fbff;padding:22px;margin-top:16px}.upload input{background:transparent;border:0;padding:5px 0;max-width:100%}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;min-width:580px;font-size:13px}th{font-weight:500;color:var(--muted);text-align:left;background:#f8fafc}td,th{padding:12px 10px;border-bottom:1px solid #e4ebf2;vertical-align:middle}td small{display:block;color:var(--muted);font-size:11px}td button{padding:6px 10px;font-size:12px}.badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:600;background:#f0f4f8;color:#526c82}.badge.ok{color:#13724e;background:#e7f7ee}.badge.warning{color:#9a5708;background:#fff3de}.badge.blue{color:#154fb7;background:#eaf1ff}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}.stat{border:1px solid var(--line);padding:18px;border-radius:11px;background:#fff}.stat b{display:block;font-size:25px;margin:6px 0}.signal{border:1px solid var(--line);border-radius:10px;padding:20px;margin:14px 0}.signal .badge{margin-right:8px}.signal p{margin-top:10px}.values{display:flex;gap:35px;margin:15px 0}.values b{display:block;font-size:17px}.source{font-size:12px;padding:12px;background:#f6f9fc;border-radius:7px;margin:8px 0;white-space:pre-wrap;overflow-wrap:anywhere}.source .row{white-space:normal;margin-bottom:8px}.review{border-top:1px solid var(--line);padding-top:15px;margin-top:18px}.review form{display:flex;align-items:end;gap:10px;flex-wrap:wrap}.review input{max-width:175px}.review .comment{flex:1;min-width:200px}.review .comment input{max-width:none;width:100%}.notice{padding:14px 18px;background:#fff3de;border-radius:8px;color:#854e0c;margin:15px 0}.audit li{margin:9px 0}.audit{padding-left:20px}.hash{overflow-wrap:anywhere;font-family:ui-monospace,monospace;font-size:11px;color:var(--muted)}details summary{cursor:pointer;font-size:13px;color:var(--muted)}dialog{border:1px solid var(--line);border-radius:14px;padding:25px;width:min(1100px,calc(100% - 30px));max-height:90vh;color:var(--ink)}dialog::backdrop{background:#14314c66}dialog input{width:100%}dialog table{margin:15px 0}dialog table input{min-width:85px;width:100%}dialog table select{min-width:90px}.formgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.small{font-size:12px}.footer{margin-top:25px;color:var(--muted);font-size:12px}#toast{position:fixed;right:25px;bottom:25px;max-width:500px;background:#15354d;color:white;padding:14px 18px;border-radius:10px;box-shadow:0 10px 35px #16344c33;display:none;z-index:100}#toast.error{background:#913b32}#busy{display:none;font-size:12px;color:var(--muted)}.emptylist{padding:15px 8px;color:var(--muted);font-size:13px}@media(max-width:900px){.shell{grid-template-columns:210px minmax(0,1fr)}main{padding:22px}.formgrid{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){header{height:auto;min-height:70px;padding:14px;flex-wrap:wrap}.shell{display:block}aside{border-right:0;border-bottom:1px solid var(--line);padding:12px}#case-list{max-height:130px;overflow:auto}aside .title{margin-bottom:8px}main{padding:18px}.card{padding:18px}.empty{padding:24px}.empty h1{font-size:29px}.empty .steps{grid-template-columns:1fr;gap:10px}.stats{gap:8px}.stat{padding:13px}.stat b{font-size:21px}.formgrid{grid-template-columns:1fr}.review form{display:block}.review label{margin:8px 0}.review input{max-width:none}.review button{margin-top:8px}.row>input,.row>select{max-width:100%}}
-dialog input[type=checkbox]{width:16px;min-width:16px;flex:none}.editor-item{border:1px solid var(--line);border-radius:10px;padding:18px;margin:16px 0;min-width:0}.editor-item legend{font-weight:600;padding:0 6px}.editor-field{min-width:0}.editor-field>input,.editor-field>select,.editor-field>textarea{width:100%}.editor-field .check{margin-top:7px}.editor-field .check input{margin:0}.editor-confidence{font-size:11px;color:var(--amber)}.editor-list{display:grid;gap:8px;margin:12px 0}.editor-list .check{align-items:flex-start}.editor-list .check input{margin:2px 0 0}.editor-id{overflow-wrap:anywhere}
-</style></head><body>
-<header><div class="brand"><span class="mark">✓</span><span>Контроль исполнения</span></div><div class="row"><span id="busy">Обработка…</span><span class="badge blue">Локальный прототип</span><button data-action="token">Доступ</button><a href="/docs" target="_blank" rel="noopener">API</a></div></header>
-<div class="shell"><aside><div class="title"><b>Проверки</b><button data-action="new" aria-label="Новая проверка">＋</button></div><div id="case-list"></div></aside><main id="main"></main></div><dialog id="editor" aria-label="Редактирование документа"></dialog><div id="toast" role="status" aria-live="polite"></div>
-<script>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#26306E">
+  <title>uzniki’s project — Контроль исполнения</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2326306E'/%3E%3Cpath d='m8 16 5 5 11-12' fill='none' stroke='%23FF7700' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="preload" href="assets/fonts/Unbounded-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Montserrat-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="stylesheet" href="assets/brand.css">
+</head>
+<body>
+  <a href="#main" class="skip-link">Перейти к содержимому</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Основная навигация">
+      <a class="brand wordmark" href="#checks" aria-label="uzniki’s project, все проверки"><span>uzniki’s</span><span class="brand-accent">project</span></a>
+      <nav class="side-nav">
+        <button class="nav-item active" id="nav-checks" data-action="home" aria-current="page"><span class="glass-icon" aria-hidden="true"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 3h18v18H3zM9 3v18M15 3v18M3 9h18M3 15h18"/></svg></span><span>Все проверки</span></button>
+        <button class="nav-item" id="nav-workspace" data-action="workspace"><span class="glass-icon" aria-hidden="true"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 3h18v18H3zM9 3v18M14 3v18"/></svg></span><span>Рабочая область</span></button>
+        <button class="nav-item" id="nav-history" data-action="global-history"><span class="glass-icon" aria-hidden="true"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l5 2"/></svg></span><span>История проверок</span></button>
+      </nav>
+      <div class="sidebar-bottom"><div class="sidebar-note"><strong>ПРОТОТИП</strong><p>Локальный режим<br>Результаты демонстрационных<br>кейсов не являются реальной<br>сверкой</p></div><div class="sidebar-tools"><button class="ghost" data-action="token">Доступ</button><a id="api-link" href="/docs" target="_blank" rel="noopener">API ↗</a><span id="busy" role="status" aria-live="polite">Обработка…</span></div></div>
+    </aside>
+    <main id="main" class="main page-registry" tabindex="-1"><p class="muted">Загрузка проверок…</p></main>
+  </div>
+  <dialog id="editor" aria-label="Редактирование документа"></dialog>
+  <dialog id="modal" aria-labelledby="modal-title"></dialog>
+  <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script>
 'use strict';
-const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])), enc=encodeURIComponent;
-const state={cases:[],demos:[],current:null,run:null,options:null,token:sessionStorage.getItem('kontrol_token')||'',busy:0};
-const types={contract:'Контракт',specification:'Спецификация',delivery:'Накладная',acceptance:'Акт приёмки',amendment:'Допсоглашение'};
-const reviewNames={needs_review:'Нужна проверка',confirmed:'Расхождение подтверждено',resolved:'Устранено',dismissed:'Сигнал отклонён'};
-const number=v=>v===null||v===undefined?'—':String(v);
-function toast(text,error=false){const t=$('#toast');t.textContent=text;t.className=error?'error':'';t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',6500)}
-async function api(url,options={}){state.busy++;$('#busy').style.display='inline';try{const headers={...(state.token?{'Authorization':'Bearer '+state.token}:{}),...(options.body&&!(options.body instanceof FormData)?{'Content-Type':'application/json'}:{}),...options.headers};const r=await fetch(url,{...options,headers});if(!r.ok){let p;try{p=await r.json()}catch{p={detail:r.statusText}}throw new Error(typeof p.detail==='string'?p.detail:JSON.stringify(p.detail))}return options.blob?r.blob():r.json()}finally{state.busy--;$('#busy').style.display=state.busy?'inline':'none'}}
-async function refreshList(){state.cases=await api('/api/cases');$('#case-list').innerHTML=state.cases.length?state.cases.map(c=>`<button class="case ${state.current?.id===c.id?'active':''}" data-action="open" data-id="${esc(c.id)}">${esc(c.title)}<small>${c.document_count} документов</small></button>`).join(''):'<div class="emptylist">Создайте проверку или откройте демонстрационный комплект.</div>'}
-function demoSelect(){return `<select id="demo-choice" aria-label="Демонстрационный сценарий">${state.demos.map(x=>`<option value="${x.id}" ${x.id==='T02'?'selected':''}>${x.id} · ${esc(x.title)}</option>`).join('')}</select><button data-action="demo">Открыть пример</button>`}
-function home(){state.current=null;state.run=null;$('#main').innerHTML=`<div class="label">Документы одного контракта</div><div class="empty"><h1>Проверьте, сходятся ли условия и поставка</h1><p class="muted">Загрузите контракт, спецификацию, накладные и акты. Система свяжет позиции и покажет, какие значения требуют внимания.</p><div class="steps"><div class="step"><span>01</span><b>Соберите комплект</b><span>Включите исправления и допсоглашения.</span></div><div class="step"><span>02</span><b>Проверьте данные</b><span>Уточните спорные реквизиты и значения из сканов.</span></div><div class="step"><span>03</span><b>Разберите сигналы</b><span>Откройте источники и сохраните своё решение.</span></div></div><button class="primary" data-action="new">Новая проверка</button><div class="demo"><b>Попробовать на примере</b><p class="muted small" style="margin-top:7px">12 синтетических сценариев: частичная поставка, исправления, НДС и другие случаи.</p><div class="row">${demoSelect()}</div></div></div><p class="footer">Проверка относится к загруженному комплекту. Решение по приёмке принимает специалист.</p>`}
-async function openCase(id,options){state.current=await api('/api/cases/'+enc(id));state.run=state.current.runs.length?await api('/api/runs/'+state.current.runs[0].id):null;const previous=state.run?.request?structuredClone(state.run.request):null;if(previous)delete previous.documents;state.options=options||previous||{as_of:new Date().toLocaleDateString('sv-SE'),delivery_complete:false};render();await refreshList()}
-function render(){const c=state.current;if(!c)return home();const r=state.run?.result;$('#main').innerHTML=`<div class="row between"><div><div class="label">Проверка комплекта</div><h1>${esc(c.title)}</h1><p class="muted">${c.documents.length} документов · редакция комплекта ${c.revision}</p></div><button data-action="new">Новая проверка</button></div><section class="card"><div class="row between"><h2>Документы</h2><span class="badge">Исходники и история сохраняются</span></div><div class="scroll"><table><thead><tr><th>Документ</th><th>Номер и дата</th><th>Строки</th><th>Состояние</th><th></th></tr></thead><tbody>${c.documents.map(d=>`<tr><td>${types[d.document.type]}<small>${esc(d.document.filename||d.id)}</small></td><td>${esc(d.document.number||'Не распознано')}<small>${esc(d.document.date||'Дата не указана')}</small></td><td>${d.document.items.length}</td><td><span class="badge ${d.document.is_complete===false?'warning':''}">${d.document.status==='cancelled'?'Отменён':d.document.status==='superseded'?'Заменён':d.document.is_complete===false?'Нужны уточнения':'Загружен'}</span></td><td><button data-action="edit" data-id="${esc(d.id)}">Реквизиты</button></td></tr>`).join('')||'<tr><td colspan="5" class="muted">Загрузите документы для начала проверки.</td></tr>'}</tbody></table></div><div class="upload"><b>Добавить документы</b><p class="muted small" style="margin-top:6px">PDF, DOCX, TXT, CSV, JSON или изображения · до 20 МБ на файл</p><div class="row" style="margin-bottom:10px"><select id="upload-type" aria-label="Тип загружаемых документов"><option value="">Определить тип автоматически</option>${Object.entries(types).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select><input id="upload-contract" placeholder="Номер контракта, если не читается" aria-label="Номер контракта для загрузки"></div><div class="row"><input type="file" id="files" multiple aria-label="Файлы документов" accept=".pdf,.docx,.txt,.csv,.tsv,.json,.png,.jpg,.jpeg,.tif,.tiff"><button data-action="upload">Загрузить</button></div></div></section><section class="card"><div class="row between"><div class="row"><label>Дата среза<input id="asof" type="date" value="${esc(state.options.as_of)}" required></label><label class="check"><input id="complete" type="checkbox" ${state.options.delivery_complete?'checked':''}>Поставка по комплекту завершена</label></div><button class="primary" data-action="run" ${!c.documents.length?'disabled':''}>Выполнить сверку</button></div><p class="muted small" style="margin-top:14px;margin-bottom:0">Пока поставка не завершена, остаток по контракту показывается справочно. Противоречия между актами и накладными проверяются в любом случае.</p></section>${state.run?renderResult(state.run):'<p class="muted">Результат появится после сверки. Все сравнения используют выбранную дату среза.</p>'}<details class="card"><summary>История действий</summary><div id="events"><button style="margin-top:12px" data-action="events">Показать историю</button></div></details><p class="footer">Сигнал показывает документальное расхождение или недостаток данных. Он не является юридическим заключением.</p>`}
-function renderResult(run){const r=run.result;const headings={ok:'Расхождения не обнаружены',needs_review:'Комплект требует проверки',incomplete:'Нужно уточнить данные'};const latest=Object.fromEntries((run.reviews||[]).map(x=>[x.signal_id,x]));return `${run.stale?'<div class="notice"><b>Документы изменены после этой проверки.</b> Выполните сверку ещё раз. Ниже показан сохранённый результат.</div>':''}<div class="row between"><h2 style="margin:0">${headings[r.status]}</h2><div class="row"><button data-action="export" data-format="html">Отчёт</button><button data-action="export" data-format="pdf">PDF</button><button data-action="export" data-format="csv">CSV</button><button data-action="export" data-format="json">JSON</button></div></div><div class="stats"><div class="stat"><span class="muted">Сигналы</span><b>${r.signals.length}</b><span class="small">к рассмотрению</span></div><div class="stat"><span class="muted">Связанные строки</span><b>${r.matches.filter(x=>x.state==='matched').length}</b><span class="small">из ${r.matches.length}</span></div><div class="stat"><span class="muted">Позиции</span><b>${r.positions.length}</b><span class="small">в спецификации</span></div></div><section class="card"><h2>Количество по позициям</h2><div class="scroll"><table><thead><tr><th>Товар</th><th>Ед.</th><th>По условиям</th><th>Поставлено</th><th>Принято</th><th>Остаток</th></tr></thead><tbody>${r.positions.map(p=>`<tr><td>${esc(p.name||p.line_id)}${!p.complete?'<small>Сравнение ограничено</small>':''}</td><td>${esc(p.unit)}</td><td>${esc(number(p.expected_quantity))}</td><td>${esc(number(p.delivered_quantity))}</td><td>${esc(number(p.accepted_quantity))}</td><td>${esc(number(p.remaining_quantity))}</td></tr>`).join('')||'<tr><td colspan="6">Нет достаточных данных для сводки</td></tr>'}</tbody></table></div></section><section class="card"><h2>Сигналы и источники</h2>${r.signals.map(s=>`<article class="signal"><span class="badge ${s.blocks_comparison?'warning':'blue'}">${s.blocks_comparison?'Сравнение ограничено':'Проверить'}</span><span class="muted small">${esc(s.code)}</span><h3>${esc(s.title)}</h3><p>${esc(s.explanation)}</p><div class="values"><div><span class="muted small">Ожидается</span><b>${esc(showValue(s.expected))}</b></div><div><span class="muted small">В комплекте</span><b>${esc(showValue(s.actual))}</b></div></div><p class="small muted">Правило: ${esc(s.rule)}</p><details><summary>Исходные данные · ${s.sources.length} фрагментов</summary>${s.sources.map(x=>`<div class="source"><div class="row between"><b>${esc(x.filename||x.document_id)}${x.page?' · стр. '+x.page:''}${x.row?' · строка '+x.row:''}</b><button data-action="edit" data-id="${esc(x.document_id)}">Открыть реквизиты</button></div>${esc(x.excerpt)}</div>`).join('')}</details><div class="review">${latest[s.id]?`<p class="small"><b>${reviewNames[latest[s.id].status]}</b> · ${esc(latest[s.id].reviewer)}<br>${esc(latest[s.id].comment)}</p>`:''}<form data-signal="${esc(s.id)}"><label>Решение<select name="status">${Object.entries(reviewNames).map(([k,v])=>`<option value="${k}" ${latest[s.id]?.status===k?'selected':''}>${v}</option>`).join('')}</select></label><label>Проверяющий<input name="reviewer" required placeholder="Имя или роль"></label><label class="comment">Комментарий<input name="comment" required placeholder="Что проверено по документам"></label><button type="submit">Сохранить</button></form></div></article>`).join('')||'<span class="badge ok">Сигналов нет в пределах выполненных проверок</span>'}</section>${renderLinks(r)}<details class="card"><summary>Учёт версий и воспроизводимость</summary><ul class="audit">${r.audit.map(a=>`<li>${esc(a.explanation)} <span class="muted small">${esc(a.document_ids.join(', '))}</span></li>`).join('')||'<li>Корректировки не применялись.</li>'}</ul><p class="small">Правила ${esc(r.engine_version)} · срез ${esc(r.as_of)}</p><p class="hash">Вход: ${r.input_hash}<br>Результат: ${r.result_hash}</p></details>`}
+
+// Shared view state. All document values and comparisons come from the API.
+const $ = selector => document.querySelector(selector);
+const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const enc = encodeURIComponent;
+const state = {
+  cases: [], demos: [], current: null, run: null, options: null,
+  token: globalThis.KONTROL_PREVIEW ? '' : sessionStorage.getItem('kontrol_token') || '', busy: 0,
+  page: 'registry', tab: 'overview', lastCaseId: null, query: '', filter: 'all',
+  files: [], events: [], history: null, historyOffset: 0,
+  preview: Boolean(globalThis.KONTROL_PREVIEW), viewerURL: null, loadingCase: 0,
+  selectedRunId: null, loadingRun: 0, viewerTicket: 0, modalTicket: 0, editorTicket: 0,
+};
+const types = {contract:'Контракт', specification:'Спецификация', delivery:'Накладная', acceptance:'Документ о приёмке', amendment:'Дополнительное соглашение'};
+const reviewNames = {needs_review:'Требует рассмотрения', confirmed:'Расхождение подтверждено', resolved:'Устранено', dismissed:'Сигнал отклонён'};
+const tabs = [['overview','Обзор'], ['documents','Документы'], ['recognition','Распознавание'], ['matching','Сопоставление'], ['results','Результаты'], ['actions','История действий']];
+const number = value => value === null || value === undefined ? '—' : String(value);
+const icon = name => {
+  const paths = {
+    grid:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+    workspace:'<rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18M14 3v18"/>',
+    history:'<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',
+    search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
+    chevron:'<path d="m6 9 6 6 6-6"/>',
+  };
+  return `<svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ''}</svg>`;
+};
+
+function toast(message, error = false) {
+  const node = $('#toast');
+  node.textContent = message;
+  node.className = error ? 'error' : '';
+  node.style.display = 'block';
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => node.style.display = 'none', error ? 10000 : 5000);
+}
+
+async function api(url, options = {}) {
+  state.busy++;
+  $('#busy').style.display = 'inline';
+  try {
+    if (state.preview) return await globalThis.KONTROL_PREVIEW.api(url, options);
+    const headers = {
+      ...(state.token ? {Authorization:'Bearer ' + state.token} : {}),
+      ...(options.body && !(options.body instanceof FormData) ? {'Content-Type':'application/json'} : {}),
+      ...options.headers,
+    };
+    const response = await fetch(url, {...options, headers});
+    if (!response.ok) {
+      let payload;
+      try { payload = await response.json(); } catch { payload = {detail:response.statusText}; }
+      const error = new Error(typeof payload.detail === 'string' ? payload.detail : JSON.stringify(payload.detail));
+      error.status = response.status;
+      throw error;
+    }
+    return options.blob ? response.blob() : response.json();
+  } finally {
+    state.busy--;
+    $('#busy').style.display = state.busy ? 'inline' : 'none';
+  }
+}
+
+function dateLabel(value, withTime = false) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString('ru-RU', {timeZone:'Europe/Moscow'}) + (withTime ? ', ' + date.toLocaleTimeString('ru-RU', {timeZone:'Europe/Moscow', hour:'2-digit', minute:'2-digit'}) : '');
+}
+
+function latestReviews(run = state.run) {
+  if (run?.latest_reviews) return run.latest_reviews;
+  return Object.fromEntries((run?.reviews || []).map(review => [review.signal_id, review]));
+}
+
+function runCounts(run = state.run) {
+  const signals = run?.result?.signals || [], reviews = latestReviews(run);
+  const reviewed = signals.filter(signal => reviews[signal.id] && reviews[signal.id].status !== 'needs_review').length;
+  return {signals:signals.length, reviewed, pending:signals.length - reviewed};
+}
+
+function contractNumber(dossier = state.current) {
+  if (dossier?.contract_number) return dossier.contract_number;
+  const numbers = [...new Set((dossier?.documents || []).filter(record => record.document.type === 'contract' && (record.document.status || 'active') === 'active').map(record => record.document.number?.trim() || record.document.contract_id?.trim()).filter(Boolean))];
+  return numbers.length === 1 ? numbers[0] : '';
+}
+
+function statusInfo(item, run) {
+  const status = run?.result?.status || item?.last_run_status;
+  const stale = run?.stale ?? item?.last_run_stale;
+  const counts = run ? runCounts(run) : {signals:item?.signal_count || 0, pending:item?.pending_signal_count || 0};
+  if (stale) return {key:'stale', text:'Обновить сверку', tone:'warning'};
+  if (!status) return {key:'draft', text:'Черновик', tone:'neutral'};
+  if (counts.pending) return {key:'needs_review', text:'Требует рассмотрения', tone:'warning'};
+  if (status === 'incomplete') return {key:'incomplete', text:'Нужны уточнения', tone:'warning'};
+  if (counts.signals) return {key:'reviewed', text:'Рассмотрено', tone:'ok'};
+  if (status === 'ok') return {key:'ok', text:'Расхождений нет', tone:'ok'};
+  return {key:'needs_review', text:'Требует рассмотрения', tone:'warning'};
+}
+
+function isDemo(dossier = state.current) {
+  return Boolean(dossier?.is_demo || /синтетическ|демо|^T\d{2}\s*·/i.test((dossier?.title || '') + ' ' + (dossier?.description || '')));
+}
+
+function setRoute(hash) {
+  if (globalThis.history?.replaceState && globalThis.location) globalThis.history.replaceState(null, '', hash);
+}
+
+function syncNav() {
+  for (const [id, page] of [['nav-checks','registry'], ['nav-workspace','workspace'], ['nav-history','history']]) {
+    const node = $('#' + id);
+    node.className = 'nav-item' + (state.page === page ? ' active' : '');
+    node.setAttribute('aria-current', state.page === page ? 'page' : 'false');
+  }
+  $('#main').className = 'main page-' + state.page;
+}
+
+function header(eyebrow, title, subtitle, action = '') {
+  return `<header class="page-header"><div class="header-copy"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p class="subtitle">${subtitle}</p></div>${action ? `<div class="header-action">${action}</div>` : ''}</header>`;
+}
+
+function stat(label, value) {
+  return `<div class="stat"><span>${label}</span><b>${esc(value)}</b></div>`;
+}
+
+function demoSelect() {
+  return `<select id="demo-choice" aria-label="Демонстрационный сценарий">${state.demos.map(item => `<option value="${esc(item.id)}" ${item.id === 'T02' ? 'selected' : ''}>${esc(item.id)} · ${esc(item.title)}</option>`).join('')}</select><button data-action="demo">Открыть пример</button>`;
+}
+
+async function refreshList() {
+  state.cases = await api('/api/cases');
+  if (state.page === 'registry') home(false);
+}
+
+function workspaceContext() {
+  return {caseId:state.current?.id, runId:state.run?.id, ticket:state.loadingCase,
+    options:structuredClone(state.options || {}), selectedRunId:state.selectedRunId};
+}
+
+function isCurrentWorkspace(context, sameRun = false) {
+  return context.ticket === state.loadingCase && state.page === 'workspace'
+    && state.current?.id === context.caseId && (!sameRun || state.run?.id === context.runId);
+}
+
+async function afterSaved(message, refresh) {
+  try { await refresh(); toast(message); }
+  catch (error) { toast(message + ' Не удалось обновить экран. Откройте проверку заново: ' + error.message, true); }
+}
+
+function registryRows() {
+  const query = state.query.trim().toLocaleLowerCase('ru');
+  const entries = state.cases.filter(item => {
+    const matchesText = (item.title + ' ' + (item.contract_number || '')).toLocaleLowerCase('ru').includes(query);
+    return matchesText && (state.filter === 'all' || statusInfo(item).key === state.filter);
+  });
+  return entries.map(item => {
+    const status = statusInfo(item);
+    return `<tr data-action="open" data-id="${esc(item.id)}"><td><button class="table-link" data-action="open" data-id="${esc(item.id)}">${esc(item.contract_number || 'Без номера')}</button></td><td><span>${esc(item.title)}</span>${isDemo(item) ? '<small class="demo-tag">Демо-кейс</small>' : ''}</td><td><span class="badge ${status.tone}">${status.text}</span></td><td>${item.document_count || 0}</td><td>${item.signal_count ?? '—'}</td><td><time>${esc(dateLabel(item.updated_at || item.last_run_at || item.created_at))}</time></td></tr>`;
+  }).join('') || `<tr><td colspan="6" class="table-empty">${state.cases.length ? 'По вашему запросу проверок не найдено. Измените поиск или статус.' : 'Проверок пока нет. Создайте новую или откройте демо-кейс.'}</td></tr>`;
+}
+
+function home(invalidate = true) {
+  if (invalidate) ++state.loadingCase;
+  state.page = 'registry';
+  state.current = null;
+  state.run = null;
+  state.selectedRunId = null;
+  syncNav();
+  setRoute('#checks');
+  const processed = state.cases.filter(item => ['ok','reviewed'].includes(statusInfo(item).key)).length;
+  $('#main').innerHTML = `${header('Все проверки', 'Проверки контрактов', 'Реестр проверочных дел и состояние рассмотрения', '<button class="primary" data-action="new">+ Новая проверка</button>')}
+    <section class="stats registry-stats" aria-label="Сводка проверок">${stat('Всего проверок',state.cases.length)}${stat('В работе',state.cases.length - processed)}${stat('Сигналов',state.cases.reduce((sum,item) => sum + (item.signal_count || 0),0))}${stat('Рассмотрено',processed)}</section>
+    <section class="card registry-card" aria-label="Реестр проверок"><div class="registry-tools"><div class="search-wrap">${icon('search')}<input class="search" id="registry-query" type="search" autocomplete="off" aria-label="Поиск по контракту или названию" placeholder="Поиск по контракту или названию" value="${esc(state.query)}"></div><select id="registry-status" aria-label="Статус проверки">${[['all','Все статусы'],['draft','Черновик'],['needs_review','Требует рассмотрения'],['incomplete','Нужны уточнения'],['stale','Обновить сверку'],['reviewed','Рассмотрено'],['ok','Расхождений нет']].map(([value,label]) => `<option value="${value}" ${state.filter === value ? 'selected' : ''}>${label}</option>`).join('')}</select></div>
+    <div class="scroll"><table class="registry-table"><thead><tr><th scope="col">Контракт</th><th scope="col">Наименование</th><th scope="col">Статус</th><th scope="col">Документы</th><th scope="col">Сигналы</th><th scope="col">Изменено</th></tr></thead><tbody id="registry-rows">${registryRows()}</tbody></table></div></section>
+    ${state.demos.length ? `<details class="demo-launcher"><summary>${state.cases.length ? 'Открыть демонстрационный комплект' : 'Попробовать на демо-кейсе'}</summary><p class="muted small">Синтетические документы для знакомства с системой.</p><div class="row">${demoSelect()}</div></details>` : ''}`;
+}
+
+async function openCase(id, options, tab, runId) {
+  const ticket = ++state.loadingCase;
+  const previousId = state.current?.id;
+  const selectedRunId = runId === undefined ? (previousId === id ? state.selectedRunId : null) : runId;
+  const dossier = await api('/api/cases/' + enc(id));
+  if (ticket !== state.loadingCase) return false;
+  const targetRunId = selectedRunId || dossier.runs[0]?.id;
+  const savedRun = targetRunId ? await api('/api/runs/' + enc(targetRunId)) : null;
+  if (ticket !== state.loadingCase) return false;
+  if (savedRun?.case_id && savedRun.case_id !== id) throw new Error('Этот результат относится к другой проверке');
+  state.current = dossier;
+  state.run = savedRun;
+  state.selectedRunId = selectedRunId || null;
+  state.lastCaseId = id;
+  state.page = 'workspace';
+  state.tab = tab || (previousId === id ? state.tab : 'overview');
+  state.files = [];
+  const previous = savedRun?.request ? structuredClone(savedRun.request) : null;
+  if (previous) delete previous.documents;
+  state.options = options || previous || {as_of:new Date().toLocaleDateString('sv-SE'), delivery_complete:false};
+  render();
+  await refreshList();
+  if (ticket !== state.loadingCase || state.current?.id !== id || state.page !== 'workspace') return false;
+  if (state.tab === 'actions') await loadEvents();
+  return ticket === state.loadingCase && state.page === 'workspace' && state.current?.id === id;
+}
+
+function staleNotice() {
+  return state.run?.stale ? '<div class="notice" role="status"><b>Документы изменены после этой проверки.</b> Выполните сверку ещё раз. Ниже показан сохранённый результат.</div>' : '';
+}
+
+function render() {
+  const dossier = state.current;
+  if (!dossier) return home();
+  state.page = 'workspace';
+  syncNav();
+  setRoute('#case/' + enc(dossier.id) + '/' + state.tab + (state.selectedRunId ? '/run/' + enc(state.selectedRunId) : ''));
+  const status = statusInfo(dossier, state.run);
+  const views = {overview:renderOverview, documents:renderDocuments, recognition:renderRecognition, matching:renderMatching, results:renderResults, actions:renderActions};
+  $('#main').innerHTML = `${header('Рабочая область', esc(dossier.title), `Контракт <strong>${esc(contractNumber() || 'без номера')}</strong> – ${status.text.toLocaleLowerCase('ru')}`, '<button data-action="home">← К списку</button>')}
+    <div class="tabs" role="tablist" aria-label="Разделы проверки">${tabs.map(([key,label]) => `<button class="tab${state.tab === key ? ' active' : ''}" id="tab-${key}" data-action="tab" data-tab="${key}" role="tab" aria-controls="workspace-panel" aria-selected="${state.tab === key}" tabindex="${state.tab === key ? '0' : '-1'}">${label}</button>`).join('')}</div>
+    <div id="workspace-panel" role="tabpanel" aria-labelledby="tab-${state.tab}">${(views[state.tab] || renderOverview)()}</div>`;
+}
+
+function contractForm(id = 'contract-form', button = 'Сохранить реквизиты') {
+  const dossier = state.current;
+  return `<form id="${id}" class="contract-form" data-form="case-metadata"><div class="field"><label for="${id}-number">Номер</label><input id="${id}-number" name="contract_number" value="${esc(contractNumber())}" maxlength="300" placeholder="Номер контракта"></div><div class="field"><label for="${id}-title">Наименование</label><input id="${id}-title" name="title" value="${esc(dossier.title)}" maxlength="300" required></div><div class="field"><label for="${id}-description">Описание</label><textarea id="${id}-description" name="description" rows="3" maxlength="5000" placeholder="Описание проверки">${esc(dossier.description || '')}</textarea></div><div class="form-actions"><button class="primary" type="submit">${button}</button>${id === 'contract-form' ? '<button type="button" data-action="tab" data-tab="documents">К документам →</button>' : ''}</div>${state.preview ? '' : '<p class="small muted form-help">Поля карточки не изменяют исходные документы. Исправить извлечённые значения можно в разделе «Распознавание».</p>'}</form>`;
+}
+
+function renderOverview() {
+  const counts = runCounts();
+  return `<section class="stats overview-stats" aria-label="Состояние проверки">${stat('Документов',state.current.documents.length)}${stat('Сигналов',counts.signals)}${stat('Ожидают решения',counts.pending)}${stat('Рассмотрено',counts.reviewed)}</section><section class="card contract-card"><h2>Данные контракта</h2>${contractForm()}</section><div class="notice">Система предоставляет информационные сигналы. Окончательная оценка документов остаётся за специалистом.</div>${staleNotice()}`;
+}
+
+function documentName(record) { return record.document.filename || record.original_name || record.id; }
+function documentTypeLabel(type) { return types[type] || (state.preview && type === 'other' ? 'Другое' : type); }
+function documentSize(record) {
+  const bytes = record.size_bytes;
+  return bytes ? Math.round(bytes / 1024).toLocaleString('ru-RU') + ' КБ' : '';
+}
+function documentMeta(record) {
+  const doc = record.document;
+  return [documentTypeLabel(doc.type), documentSize(record), 'версия ' + record.revision, doc.status === 'cancelled' ? 'отменён' : doc.status === 'superseded' ? 'заменён' : ''].filter(Boolean).join(' – ');
+}
+
+function renderDocuments() {
+  const records = state.current.documents;
+  return `<div class="workspace-grid documents-grid"><section class="card upload-panel"><h2>Загрузка документов</h2><div class="dropzone" id="dropzone"><div class="upload-arrow" aria-hidden="true">↑</div><h3>Перетащите файлы сюда</h3><p class="upload-hint">или выберите файлы на устройстве (<span>${state.preview ? 'PDF, PNG, JPEG, TXT' : 'PDF, DOCX, PNG, JPEG, TIFF, TXT, CSV, TSV, JSON'}</span>)</p><div class="file-picker-row"><button class="file-button" data-action="choose-files">Выбрать файлы</button><span id="file-count">Файлы не выбраны</span></div><input class="visually-hidden" type="file" id="files" multiple aria-label="Выбрать документы" accept=".pdf,.docx,.txt,.csv,.tsv,.json,.png,.jpg,.jpeg,.tif,.tiff"></div>
+    <div id="upload-controls" hidden><div class="row"><label class="grow">Тип документа<select id="upload-type"><option value="">Определить автоматически</option>${Object.entries(types).map(([key,label]) => `<option value="${key}">${label}</option>`).join('')}</select></label><label class="grow">Номер контракта<input id="upload-contract" value="${esc(contractNumber())}" placeholder="Если не читается в файле"></label></div><p id="upload-selection" class="small muted"></p><button class="primary" data-action="upload">Загрузить документы</button></div>
+    <p class="small muted storage-note">${state.preview ? 'Автономный макет. Загрузка и распознавание файлов доступны в версии с сервером. Изменения макета сохраняются только в открытой вкладке.' : 'Исходные файлы, реквизиты и решения сохраняются на локальном сервере. До 20 МБ на файл. Повторная загрузка одного файла не создаёт дубликат.'}</p></section>
+    <section class="card document-panel"><h2>Комплект документов: <span class="accent">${records.length}</span></h2><div class="document-list">${records.map(record => `<div class="document-row${record.document.status === 'cancelled' ? ' cancelled' : ''}"><div class="document-info"><b>${esc(documentName(record))}</b><span class="muted">${esc(documentMeta(record))}</span></div><div class="document-actions"><button data-action="type" data-id="${esc(record.id)}" aria-label="Изменить тип ${esc(documentName(record))}">Тип</button><button data-action="view" data-id="${esc(record.id)}" aria-label="Открыть ${esc(documentName(record))}">Открыть</button><button class="icon-button" data-action="exclude" data-id="${esc(record.id)}" aria-label="${record.document.status === 'cancelled' ? 'Восстановить' : 'Исключить из сверки'} ${esc(documentName(record))}">${record.document.status === 'cancelled' ? '↶' : '×'}</button></div></div>`).join('') || '<div class="emptylist">Загрузите контракт, спецификацию, накладные и документы о приёмке.</div>'}</div></section></div>
+    <div class="notice">Если в загруженном комплекте отсутствует документ, это не означает, что он отсутствует у сторон контракта.</div><div class="form-actions"><button class="primary" data-action="tab" data-tab="recognition">К распознаванию →</button></div>`;
+}
+
+function renderRecognition() {
+  const documents = state.current.documents;
+  const notice = state.preview
+    ? 'Модуль OCR и извлечения данных ещё не подключён. Ниже доступны редактируемые реквизиты проверки, но значения из загруженных файлов автоматически не извлекаются.'
+    : 'Реквизиты извлекаются при загрузке документов. Проверьте значения по оригиналам, особенно после распознавания сканов. Изменённое поле становится подтверждённым только после вашей отметки.';
+  return `<section class="card recognition-card"><h2>Распознавание реквизитов</h2><div class="notice">${notice}</div><div class="recognition-grid"><section><h2>Исходные документы</h2><div class="source-documents">${documents.map(record => `<div class="document-row"><div class="document-info"><b>${esc(documentName(record))}</b>${!state.preview ? `<span class="small muted">${esc(documentTypeLabel(record.document.type))} · ${record.document.items.length} строк${record.document.extraction_method === 'ocr' ? ' · OCR' : ''}</span>` : ''}</div><div class="document-actions"><button data-action="view" data-id="${esc(record.id)}">Просмотреть</button>${!state.preview ? `<button data-action="edit" data-id="${esc(record.id)}">Реквизиты</button>` : ''}</div></div>`).join('') || '<p class="muted">Сначала добавьте документы.</p>'}</div></section><section>${contractForm('recognition-form','Сохранить исправления')}${!state.preview && documents.length ? '<p class="small muted">Кнопка «Реквизиты» открывает значения и товарные строки выбранного документа с отметками проверки по оригиналу.</p>' : ''}</section></div></section><div class="form-actions"><button data-action="tab" data-tab="matching">К сопоставлению →</button></div>`;
+}
+
+function runControls() {
+  if (state.preview) return '';
+  return `<section class="card run-controls"><div class="row between"><div class="row"><label>Дата среза<input id="asof" type="date" value="${esc(state.options.as_of)}" required></label><label class="check"><input id="complete" type="checkbox" ${state.options.delivery_complete ? 'checked' : ''}>Поставка по комплекту завершена</label></div><button class="primary" data-action="run" ${!state.current.documents.length ? 'disabled' : ''}>${state.run ? 'Повторить сверку' : 'Выполнить сверку'}</button></div><p class="small muted form-help">До завершения поставки остаток по контракту показывается справочно. Противоречия между актами и накладными проверяются при каждом запуске.</p></section>`;
+}
+
+function quantity(value, unit) {
+  return value == null ? '—' : esc(String(value)) + (unit ? ' ' + esc(unit) + (unit === 'шт' ? '.' : '') : '');
+}
+
+function renderMatching() {
+  const result = state.run?.result;
+  const note = state.preview
+    ? 'Автоматическое связывание товарных позиций ожидает подключения серверного модуля. Система не выполняет сравнение единиц измерения без подтверждённого коэффициента пересчёта.'
+    : 'Позиции связаны по данным последней сверки. Неоднозначные связи требуют подтверждения. Система не сравнивает разные единицы измерения без подтверждённого коэффициента пересчёта.';
+  return `${staleNotice()}<section class="card matching-card"><h2>Сопоставление позиций</h2><div class="notice">${result ? note : 'Запустите сверку, чтобы связать позиции из контракта, накладных и документов о приёмке.'}</div><div class="scroll"><table class="matching-table"><thead><tr><th scope="col">Позиция</th><th scope="col">Контракт</th><th scope="col">Накладная</th><th scope="col">Приёмка</th><th scope="col">Состояние</th></tr></thead><tbody>${(result?.positions || []).map(position => {
+    const signals = result.signals.filter(signal => signal.position_id === position.line_id);
+    const blocked = !position.complete;
+    const text = blocked ? 'Нужны уточнения' : signals.length ? 'Требует проверки' : 'Сопоставлено';
+    return `<tr><td>${esc(position.name || position.line_id)}</td><td>${quantity(position.expected_quantity,position.unit)}</td><td>${quantity(position.delivered_quantity,position.unit)}</td><td>${quantity(position.accepted_quantity,position.unit)}</td><td><span class="badge ${blocked || signals.length ? 'warning' : 'ok'}">${text}</span></td></tr>`;
+  }).join('') || '<tr><td colspan="5" class="table-empty">Позиции появятся после сверки комплекта.</td></tr>'}</tbody></table></div><p class="matching-note muted">${state.preview ? 'Демонстрационное сопоставление из синтетического кейса T02.' : result ? `Срез на ${esc(dateLabel(result.as_of))}. Количества приведены по действующим документам выбранной редакции.` : 'Сначала загрузите и проверьте исходные документы.'}</p></section>
+    ${runControls()}${result ? renderLinks(result) : ''}<div class="form-actions"><button class="primary" data-action="tab" data-tab="results">К результатам →</button></div>`;
+}
+
+function renderResults() {
+  return state.run ? renderResult(state.run) : `<section class="card"><h2>Результаты проверки</h2><p class="muted">Результат появится после сверки загруженного комплекта.</p><button data-action="tab" data-tab="matching">К сопоставлению →</button></section>`;
+}
+
+function renderResult(run) {
+  const result = run.result, counts = runCounts(run), reviews = latestReviews(run);
+  const headings = {ok:'Расхождения не обнаружены', needs_review:'Комплект требует проверки', incomplete:'Нужно уточнить данные'};
+  return `${staleNotice()}<div class="row between results-heading"><h2>${headings[result.status] || 'Результаты проверки'}</h2><div class="row">${['html','pdf','csv','json'].map(format => `<button data-action="export" data-format="${format}">${format === 'html' ? 'Отчёт' : format.toUpperCase()}</button>`).join('')}</div></div><section class="stats overview-stats">${stat('Сигналов',counts.signals)}${stat('Ожидают решения',counts.pending)}${stat('Рассмотрено',counts.reviewed)}${stat('Позиций',result.positions.length)}</section>
+    <section class="card"><h2>Количество по позициям</h2><div class="scroll"><table><thead><tr><th>Товар</th><th>Ед.</th><th>По условиям</th><th>Поставлено</th><th>Принято</th><th>Остаток</th></tr></thead><tbody>${result.positions.map(position => `<tr><td>${esc(position.name || position.line_id)}${!position.complete ? '<small>Сравнение ограничено</small>' : ''}</td><td>${esc(position.unit || '—')}</td><td>${esc(number(position.expected_quantity))}</td><td>${esc(number(position.delivered_quantity))}</td><td>${esc(number(position.accepted_quantity))}</td><td>${esc(number(position.remaining_quantity))}</td></tr>`).join('') || '<tr><td colspan="6">Нет достаточных данных для сводки.</td></tr>'}</tbody></table></div></section>
+    <section class="card"><h2>Сигналы и источники</h2>${result.signals.map(signal => `<article class="signal"><div class="row"><span class="badge ${reviews[signal.id] && reviews[signal.id].status !== 'needs_review' ? 'ok' : signal.blocks_comparison ? 'warning' : 'neutral'}">${esc(reviews[signal.id] ? reviewNames[reviews[signal.id].status] : signal.blocks_comparison ? 'Сравнение ограничено' : 'Требует проверки')}</span>${reviews[signal.id] && signal.blocks_comparison ? '<span class="badge warning">Сравнение ограничено</span>' : ''}<span class="small muted">${esc(signal.code)}</span></div><h3>${esc(signal.title)}</h3><p>${esc(signal.explanation)}</p><div class="values"><div><span class="small muted">Ожидается</span><b>${esc(showValue(signal.expected))}</b></div><div><span class="small muted">В комплекте</span><b>${esc(showValue(signal.actual))}</b></div></div><p class="small muted">Правило: ${esc(signal.rule)}</p><details><summary>Исходные данные · ${signal.sources.length} фрагментов</summary>${signal.sources.map(source => `<div class="source"><div class="row between"><b>${esc(source.filename || source.document_id)}${source.page ? ' · стр. ' + esc(source.page) : ''}${source.row ? ' · строка ' + esc(source.row) : ''}</b><div class="row"><button data-action="view-snapshot" data-id="${esc(source.document_id)}">Просмотреть</button><button data-action="edit" data-id="${esc(source.document_id)}">Открыть реквизиты</button></div></div>${esc(source.excerpt)}</div>`).join('')}</details><div class="review">${reviews[signal.id] ? `<p class="small"><b>${esc(reviewNames[reviews[signal.id].status])}</b> · ${esc(reviews[signal.id].reviewer)}<br>${esc(reviews[signal.id].comment)}</p>` : ''}<form data-signal="${esc(signal.id)}"><label>Решение<select name="status">${Object.entries(reviewNames).map(([key,label]) => `<option value="${key}" ${reviews[signal.id]?.status === key ? 'selected' : ''}>${label}</option>`).join('')}</select></label><label>Проверяющий<input name="reviewer" required maxlength="200" placeholder="Имя или роль"></label><label class="comment">Комментарий<input name="comment" required maxlength="10000" placeholder="Что проверено по документам"></label><button type="submit" class="primary">Сохранить</button></form></div></article>`).join('') || '<span class="badge ok">Сигналов нет в пределах выполненных проверок</span>'}</section>
+    <details class="card"><summary>Учёт версий и воспроизводимость</summary><ul class="audit">${result.audit.map(entry => `<li>${esc(entry.explanation)} <span class="small muted">${esc(entry.document_ids.join(', '))}</span></li>`).join('') || '<li>Корректировки не применялись.</li>'}</ul><p class="small">Правила ${esc(result.engine_version)} · срез ${esc(result.as_of)}</p><p class="hash">Вход: ${esc(result.input_hash)}<br>Результат: ${esc(result.result_hash)}</p></details><p class="footer">Сигнал показывает документальное расхождение или недостаток данных. Окончательная оценка остаётся за специалистом.</p>`;
+}
+
+function renderActions() {
+  return '<section class="card"><div class="row between"><h2>История действий</h2><button data-action="events">Обновить</button></div><div id="events"><p class="muted">Загрузка истории…</p></div></section>';
+}
+
+const eventNames = {case_created:'Создана проверка', case_updated:'Обновлены реквизиты карточки', document_added:'Загружен документ', extraction_reviewed:'Исправлены реквизиты документа', duplicate_upload:'Повторная загрузка исключена', duplicate_document:'Повторный документ исключён', check_completed:'Выполнена сверка', signal_reviewed:'Сохранено решение по сигналу', report_exported:'Выгружен отчёт'};
+async function loadEvents() {
+  const ticket = state.loadingCase;
+  const id = state.current?.id;
+  if (!id) return;
+  const entries = await api(`/api/cases/${enc(id)}/events`);
+  if (ticket !== state.loadingCase || state.page !== 'workspace' || state.current?.id !== id || state.tab !== 'actions') return;
+  state.events = entries;
+  $('#events').innerHTML = entries.length ? `<ol class="timeline">${entries.slice().reverse().map(entry => `<li><div><strong>${esc(eventNames[entry.action] || entry.action)}</strong><time class="small muted">${esc(dateLabel(entry.created_at,true))}</time></div>${entry.payload?.comment ? `<p>${esc(entry.payload.comment)}</p>` : ''}${entry.payload?.reviewer ? `<p class="small muted">${esc(entry.payload.reviewer)}</p>` : ''}<details><summary>Подробности</summary><pre class="source">${esc(JSON.stringify(entry.payload,null,2))}</pre></details></li>`).join('')}</ol>` : '<p class="muted">История пока пуста.</p>';
+}
+
+async function showHistory(offset = 0) {
+  const ticket = ++state.loadingCase;
+  state.page = 'history';
+  state.historyOffset = offset;
+  syncNav();
+  setRoute('#history');
+  $('#main').innerHTML = header('История проверок','Журнал проверок','Сохранённые результаты и состояние рассмотрения') + '<div class="card"><p class="muted">Загрузка журнала…</p></div>';
+  const history = await api('/api/runs?limit=25&offset=' + offset);
+  if (ticket !== state.loadingCase || state.page !== 'history' || state.historyOffset !== offset) return;
+  state.history = history;
+  const names = {ok:'Расхождений нет', needs_review:'Требует рассмотрения', incomplete:'Нужны уточнения'};
+  $('#main').innerHTML = header('История проверок','Журнал проверок','Сохранённые результаты и состояние рассмотрения') + `<section class="card"><div class="scroll"><table><thead><tr><th>Проверка</th><th>Дата запуска</th><th>Состояние</th><th>Сигналы</th><th></th></tr></thead><tbody>${history.items.map(item => `<tr><td>${esc(item.case_title)}</td><td>${esc(dateLabel(item.created_at,true))}</td><td><span class="badge ${item.stale || item.status !== 'ok' ? 'warning' : 'ok'}">${item.stale ? 'Сохранённая редакция' : names[item.status] || item.status}</span></td><td>${item.signal_count ?? '—'}</td><td><button data-action="open-run" data-id="${esc(item.id)}" data-case="${esc(item.case_id)}">Открыть</button></td></tr>`).join('') || '<tr><td colspan="5" class="table-empty">Выполненных сверок пока нет.</td></tr>'}</tbody></table></div><div class="row between pagination"><p class="small muted">${history.total ? `${offset + 1}–${Math.min(offset + history.limit,history.total)} из ${history.total}` : '0 проверок'}</p><div class="row"><button data-action="history-page" data-offset="${Math.max(0,offset - 25)}" ${offset === 0 ? 'disabled' : ''}>← Назад</button><button data-action="history-page" data-offset="${offset + 25}" ${offset + 25 >= history.total ? 'disabled' : ''}>Далее →</button></div></div></section>`;
+}
+
+
+// Existing reviewed-field editor and SKU links are preserved.
 function showValue(v){if(v===null||v===undefined)return '—';return typeof v==='object'?JSON.stringify(v):v}
 function renderLinks(r){
   const pending=r.matches.filter(x=>x.state!=='matched');
@@ -85,7 +419,7 @@ function editorValue(def,value){if(def.kind==='json')return JSON.stringify(value
 function editorControl(def,scope,index,value,confidence,identity){
   const id=`editor-${scope}-${index}-${def.key}`,raw=editorValue(def,value),data=`data-${scope}-field="${def.key}"`;
   let control;
-  if(def.options)control=`<select id="${id}" ${data}>${def.options.map(([key,label])=>`<option value="${esc(key)}" ${raw===key?'selected':''}>${esc(label)}</option>`).join('')}</select>`;
+  if(def.options)control=`<select id="${id}" ${data}>${state.preview && scope==='doc' && def.key==='type' && raw==='other' ? '<option value="other" selected>Другое</option>' : ''}${def.options.map(([key,label])=>`<option value="${esc(key)}" ${raw===key?'selected':''}>${esc(label)}</option>`).join('')}</select>`;
   else if(def.kind==='list'||def.kind==='json')control=`<textarea id="${id}" ${data} rows="3">${esc(raw)}</textarea>`;
   else control=`<input id="${id}" ${data} type="${def.kind==='date'?'date':'text'}" ${def.kind==='readonly'?'readonly':''} ${def.kind==='decimal'?'inputmode="decimal"':''} ${def.kind==='integer'||def.kind==='optionalInteger'?'inputmode="numeric"':''} value="${esc(raw)}">`;
   const estimate=Object.hasOwn(confidence,def.key)?` <span class="editor-confidence">Уверенность: ${esc(Math.round(confidence[def.key]*100))}%</span>`:'';
@@ -137,6 +471,7 @@ function editorError(error){
 function editDocument(id){
   const record=state.current.documents.find(d=>d.id===id);
   if(!record)return toast('Этого документа нет в текущем комплекте',true);
+  const caseId=state.current.id,editorTicket=++state.editorTicket;
   const d=record.document,originals=new Map(d.items.map((item,index)=>[String(index),item])),usedIds=new Set(d.items.map(item=>item.line_id));
   let nextIndex=d.items.length,nextManual=1;
   const missing=d.missing_fields||[],warnings=d.extraction_warnings||[],confidence=d.fields_confidence||{};
@@ -145,7 +480,7 @@ function editDocument(id){
     <p class="small muted">Изменённые, но не отмеченные поля сохраняются неподтверждёнными. Отмечайте только то, что проверили по оригиналу. Исходный файл и история исправлений сохраняются.</p>
     <div class="formgrid">${editorDocumentFields.map(def=>editorControl(def,'doc',0,d[def.key],confidence)).join('')}</div>
     ${editorSource(d.source)}${editorUnknownConfidence(d,confidence,[...editorDocumentFields.map(def=>def.key),'missing_fields','items'],'doc')}
-    <details><summary>ID документов комплекта</summary><ul class="small">${state.current.documents.map(x=>`<li>${esc(types[x.document.type]||x.document.type)} · ${esc(x.document.number||'без номера')} · <span class="editor-id">${esc(x.id)}</span></li>`).join('')}</ul></details>
+    <details><summary>ID документов комплекта</summary><ul class="small">${state.current.documents.map(x=>`<li>${esc(documentTypeLabel(x.document.type))} · ${esc(x.document.number||'без номера')} · <span class="editor-id">${esc(x.id)}</span></li>`).join('')}</ul></details>
     <div class="row between" style="margin-top:20px"><h3>Товарные строки</h3><button type="button" data-editor-action="add">Добавить строку</button></div>
     <p class="small muted">Для новой строки нулевая скидка остаётся неподтверждённой до проверки. Удаление строки может потребовать повторного подтверждения ручных связей.</p>
     <label class="check"><input type="checkbox" data-doc-confirm="items">Весь состав товарных строк проверен по оригиналу${Object.hasOwn(confidence,'items')?` · уверенность ${esc(Math.round(confidence.items*100))}%`:''}</label>
@@ -191,6 +526,7 @@ function editDocument(id){
     const submit=form.querySelector('[type="submit"]');
     submit.disabled=true;
     form.inert=true;
+    const context=workspaceContext();
     let saved=false;
     try{
       const reviewer=form.elements.reviewer.value.trim(),comment=form.elements.comment.value.trim();
@@ -226,17 +562,445 @@ function editDocument(id){
       });
       if(JSON.stringify(updated.items.map(item=>item.line_id))!==JSON.stringify(d.items.map(item=>item.line_id)))updated.fields_confidence.items=0;
       if(form.querySelector('[data-doc-confirm="items"]').checked){updated.fields_confidence.items=1;confirmed_fields.push('items')}
-      await api(`/api/cases/${enc(state.current.id)}/documents/${enc(id)}`,{method:'PUT',body:JSON.stringify({document:updated,expected_revision:record.revision,reviewer,comment,confirmed_fields,confirmed_items,discarded_confidence_fields,discarded_item_confidence})});
+      await api(`/api/cases/${enc(caseId)}/documents/${enc(id)}`,{method:'PUT',body:JSON.stringify({document:updated,expected_revision:record.revision,reviewer,comment,confirmed_fields,confirmed_items,discarded_confidence_fields,discarded_item_confidence})});
       saved=true;
-      $('#editor').close();
-      await openCase(state.current.id,state.options);
+      if(state.editorTicket===editorTicket)$('#editor').close();
+      if(context.caseId===caseId&&isCurrentWorkspace(context))await openCase(caseId,context.options,state.tab,context.selectedRunId);
+      else await refreshList();
       toast('Исправление сохранено. Выполните сверку ещё раз.');
     }catch(e){const message=editorError(e);toast(saved?'Исправление сохранено, но не удалось обновить комплект. Откройте его заново: '+message:message,true)}finally{submit.disabled=false;form.inert=false}
   };
 }
-async function run(){state.options={...state.options,as_of:$('#asof').value,delivery_complete:$('#complete').checked};if(!state.options.as_of)throw new Error('Укажите дату среза');const r=await api(`/api/cases/${state.current.id}/runs`,{method:'POST',body:JSON.stringify(state.options)});state.run=await api('/api/runs/'+r.id);render();await refreshList()}
-async function download(url,name){const blob=await api(url,{blob:true}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
-document.addEventListener('click',async event=>{const b=event.target.closest('[data-action]');if(!b)return;const action=b.dataset.action;b.disabled=true;try{if(action==='new'){const title=prompt('Название проверки','Проверка исполнения контракта');if(title?.trim()){const c=await api('/api/cases',{method:'POST',body:JSON.stringify({title:title.trim()})});await openCase(c.id)}}if(action==='open')await openCase(b.dataset.id);if(action==='demo'){const d=await api('/api/demo/'+$('#demo-choice').value,{method:'POST'});await openCase(d.case.id,d.options);await run()}if(action==='upload'){const files=[...$('#files').files];if(!files.length)throw new Error('Выберите файлы');for(const file of files){const data=new FormData();data.append('file',file);if($('#upload-type').value)data.append('document_type',$('#upload-type').value);if($('#upload-contract').value.trim())data.append('contract_id',$('#upload-contract').value.trim());const r=await api(`/api/cases/${state.current.id}/documents`,{method:'POST',body:data});if(r.duplicate)toast('Повторный файл исключён: '+file.name)}await openCase(state.current.id,state.options);toast('Документы загружены')}if(action==='run')await run();if(action==='edit')editDocument(b.dataset.id);if(action==='close')$('#editor').close();if(action==='export')await download(`/api/runs/${state.run.id}/export?format=${b.dataset.format}`,'proverka.'+b.dataset.format);if(action==='source')await download(`/api/cases/${state.current.id}/documents/${enc(b.dataset.id)}/file`,state.current.documents.find(x=>x.id===b.dataset.id)?.document.filename||'document');if(action==='history'){const rows=await api(`/api/cases/${state.current.id}/documents/${enc(b.dataset.id)}/history`);$('#history').innerHTML='<h3>История исправлений</h3>'+rows.map(x=>`<p class="small">Редакция ${x.revision} · ${esc(x.reviewer)} · ${esc(x.created_at)}<br>${esc(x.comment)}</p>`).join('')}if(action==='events'){const events=await api(`/api/cases/${state.current.id}/events`);$('#events').innerHTML='<ul class="audit small">'+events.map(x=>`<li>${esc(x.created_at)} · ${esc(x.action)}<br><span class="muted">${esc(JSON.stringify(x.payload))}</span></li>`).join('')+'</ul>'}if(action==='links'){const reviewer=$('#link-reviewer').value.trim(),comment=$('#link-comment').value.trim();if(!reviewer||!comment)throw new Error('Укажите проверяющего и основание');const links=[...document.querySelectorAll('[data-link-document]')].filter(x=>x.value).map(x=>({document_id:x.dataset.linkDocument,line_id:x.dataset.linkLine,target_line_id:x.value,reviewer,comment}));state.options.manual_links=[...(state.options.manual_links||[]).filter(old=>!links.some(n=>n.document_id===old.document_id&&n.line_id===old.line_id)),...links];await run()}if(action==='token'){const v=prompt('Bearer-токен локального сервера. Оставьте пустым, если токен не настроен.',state.token);if(v!==null){state.token=v.trim();sessionStorage.setItem('kontrol_token',state.token);state.demos=await api('/api/demo');await refreshList();if(state.current)render();else home();toast('Настройка доступа сохранена в этой вкладке')}}}catch(e){toast(e.message,true)}finally{b.disabled=false}});
-document.addEventListener('submit',async event=>{const form=event.target;if(!form.dataset.signal)return;event.preventDefault();try{const data=Object.fromEntries(new FormData(form));await api(`/api/runs/${state.run.id}/signals/${form.dataset.signal}/reviews`,{method:'POST',body:JSON.stringify(data)});state.run=await api('/api/runs/'+state.run.id);render();toast('Решение сохранено в истории')}catch(e){toast(e.message,true)}});
-(async()=>{try{state.demos=await api('/api/demo');await refreshList();home()}catch(e){home();toast(e.message,true)}})();
-</script></body></html>
+
+// Navigation and actions share the same API in every screen.
+async function run() {
+  if (!state.current) throw new Error('Откройте проверку');
+  const context = workspaceContext(), runTicket = ++state.loadingRun;
+  state.options = {
+    ...state.options,
+    as_of: $('#asof')?.value || state.options?.as_of,
+    delivery_complete: $('#complete') ? $('#complete').checked : Boolean(state.options?.delivery_complete),
+  };
+  if (!state.options.as_of) throw new Error('Укажите дату среза');
+  const options = structuredClone(state.options);
+  const response = await api(`/api/cases/${enc(context.caseId)}/runs`, {method:'POST', body:JSON.stringify(options)});
+  await afterSaved('Сверка выполнена.', async () => {
+    if (isCurrentWorkspace(context) && state.loadingRun === runTicket) {
+      const savedRun = await api('/api/runs/' + enc(response.id));
+      const dossier = await api('/api/cases/' + enc(context.caseId));
+      if (isCurrentWorkspace(context) && state.loadingRun === runTicket) {
+        state.run = savedRun;
+        state.current = dossier;
+        state.selectedRunId = null;
+        render();
+      }
+    }
+    await refreshList();
+  });
+  return response;
+}
+
+async function download(url, name) {
+  const blob = await api(url, {blob:true});
+  const objectURL = URL.createObjectURL(blob), link = document.createElement('a');
+  link.href = objectURL;
+  link.download = name;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(objectURL),1000);
+}
+
+function openModal(markup, className = '') {
+  ++state.modalTicket;
+  ++state.viewerTicket;
+  if (state.viewerURL) { URL.revokeObjectURL(state.viewerURL); state.viewerURL = null; }
+  const dialog = $('#modal');
+  dialog.className = className;
+  dialog.innerHTML = markup;
+  if (!dialog.open) dialog.showModal();
+}
+
+function closeModal() {
+  ++state.modalTicket;
+  ++state.viewerTicket;
+  $('#modal').close();
+}
+
+function modalHeader(eyebrow, title) {
+  return `<div class="modal-header"><div><div class="modal-eyebrow">${eyebrow}</div><h2 id="modal-title">${title}</h2></div><button type="button" class="ghost" data-action="close-modal" aria-label="Закрыть диалог">Закрыть ×</button></div>`;
+}
+
+function newCaseModal() {
+  openModal(`${modalHeader('Новая проверка','Данные контракта')}<form data-form="new-case" class="contract-form"><div class="field"><label for="new-number">Номер</label><input id="new-number" name="contract_number" placeholder="ГК-2026/0142" maxlength="300"></div><div class="field"><label for="new-title">Наименование</label><input id="new-title" name="title" placeholder="Например, поставка уличных скамеек" maxlength="300" required autofocus></div><div class="field"><label for="new-description">Описание</label><textarea id="new-description" name="description" maxlength="5000" placeholder="Что нужно проверить"></textarea></div><div class="modal-actions"><button class="primary" type="submit">Создать проверку</button><button type="button" data-action="close-modal">Отмена</button></div></form>`);
+}
+
+function typeModal(id) {
+  const record = state.current.documents.find(item => item.id === id);
+  if (!record) throw new Error('Документ не найден');
+  const entries = [...Object.entries(types), ['corrected','Исправленная версия'], ['other','Другое']];
+  openModal(`${modalHeader('Классификация документа','Изменить тип документа')}<p class="modal-filename">${esc(documentName(record))}</p><form data-form="document-type" data-id="${esc(id)}"><label for="type-trigger" class="type-label">Категория документа</label><input type="hidden" id="type-value" name="type" value="${esc(record.document.type)}"><div class="type-picker"><button type="button" id="type-trigger" class="type-trigger" data-action="type-toggle" aria-haspopup="listbox" aria-expanded="false" aria-controls="type-options"><span id="type-selected">${esc(documentTypeLabel(record.document.type))}</span>${icon('chevron')}</button><div id="type-options" class="type-list" role="listbox" aria-label="Категория документа" hidden>${entries.map(([value,label]) => `<button type="button" class="type-option" role="option" aria-selected="${record.document.type === value}" data-action="type-choice" data-value="${value}" ${value === 'other' && !state.preview ? 'aria-disabled="true" title="Для этого документа нужно выбрать одну из поддерживаемых категорий"' : ''}>${label}</button>`).join('')}</div></div><p class="modal-description">Тип определяет роль документа в сверке: контракт задаёт условия, накладные подтверждают поставку, акт фиксирует приёмку, дополнительное соглашение меняет действующую редакцию.</p><p id="type-help" class="small muted" hidden></p>${state.preview ? '' : '<div class="type-review-fields"><label>Проверяющий<input name="reviewer" required maxlength="200" placeholder="Имя или роль"></label><label>Основание изменения<input name="comment" required maxlength="10000" placeholder="Что проверено по оригиналу"></label></div>'}<div class="modal-actions"><button class="primary" type="submit">Сохранить тип</button><button type="button" data-action="close-modal">Отмена</button></div></form>`, 'type-modal');
+}
+
+function toggleTypeOptions(force) {
+  const list = $('#type-options');
+  if (!list) return;
+  const expanded = force ?? list.hidden;
+  list.hidden = !expanded;
+  $('#type-trigger').setAttribute('aria-expanded', String(expanded));
+  if (expanded) list.querySelector('[aria-selected="true"]')?.focus();
+  else $('#type-trigger').focus();
+}
+
+function selectType(button) {
+  if (button.getAttribute('aria-disabled') === 'true') {
+    $('#type-help').hidden = false;
+    $('#type-help').textContent = 'Для сверки подходят контракт, спецификация, накладная, документ о приёмке или дополнительное соглашение. Для другого документа сначала уточните его роль.';
+    toggleTypeOptions(false);
+    return;
+  }
+  $('#type-value').value = button.dataset.value;
+  $('#type-selected').textContent = button.textContent;
+  for (const option of document.querySelectorAll('#type-options [role="option"]')) option.setAttribute('aria-selected',String(option === button));
+  const corrected = button.dataset.value === 'corrected';
+  $('#type-help').hidden = !corrected;
+  $('#type-help').textContent = corrected ? 'Исправленная версия сохраняет категорию документа. После продолжения укажите заменяемый документ и редакцию в реквизитах.' : '';
+  toggleTypeOptions(false);
+}
+
+function exclusionModal(id) {
+  const record = state.current.documents.find(item => item.id === id);
+  if (!record) throw new Error('Документ не найден');
+  const restoring = record.document.status === 'cancelled';
+  openModal(`${modalHeader('Состав комплекта',restoring ? 'Восстановить документ' : 'Исключить из сверки')}<p class="modal-filename">${esc(documentName(record))}</p><p class="modal-description">${restoring ? 'Документ снова будет участвовать в следующей сверке.' : 'Документ получит статус «Отменён» и не будет участвовать в следующей сверке. Оригинал и история сохранятся.'}</p><form data-form="document-status" data-id="${esc(id)}" data-status="${restoring ? 'active' : 'cancelled'}"><div class="field"><label for="status-reviewer">Проверяющий</label><input id="status-reviewer" name="reviewer" required maxlength="200"></div><div class="field"><label for="status-comment">Причина</label><textarea id="status-comment" name="comment" required maxlength="10000"></textarea></div><div class="modal-actions"><button class="primary" type="submit">${restoring ? 'Восстановить' : 'Исключить из сверки'}</button><button type="button" data-action="close-modal">Отмена</button></div></form>`);
+}
+
+function snapshotContent(doc) {
+  return `<div class="viewer-data"><div class="notice">Показаны сохранённые реквизиты и фрагменты источника. Они не заменяют оригинальный файл.</div><dl class="document-facts"><div><dt>Категория</dt><dd>${esc(documentTypeLabel(doc.type))}</dd></div><div><dt>Номер</dt><dd>${esc(doc.number || 'Не указан')}</dd></div><div><dt>Дата</dt><dd>${esc(dateLabel(doc.date))}</dd></div><div><dt>Контракт</dt><dd>${esc(doc.contract_id || 'Не указан')}</dd></div></dl>${doc.source ? `<pre class="source">${esc(doc.source.excerpt)}</pre>` : ''}<div class="scroll"><table><thead><tr><th>Позиция</th><th>Количество</th><th>Ед.</th><th>Цена</th></tr></thead><tbody>${doc.items.map(item => `<tr><td>${esc(item.name || item.line_id)}</td><td>${esc(number(item.quantity))}</td><td>${esc(item.unit || '—')}</td><td>${esc(number(item.unit_price))}</td></tr>`).join('') || '<tr><td colspan="4">Товарные строки не извлечены.</td></tr>'}</tbody></table></div></div>`;
+}
+
+async function viewDocument(id, snapshot = false) {
+  const context = workspaceContext(), dossierId = context.caseId;
+  const record = state.current.documents.find(item => item.id === id);
+  const snapshotDocuments = snapshot ? state.run?.request?.documents : null;
+  const doc = snapshotDocuments ? snapshotDocuments.find(item => item.id === id) : record?.document;
+  if (!doc) throw new Error(snapshotDocuments ? 'Документ отсутствует в сохранённом снимке сверки' : 'Документ не найден');
+  const title = doc.filename || id;
+  openModal(`${modalHeader(snapshot ? 'Источники сохранённой сверки' : 'Просмотр документа',esc(title))}<div id="viewer-content"><p class="muted">Открываю документ…</p></div><div class="modal-actions"><button data-action="edit-from-viewer" data-id="${esc(id)}">Реквизиты</button><button data-action="close-modal">Закрыть</button></div>`, 'viewer');
+  const ticket = state.viewerTicket;
+  const activeViewer = () => ticket === state.viewerTicket && isCurrentWorkspace(context)
+    && $('#modal').open && $('#viewer-content');
+  if (snapshot || state.preview) {
+    $('#viewer-content').innerHTML = snapshotContent(doc);
+    return;
+  }
+  try {
+    const blob = await api(`/api/cases/${enc(dossierId)}/documents/${enc(id)}/file`, {blob:true});
+    if (!activeViewer()) return;
+    const lower = title.toLocaleLowerCase();
+    if (/\.(txt|csv|tsv|json)$/.test(lower)) {
+      const text = await blob.text();
+      if (activeViewer()) $('#viewer-content').innerHTML = `<pre class="source file-text">${esc(text)}</pre>`;
+    } else if (/\.(pdf|png|jpe?g|gif|webp)$/.test(lower)) {
+      state.viewerURL = URL.createObjectURL(blob);
+      $('#viewer-content').innerHTML = lower.endsWith('.pdf')
+        ? `<iframe title="${esc(title)}" src="${state.viewerURL}"></iframe>`
+        : `<img src="${state.viewerURL}" alt="${esc(title)}">`;
+    } else $('#viewer-content').innerHTML = snapshotContent(doc) + `<button data-action="source" data-id="${esc(id)}">Скачать исходный файл</button>`;
+  } catch (error) {
+    if (!activeViewer()) return;
+    if (error.status === 404) $('#viewer-content').innerHTML = '<p class="small muted">Оригинальный файл не сохранён в этом комплекте.</p>' + snapshotContent(doc);
+    else {
+      $('#viewer-content').innerHTML = `<div class="notice">Не удалось открыть исходный файл: ${esc(error.message)}</div><button data-action="view" data-id="${esc(id)}">Повторить</button>`;
+    }
+  }
+}
+
+function selectFiles(files) {
+  state.files = Array.from(files);
+  $('#file-count').textContent = state.files.length ? `Выбрано: ${state.files.length}` : 'Файлы не выбраны';
+  $('#upload-controls').hidden = !state.files.length;
+  $('#upload-selection').textContent = state.files.map(file => file.name).join(', ');
+}
+
+async function uploadFiles() {
+  if (!state.files.length) throw new Error('Выберите файлы');
+  const context = workspaceContext(), id = context.caseId;
+  const files = state.files.slice(), errors = [], successful = [];
+  const documentType = $('#upload-type').value, contractId = $('#upload-contract').value.trim();
+  for (const file of files) {
+    try {
+      if (file.size > 20 * 1024 * 1024) throw new Error('Файл больше 20 МБ');
+      if (!/\.(pdf|docx|txt|csv|tsv|json|png|jpe?g|tiff?)$/i.test(file.name)) throw new Error('Неподдерживаемый формат');
+      const data = new FormData();
+      data.append('file',file);
+      if (documentType) data.append('document_type',documentType);
+      if (contractId) data.append('contract_id',contractId);
+      const response = await api(`/api/cases/${enc(id)}/documents`,{method:'POST',body:data});
+      successful.push(response.duplicate ? `${file.name}: повторный файл исключён` : file.name);
+    } catch (error) { errors.push({file,message:error.message}); }
+  }
+  let refreshed = false;
+  try {
+    if (isCurrentWorkspace(context)) refreshed = await openCase(id,context.options,state.tab,context.selectedRunId);
+    else await refreshList();
+  } catch (error) {
+    toast(`${successful.length ? 'Обработано файлов: ' + successful.length + '. ' : ''}Не удалось обновить комплект: ${error.message}${errors.length ? '. Ошибки загрузки: ' + errors.map(item => item.file.name + ': ' + item.message).join('; ') : ''}`,true);
+    return;
+  }
+  if (errors.length) {
+    if (refreshed && state.current?.id === id && state.tab === 'documents') selectFiles(errors.map(item => item.file));
+    toast(`${successful.length ? 'Обработано: ' + successful.length + '. ' : ''}${errors.map(item => item.file.name + ': ' + item.message).join('; ')}`,true);
+  } else toast('Документы обработаны: ' + successful.join(', '));
+}
+
+async function saveCaseMetadata(form) {
+  const context = workspaceContext();
+  const payload = Object.fromEntries(new FormData(form));
+  payload.title = payload.title.trim();
+  if (!payload.title) throw new Error('Укажите наименование проверки');
+  payload.expected_metadata_revision = state.current.metadata_revision || 0;
+  const id = context.caseId;
+  const metadata = await api('/api/cases/' + enc(id),{method:'PUT',body:JSON.stringify(payload)});
+  if (isCurrentWorkspace(context)) {
+    for (const key of ['title','description','contract_number','metadata_revision','updated_at']) state.current[key] = metadata[key];
+    render();
+  }
+  await afterSaved('Реквизиты карточки сохранены.',refreshList);
+}
+
+async function saveDocumentType(form) {
+  const context = workspaceContext(), modalTicket = state.modalTicket;
+  const id = form.dataset.id, selected = $('#type-value').value;
+  if (selected === 'corrected') {
+    closeModal();
+    editDocument(id);
+    toast('Укажите заменяемый документ и редакцию. Категория документа сохраняется.');
+    return;
+  }
+  if (!Object.hasOwn(types,selected) && !state.preview) throw new Error('Выберите поддерживаемую категорию документа');
+  const record = state.current.documents.find(item => item.id === id);
+  if (selected === record.document.type) { closeModal(); return; }
+  const values = Object.fromEntries(new FormData(form));
+  const updated = structuredClone(record.document);
+  updated.type = selected;
+  updated.fields_confidence = {...updated.fields_confidence,type:0};
+  await api(`/api/cases/${enc(context.caseId)}/documents/${enc(id)}`,{method:'PUT',body:JSON.stringify({document:updated,expected_revision:record.revision,reviewer:values.reviewer?.trim() || (state.preview ? 'Демонстрация' : ''),comment:values.comment?.trim() || (state.preview ? 'Изменён тип в макете' : ''),confirmed_fields:[],confirmed_items:{}})});
+  if (state.modalTicket === modalTicket) closeModal();
+  await afterSaved('Тип сохранён. Подтвердите его по оригиналу в реквизитах и повторите сверку.',async () => {
+    if (isCurrentWorkspace(context)) await openCase(context.caseId,context.options,state.tab,context.selectedRunId);
+    else await refreshList();
+  });
+}
+
+async function saveDocumentStatus(form) {
+  const context = workspaceContext(), modalTicket = state.modalTicket;
+  const id = form.dataset.id, record = state.current.documents.find(item => item.id === id);
+  const values = Object.fromEntries(new FormData(form)), updated = structuredClone(record.document);
+  const reviewer = values.reviewer.trim(), comment = values.comment.trim();
+  if (!reviewer || !comment) throw new Error('Укажите проверяющего и причину');
+  updated.status = form.dataset.status;
+  updated.fields_confidence = {...updated.fields_confidence,status:1};
+  await api(`/api/cases/${enc(context.caseId)}/documents/${enc(id)}`,{method:'PUT',body:JSON.stringify({document:updated,expected_revision:record.revision,reviewer,comment,confirmed_fields:['status'],confirmed_items:{}})});
+  if (state.modalTicket === modalTicket) closeModal();
+  await afterSaved('Статус сохранён. Повторите сверку для обновления результата.',async () => {
+    if (isCurrentWorkspace(context)) await openCase(context.caseId,context.options,state.tab,context.selectedRunId);
+    else await refreshList();
+  });
+}
+
+async function saveSignalReview(form) {
+  const context = workspaceContext(), data = Object.fromEntries(new FormData(form));
+  data.reviewer = data.reviewer.trim(); data.comment = data.comment.trim();
+  if (!data.reviewer || !data.comment) throw new Error('Укажите проверяющего и комментарий');
+  await api(`/api/runs/${enc(context.runId)}/signals/${enc(form.dataset.signal)}/reviews`,{method:'POST',body:JSON.stringify(data)});
+  await afterSaved('Решение сохранено в истории.',async () => {
+    if (isCurrentWorkspace(context,true)) {
+      const savedRun = await api('/api/runs/' + enc(context.runId));
+      if (isCurrentWorkspace(context,true)) { state.run = savedRun; render(); }
+    }
+    await refreshList();
+  });
+}
+
+document.addEventListener('click', async event => {
+  if (event.target.closest('a.skip-link')?.getAttribute?.('href') === '#main') {
+    event.preventDefault(); $('#main').focus(); return;
+  }
+  const button = event.target.closest('[data-action]');
+  if (!button || button.disabled) return;
+  const action = button.dataset.action;
+  button.disabled = true;
+  try {
+    if (action === 'home') { home(); await refreshList(); }
+    if (action === 'new') newCaseModal();
+    if (action === 'open') await openCase(button.dataset.id);
+    if (action === 'workspace') {
+      const id = state.current?.id || state.lastCaseId || state.cases[0]?.id;
+      if (id) await openCase(id); else newCaseModal();
+    }
+    if (action === 'tab') {
+      if (!tabs.some(([key]) => key === button.dataset.tab)) return;
+      state.tab = button.dataset.tab;
+      state.files = [];
+      render();
+      $('#tab-' + state.tab)?.focus();
+      if (state.tab === 'actions') await loadEvents();
+    }
+    if (action === 'demo') {
+      const ticket = state.loadingCase;
+      const response = await api('/api/demo/' + enc($('#demo-choice').value),{method:'POST'});
+      try {
+        if (ticket !== state.loadingCase) { await refreshList(); toast('Демонстрационный комплект создан в реестре'); }
+        else if (await openCase(response.case.id,response.options,'overview',null)) {
+          if (!state.preview) await run();
+        }
+      } catch (error) { toast('Демонстрационный комплект создан, но открыть или проверить его не удалось: ' + error.message,true); }
+    }
+    if (action === 'choose-files') $('#files').click();
+    if (action === 'upload') await uploadFiles();
+    if (action === 'run') await run();
+    if (action === 'edit') editDocument(button.dataset.id);
+    if (action === 'close') $('#editor').close();
+    if (action === 'close-modal') closeModal();
+    if (action === 'type') typeModal(button.dataset.id);
+    if (action === 'type-toggle') toggleTypeOptions();
+    if (action === 'type-choice') selectType(button);
+    if (action === 'exclude') exclusionModal(button.dataset.id);
+    if (action === 'view') await viewDocument(button.dataset.id);
+    if (action === 'view-snapshot') await viewDocument(button.dataset.id,true);
+    if (action === 'edit-from-viewer') { closeModal(); editDocument(button.dataset.id); }
+    if (action === 'export') await download(`/api/runs/${enc(state.run.id)}/export?format=${button.dataset.format}`,'proverka.' + button.dataset.format);
+    if (action === 'source') await download(`/api/cases/${enc(state.current.id)}/documents/${enc(button.dataset.id)}/file`,state.current.documents.find(item => item.id === button.dataset.id)?.document.filename || 'document');
+    if (action === 'history') {
+      const context = workspaceContext(), editorTicket = state.editorTicket;
+      const rows = await api(`/api/cases/${enc(context.caseId)}/documents/${enc(button.dataset.id)}/history`);
+      if (isCurrentWorkspace(context) && editorTicket === state.editorTicket && $('#history')) $('#history').innerHTML = '<h3>История исправлений</h3>' + rows.map(item => `<p class="small">Редакция ${item.revision} · ${esc(item.reviewer)} · ${esc(dateLabel(item.created_at,true))}<br>${esc(item.comment)}</p>`).join('');
+    }
+    if (action === 'events') await loadEvents();
+    if (action === 'global-history') await showHistory();
+    if (action === 'history-page') await showHistory(Number(button.dataset.offset));
+    if (action === 'open-run') await openCase(button.dataset.case,null,'results',button.dataset.id);
+    if (action === 'links') {
+      const reviewer = $('#link-reviewer').value.trim(), comment = $('#link-comment').value.trim();
+      if (!reviewer || !comment) throw new Error('Укажите проверяющего и основание');
+      const links = [...document.querySelectorAll('[data-link-document]')].filter(node => node.value).map(node => ({document_id:node.dataset.linkDocument,line_id:node.dataset.linkLine,target_line_id:node.value,reviewer,comment}));
+      state.options.manual_links = [...(state.options.manual_links || []).filter(old => !links.some(link => link.document_id === old.document_id && link.line_id === old.line_id)), ...links];
+      await run();
+    }
+    if (action === 'token') openModal(`${modalHeader('Настройки','Доступ к серверу')}<form data-form="token"><p class="modal-description">Если для сервера задан токен, введите его здесь. Он будет храниться только в этой вкладке.</p><div class="field"><label for="api-token">Токен доступа</label><input id="api-token" name="token" type="password" autocomplete="off" value="${esc(state.token)}"></div><div class="modal-actions"><button class="primary" type="submit">Сохранить</button><button type="button" data-action="close-modal">Отмена</button></div></form>`);
+  } catch (error) { toast(error.message,true); }
+  finally { button.disabled = false; }
+});
+
+document.addEventListener('submit', async event => {
+  const form = event.target;
+  if (!form.dataset.signal && !form.dataset.form) return;
+  event.preventDefault();
+  const submit = form.querySelector('[type="submit"]');
+  if (submit?.disabled) return;
+  if (submit) submit.disabled = true;
+  try {
+    if (form.dataset.signal) await saveSignalReview(form);
+    if (form.dataset.form === 'case-metadata') await saveCaseMetadata(form);
+    if (form.dataset.form === 'new-case') {
+      const ticket = state.loadingCase, modalTicket = state.modalTicket;
+      const payload = Object.fromEntries(new FormData(form));
+      payload.title = payload.title.trim();
+      if (!payload.title) throw new Error('Укажите наименование проверки');
+      const dossier = await api('/api/cases',{method:'POST',body:JSON.stringify(payload)});
+      if (state.modalTicket === modalTicket) closeModal();
+      await afterSaved('Проверка создана.',async () => {
+        if (ticket === state.loadingCase) await openCase(dossier.id,null,'documents',null);
+        else await refreshList();
+      });
+    }
+    if (form.dataset.form === 'document-type') await saveDocumentType(form);
+    if (form.dataset.form === 'document-status') await saveDocumentStatus(form);
+    if (form.dataset.form === 'token') {
+      state.token = form.elements.token.value.trim();
+      sessionStorage.setItem('kontrol_token',state.token);
+      closeModal();
+      state.demos = await api('/api/demo');
+      await refreshList();
+      toast('Настройка доступа сохранена');
+    }
+  } catch (error) { toast(error.message,true); }
+  finally { if (submit) submit.disabled = false; }
+});
+
+document.addEventListener('input', event => {
+  if (event.target.id === 'registry-query') { state.query = event.target.value; $('#registry-rows').innerHTML = registryRows(); }
+});
+document.addEventListener('change', event => {
+  if (event.target.id === 'registry-status') { state.filter = event.target.value; $('#registry-rows').innerHTML = registryRows(); }
+  if (event.target.id === 'files') selectFiles(event.target.files);
+  if (event.target.id === 'asof') state.options.as_of = event.target.value;
+  if (event.target.id === 'complete') state.options.delivery_complete = event.target.checked;
+});
+document.addEventListener('dragover', event => {
+  const dropzone = event.target.closest('#dropzone');
+  if (!dropzone) return;
+  event.preventDefault(); dropzone.classList.add('dragging');
+});
+document.addEventListener('dragleave', event => {
+  const dropzone = event.target.closest('#dropzone');
+  if (dropzone && !dropzone.contains(event.relatedTarget)) dropzone.classList.remove('dragging');
+});
+document.addEventListener('drop', event => {
+  const dropzone = event.target.closest('#dropzone');
+  if (!dropzone) return;
+  event.preventDefault(); dropzone.classList.remove('dragging'); selectFiles(event.dataTransfer.files);
+});
+document.addEventListener('keydown', event => {
+  const tab = event.target.closest('[role="tab"]');
+  if (tab && ['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) {
+    event.preventDefault();
+    const index = tabs.findIndex(([key]) => key === tab.dataset.tab);
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    $('#tab-' + tabs[next][0]).click();
+  }
+  const list = $('#type-options');
+  if (list && !list.hidden && ['ArrowDown','ArrowUp','Home','End','Escape'].includes(event.key)) {
+    event.preventDefault(); event.stopPropagation();
+    if (event.key === 'Escape') { toggleTypeOptions(false); return; }
+    const options = [...list.querySelectorAll('[role="option"]')];
+    const current = options.indexOf(document.activeElement);
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? options.length - 1 : (current + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+    options[next].focus();
+  }
+});
+
+async function routeFromHash() {
+  const hash = (globalThis.location?.hash || '#checks').slice(1);
+  const match = hash.match(/^case\/([^/]+)\/(overview|documents|recognition|matching|results|actions)(?:\/run\/([^/]+))?$/);
+  if (match) return openCase(decodeURIComponent(match[1]),null,match[2],match[3] ? decodeURIComponent(match[3]) : null);
+  if (hash === 'history') return showHistory();
+  home();
+}
+
+if (globalThis.addEventListener) globalThis.addEventListener('hashchange', () => routeFromHash().catch(error => toast(error.message,true)));
+if ($('#modal').addEventListener) $('#modal').addEventListener('close', () => {
+  if ($('#modal').open) return;
+  ++state.modalTicket;
+  ++state.viewerTicket;
+  if (state.viewerURL) { URL.revokeObjectURL(state.viewerURL); state.viewerURL = null; }
+});
+if ($('#editor').addEventListener) $('#editor').addEventListener('close', () => {
+  if (!$('#editor').open) ++state.editorTicket;
+});
+
+(async () => {
+  try {
+    const initialHash = globalThis.location?.hash;
+    state.demos = await api('/api/demo');
+    state.cases = await api('/api/cases');
+    if (state.preview) $('#api-link').hidden = true;
+    if (initialHash) await routeFromHash(); else home();
+  } catch (error) {
+    home();
+    toast(error.status === 401 ? 'Введите токен сервера через кнопку «Доступ» в боковом меню.' : 'Не удалось загрузить данные: ' + error.message,true);
+  }
+})();
+
+  </script>
+</body>
+</html>

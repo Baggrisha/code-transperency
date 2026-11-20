@@ -15,8 +15,9 @@ from fastapi.security import HTTPBearer
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
-from pydantic import Field, ValidationError, model_validator
+from pydantic import Field, ValidationError, field_validator, model_validator
 from starlette.concurrency import run_in_threadpool
+from starlette.staticfiles import StaticFiles
 
 from . import __version__
 from .engine import run_check
@@ -36,6 +37,20 @@ ALLOWED_SUFFIXES = {".json", ".txt", ".csv", ".tsv", ".pdf", ".docx", ".png", ".
 
 class CaseCreate(Model):
     title: str = Field(min_length=1, max_length=300)
+    description: str = Field(default="", max_length=10000)
+    contract_number: str = Field(default="", max_length=300)
+
+    @field_validator("title", "description", "contract_number", mode="before")
+    @classmethod
+    def trim_text(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
+
+class CaseUpdate(CaseCreate):
+    # This revision protects only display metadata, never the document snapshot.
+    description: str = Field(max_length=10000)
+    contract_number: str = Field(max_length=300)
+    expected_metadata_revision: int = Field(ge=0)
 
 
 class RunOptions(Model):
@@ -137,6 +152,13 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
             return HTMLResponse(path.read_text(encoding="utf-8"))
         return HTMLResponse('<html lang="ru"><meta charset="utf-8"><h1>Контроль исполнения</h1><a href="/docs">Открыть API</a></html>')
 
+    @app.get("/prototype", response_class=HTMLResponse, include_in_schema=False)
+    def prototype():
+        """The supplied standalone prototype, restyled without changing its storage model."""
+        return HTMLResponse((ROOT / "web" / "prototype.html").read_text(encoding="utf-8"))
+
+    app.mount("/assets", StaticFiles(directory=ROOT / "web" / "assets", check_dir=False), name="assets")
+
     @app.post("/api/check", tags=["Сверка"])
     def check(request: CheckRequest):
         """Stateless, repeatable check. as_of must be explicit."""
@@ -148,11 +170,17 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
 
     @app.post("/api/cases", status_code=201, tags=["Дела"])
     def new_case(payload: CaseCreate):
-        return store.create_case(payload.title)
+        return store.create_case(payload.title, payload.description, payload.contract_number)
 
     @app.get("/api/cases/{case_id}", tags=["Дела"])
     def get_case(case_id: str):
         return store.case(case_id)
+
+    @app.put("/api/cases/{case_id}", tags=["Дела"])
+    def edit_case(case_id: str, payload: CaseUpdate):
+        """Edit the display card; extracted documents and saved runs stay unchanged."""
+        return store.update_case(case_id, payload.title, payload.description, payload.contract_number,
+                                 payload.expected_metadata_revision)
 
     async def receive_file(file: UploadFile) -> tuple[Path, str, str]:
         original_name = Path((file.filename or "document").replace("\\", "/")).name
